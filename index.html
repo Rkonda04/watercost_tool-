@@ -1,0 +1,2269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Water Rate Tool - Civitas Engineering</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{
+  --color-primary:#4B2E83;
+  --color-primary-dark:#34205C;
+  --color-accent:#6C3FA6;
+  --color-accent2:#8B5FC4;
+  --bg:#f5f3f9;
+  --card-bg:#ffffff;
+  --text:#1f2d3a;
+  --muted:#65788a;
+  --danger:#c0392b;
+  --danger-bg:#fdecea;
+  --warning:#b9770e;
+  --warning-bg:#fef5e7;
+  --success:#1e8449;
+  --success-bg:#eafaf1;
+  --border:#e2dcec;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:20px;
+  line-height:1.5;
+}
+.app-shell{max-width:1180px;margin:0 auto;}
+.card{background:var(--card-bg);border-radius:14px;box-shadow:0 10px 40px rgba(75,46,131,0.14);overflow:hidden;}
+.header{
+  background:linear-gradient(120deg,var(--color-primary-dark) 0%,var(--color-primary) 55%,var(--color-accent) 100%);
+  color:#fff;padding:28px 32px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+}
+.header img{height:52px;width:auto;object-fit:contain;}
+.header-text h1{font-size:24px;font-weight:700;letter-spacing:.2px;}
+.header-text p{font-size:13.5px;opacity:.88;margin-top:2px;}
+.header-actions{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;}
+.btn{
+  border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;transition:transform .12s ease,box-shadow .12s ease,background .12s ease;
+  white-space:nowrap;
+}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--color-accent);color:#fff;}
+.btn-primary:hover{background:#5A3390;}
+.btn-secondary{background:#fff;color:var(--color-primary);border:1.5px solid var(--color-primary);}
+.btn-secondary:hover{background:#f1ecf8;}
+.btn-ghost{background:rgba(255,255,255,0.14);color:#fff;border:1px solid rgba(255,255,255,0.4);}
+.btn-ghost:hover{background:rgba(255,255,255,0.24);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{background:#a53125;}
+.btn-sm{padding:6px 12px;font-size:12.5px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-icon{background:none;border:none;color:var(--danger);cursor:pointer;font-size:15px;padding:6px 8px;border-radius:6px;}
+.btn-icon:hover{background:var(--danger-bg);}
+
+
+
+.page-body{padding:32px;min-height:420px;}
+.step-page{display:none;}
+.step-page.active{display:block;animation:fadein .25s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.page-title{font-size:20px;font-weight:700;color:var(--color-primary-dark);margin-bottom:4px;display:flex;align-items:center;gap:10px;}
+.page-subtitle{font-size:13.5px;color:var(--muted);margin-bottom:24px;}
+
+.section{margin-bottom:30px;}
+.section-title{font-size:14.5px;font-weight:700;color:var(--color-primary);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px;justify-content:space-between;}
+
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{font-size:12.5px;font-weight:700;color:var(--text);}
+.form-group .hint{font-size:11.5px;color:var(--muted);font-weight:400;}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  border:1.5px solid var(--color-accent);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--text);
+  background:#fff;font-family:inherit;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(20,160,152,.12);}
+input.invalid,select.invalid{border-color:var(--danger);background:var(--danger-bg);}
+textarea{resize:vertical;min-height:70px;}
+
+.field-error{font-size:11.5px;color:var(--danger);font-weight:600;display:none;}
+.field-error.show{display:block;}
+
+.alert{border-radius:10px;padding:12px 16px;font-size:13px;font-weight:600;display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;}
+.alert i{margin-top:2px;}
+.alert-danger{background:var(--danger-bg);color:var(--danger);}
+.alert-warning{background:var(--warning-bg);color:var(--warning);}
+.alert-success{background:var(--success-bg);color:var(--success);}
+.alert-info{background:#ede7f6;color:var(--color-primary);}
+
+table.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+table.data-table th{
+  background:#f5f2fa;color:var(--color-primary-dark);font-weight:700;text-align:left;padding:10px 10px;
+  border-bottom:2px solid var(--border);white-space:nowrap;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;
+}
+table.data-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+table.data-table td input, table.data-table td select{width:100%;min-width:90px;padding:7px 9px;font-size:13px;}
+table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px solid var(--border);}
+.table-scroll{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+
+.yesno-group{display:flex;gap:12px;}
+.yesno-option{padding:10px 24px;border-radius:8px;border:1.5px solid var(--border);font-weight:700;cursor:pointer;color:var(--muted);}
+.yesno-option.active{border-color:var(--color-accent);background:#f3e9fb;color:var(--color-accent);}
+
+.rate-choice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:640px;}
+.rate-choice-card{position:relative;border:1.5px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;background:#fff;transition:all .15s ease;}
+.rate-choice-card:hover{border-color:var(--color-accent2);}
+.rate-choice-check{position:absolute;top:14px;right:14px;font-size:19px;color:var(--border);}
+.rate-choice-icon{font-size:22px;color:var(--color-accent);margin-bottom:12px;}
+.rate-choice-title{font-size:15px;font-weight:800;color:var(--text);}
+.rate-choice-card.selected{border-color:var(--color-accent);background:#f3e9fb;box-shadow:0 0 0 3px rgba(108,63,166,.12);}
+.rate-choice-card.selected .rate-choice-check{color:var(--color-accent);}
+
+.totals-row{display:flex;gap:24px;flex-wrap:wrap;margin-top:14px;padding:14px 18px;background:#f5f2fa;border-radius:10px;}
+.totals-row .total-item{display:flex;flex-direction:column;gap:2px;}
+.totals-row .total-item .label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+.totals-row .total-item .value{font-size:18px;font-weight:700;color:var(--color-primary-dark);}
+
+.nav-footer{display:flex;justify-content:space-between;align-items:center;padding:20px 32px;background:#faf9fc;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px;}
+.nav-footer .left-actions, .nav-footer .right-actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+.toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.toast{background:var(--color-primary-dark);color:#fff;padding:12px 20px;border-radius:8px;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px;animation:slidein .25s ease;}
+.toast.success{background:var(--success);}
+.toast.danger{background:var(--danger);}
+@keyframes slidein{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(7,51,73,.55);z-index:9998;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:#fff;border-radius:14px;padding:28px;max-width:420px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-box h3{font-size:17px;margin-bottom:10px;color:var(--color-primary-dark);}
+.modal-box p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:30px;}
+.metric-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;}
+.metric-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--color-accent);}
+.metric-card.negative::before{background:var(--danger);}
+.metric-card .metric-label{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;}
+.metric-card .metric-value{font-size:22px;font-weight:800;color:var(--color-primary-dark);}
+.metric-card .metric-value.negative{color:var(--danger);}
+.metric-card .metric-sub{font-size:11.5px;color:var(--muted);margin-top:4px;}
+
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:22px;margin-bottom:30px;}
+.chart-box{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;}
+.chart-box h4{font-size:13.5px;font-weight:700;color:var(--color-primary-dark);margin-bottom:12px;}
+.chart-canvas-wrap{position:relative;height:260px;}
+.chart-detail{margin-top:12px;padding:10px 14px;background:#f5f2fa;border-radius:8px;font-size:12.5px;color:var(--text);min-height:20px;font-weight:600;}
+.chart-empty{display:flex;align-items:center;justify-content:center;height:260px;color:var(--muted);font-size:13px;font-style:italic;}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-fixed{background:#ede7f6;color:var(--color-accent2);}
+.badge-tier{background:#f3e9fb;color:var(--color-accent);}
+
+.connection-type-row, .dyn-row{display:flex;gap:10px;align-items:center;margin-bottom:8px;}
+.connection-type-row input[type=text]{flex:2;}
+.connection-type-row input[type=number]{flex:1;}
+
+.step-overview-grid{display:flex;flex-direction:column;gap:10px;}
+.step-overview-card{border-radius:10px;padding:14px 20px;color:#1f2d3a;display:flex;align-items:center;gap:18px;}
+.step-overview-card .icon-badge{flex:none;width:46px;height:46px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;color:var(--color-primary-dark);box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.step-overview-card .text{display:flex;flex-direction:column;gap:2px;}
+.step-overview-card .title{font-size:14.5px;font-weight:800;}
+.step-overview-card .desc{font-size:12.5px;line-height:1.4;}
+
+.landing-cta{display:flex;gap:12px;justify-content:center;margin-top:10px;padding-top:20px;border-top:1px solid var(--border);flex-wrap:wrap;}
+
+.home-view{padding:70px 32px 90px;text-align:center;}
+.home-title{font-size:26px;font-weight:800;color:var(--color-primary-dark);}
+.home-subtitle{font-size:14px;color:var(--muted);margin-top:6px;}
+.home-btn-row{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-top:56px;}
+.btn-home{min-width:150px;padding:22px 30px;font-size:16px;border-radius:10px;flex-direction:column;gap:10px;box-shadow:0 4px 10px rgba(75,46,131,0.08);}
+.btn-home i{font-size:22px;}
+
+@media (max-width:720px){
+  .header{padding:20px;}
+  .header h1{font-size:19px;}
+  .page-body{padding:18px;}
+  .nav-footer{padding:16px 18px;}
+}
+</style>
+</head>
+<body>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="app-shell">
+  <div class="card">
+    <div class="header">
+      <img src="./Civitas Logo-white.png" alt="Civitas Engineering Group">
+      <div class="header-text">
+        <h1>Water Rate Tool</h1>
+   
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm" onclick="showHome()"><i class="fa-solid fa-house"></i> Home</button>
+        <button class="btn btn-ghost btn-sm" onclick="openResetModal()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+      </div>
+    </div>
+
+    <!-- HOME VIEW -->
+    <div id="homeView">
+      <div class="home-view">
+        <div class="home-title"> Water Rate Tool</div>
+        <div class="home-btn-row">
+          <button class="btn btn-secondary btn-home" id="btnHomeStart" onclick="homeStart()"><i class="fa-solid fa-play"></i> Start</button>
+          <button class="btn btn-secondary btn-home" onclick="showInstructions()"><i class="fa-solid fa-circle-question"></i> Instruction</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTRUCTIONS VIEW -->
+    <div id="instructionsView" style="display:none;">
+      <div class="page-body">
+        <div class="page-title"><i class="fa-solid fa-circle-question"></i> How to use the tool:</div>
+
+        <div class="section">
+          <div class="section-title">The tool has 9 steps in total:</div>
+          <div class="step-overview-grid" id="stepOverviewGrid"></div>
+        </div>
+
+        <div class="landing-cta">
+          <button class="btn btn-secondary" onclick="showHome()"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+          <button class="btn btn-primary" id="btnStartAnalysis" onclick="startTool()">Start Analysis <i class="fa-solid fa-arrow-right"></i></button>
+          <button class="btn btn-secondary" id="btnContinueAnalysis" style="display:none;" onclick="continueTool()">Continue Where You Left Off <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIZARD VIEW -->
+    <div id="wizardView" style="display:none;">
+
+    <div class="page-body">
+
+      <!-- STEP 1: CUSTOMER & CONNECTIONS -->
+      <div class="step-page" data-step="1">
+        <div class="page-title"><i class="fa-solid fa-address-card"></i> Customer &amp; Connections</div>
+        <div class="page-subtitle"></div>
+
+        <div class="section">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Total number of customers *</label>
+              <input type="number" min="0" step="1" id="totalCustomers" oninput="onField1Change()">
+              <div class="field-error" id="err-totalCustomers"></div>
+            </div>
+            <div class="form-group">
+              <label>Active customers *</label>
+              <input type="number" min="0" step="1" id="activeCustomers" oninput="onField1Change()">
+              <div class="field-error" id="err-activeCustomers"></div>
+            </div>
+            <div class="form-group">
+              <label>Monthly Average Water Sold</label>
+              <input type="text" inputmode="numeric" class="number-commas" id="monthlyWaterSold" oninput="onField1Change()">
+              <div class="field-error" id="err-monthlyWaterSold"></div>
+            </div>
+          </div>
+          <div class="alert alert-info" style="margin-top:16px;"><i class="fa-solid fa-circle-info"></i></div>
+        </div>
+      </div>
+
+      <!-- STEP 2: METER DISTRIBUTION -->
+      <div class="step-page" data-step="2">
+        <div class="page-title"><i class="fa-solid fa-gauge"></i> Meter Distribution</div>
+        <div class="page-subtitle"></div>
+
+        <div id="meterAlert"></div>
+
+        <div class="table-scroll">
+          <table class="data-table" id="meterTable">
+            <thead>
+              <tr>
+                <th style="width:29%">Meter Size</th>
+                <th style="width:22%">Number of Meters</th>
+                <th style="width:24%">AWWA Equivalent Factor</th>
+                <th style="width:10%"></th>
+              </tr>
+            </thead>
+            <tbody id="meterTableBody"></tbody>
+            <tfoot>
+              <tr>
+                <td>Total</td>
+                <td id="meterTotalCount">0</td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-secondary btn-sm" onclick="addMeterRow()"><i class="fa-solid fa-plus"></i> Add Meter Row</button>
+        </div>
+
+        <div class="totals-row">
+          <div class="total-item"><span class="label">Total Meters</span><span class="value" id="meterSummaryCount">0</span></div>
+          <div class="total-item"><span class="label">Active Customers (Page 1)</span><span class="value" id="meterSummaryConnections">0</span></div>
+        </div>
+      </div>
+
+      <!-- STEP 3: COST MODEL, RATE STRUCTURE, ASSESSMENT FEES -->
+      <div class="step-page" data-step="3">
+        <div class="page-title"><i class="fa-solid fa-sliders"></i> Rate Model</div>
+        <div class="page-subtitle"></div>
+
+        <div class="section">
+          <div class="section-title">Choose a Rate Model</div>
+          <div class="rate-choice-grid" id="rateModelToggle">
+            <div class="rate-choice-card" data-model="fixed" onclick="setRateModel('fixed')">
+              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="rate-choice-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+              <div class="rate-choice-title">Fixed Rate</div>
+            </div>
+            <div class="rate-choice-card" data-model="tier" onclick="setRateModel('tier')">
+              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="rate-choice-icon"><i class="fa-solid fa-layer-group"></i></div>
+              <div class="rate-choice-title">Tier-Based Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: RATE DETAILS -->
+      <div class="step-page" data-step="4">
+        <div class="page-title"><i class="fa-solid fa-sliders"></i> Rate Details</div>
+        <div class="page-subtitle"></div>
+
+        <div class="section" id="fixedRateSection">
+          <div class="section-title">Fixed-Rate Inputs</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Base Charge ($ / connection / month)</label>
+              <input type="text" id="fixedBaseCharge" class="currency-input" oninput="onFixedRateChange()">
+            </div>
+            <div class="form-group">
+              <label>Volumetric Rate ($ / 1,000 gal)</label>
+              <input type="text" id="fixedVolumetricRate" class="currency-input" oninput="onFixedRateChange()">
+            </div>
+            <div class="form-group">
+              <label>Minimum Charge ($ / month)</label>
+              <input type="text" id="fixedMinimumCharge" class="currency-input" oninput="onFixedRateChange()">
+            </div>
+
+          </div>
+        </div>
+
+        <div class="section" id="tierRateSection" style="display:none;">
+          <div class="section-title">
+            <span>Consumption Tiers</span>
+          </div>
+          <div class="form-grid" style="margin-bottom:16px;">
+            <div class="form-group">
+              <label>Unit cost difference between tiers ($)</label>
+              <input type="text" class="currency-input" id="tierUnitCostDifference" oninput="onTierUnitCostDifferenceChange()">
+              <span class="hint"></span>
+            </div>
+          </div>
+          <div id="tierAlert"></div>
+          <div class="table-scroll">
+            <table class="data-table" id="tierTable">
+              <thead>
+                <tr>
+                  <th>Tier Name</th>
+                  <th>Start (gal)</th>
+                  <th>End (gal)</th>
+                  <th>Rate ($ / 1,000 gal)</th>
+                  <th>Customers</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tierTableBody"></tbody>
+            </table>
+          </div>
+          <div style="margin-top:14px;">
+            <button class="btn btn-secondary btn-sm" onclick="addTierRow()"><i class="fa-solid fa-plus"></i> Add Tier</button>
+          </div>
+          <div class="hint" style="margin-top:8px;display:block;"></div>
+        </div>
+      </div>
+
+      <!-- STEP 5: ASSESSMENT FEE -->
+      <div class="step-page" data-step="5">
+        <div class="page-title"><i class="fa-solid fa-percent"></i> Assessment Fee</div>
+        <div class="page-subtitle"></div>
+
+        <div class="section">
+          <div class="section-title">Assessment Fee</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Assessment Fee (% of Revenue)</label>
+              <input type="number" min="0" step="0.01" id="assessmentFeePct" oninput="onAssessmentFeeChange()">
+            </div>
+            <div class="form-group">
+              <label>Calculated Annual Amount</label>
+              <div class="totals-row" style="margin-top:0;padding:10px 14px;">
+                <div class="total-item"><span class="value" id="assessmentFeeAnnual">$0.00</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6: OPERATING EXPENSES -->
+      <div class="step-page" data-step="6">
+        <div class="page-title"><i class="fa-solid fa-file-invoice-dollar"></i> Operating Expenses</div>
+        <div class="page-subtitle"></div>
+
+        <div id="expenseAlert"></div>
+
+        <div class="table-scroll">
+          <table class="data-table" id="expenseTable">
+            <thead>
+              <tr>
+                <th style="width:26%">Description</th>
+                <th style="width:20%">Category</th>
+                <th style="width:14%">Amount</th>
+                <th style="width:14%">Frequency</th>
+                <th style="width:18%">Annual Amount</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="expenseTableBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-secondary btn-sm" onclick="addExpenseRow()"><i class="fa-solid fa-plus"></i> Add Expense Row</button>
+        </div>
+
+        <div class="section" style="margin-top:24px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Contingency / Inflation (%)</label>
+              <input type="number" min="0" step="0.1" id="expenseContingencyPct" oninput="onExpenseTotalsChange()">
+            </div>
+          </div>
+        </div>
+
+        <div class="totals-row">
+          <div class="total-item"><span class="label">Subtotal (Monthly Equivalent)</span><span class="value" id="expenseMonthlyEquivalent">$0.00</span></div>
+          <div class="total-item"><span class="label">Subtotal (Annual)</span><span class="value" id="expenseSubtotalAnnual">$0.00</span></div>
+          <div class="total-item"><span class="label">Total Annual Operating Expenses</span><span class="value" id="expenseGrandTotal">$0.00</span></div>
+        </div>
+      </div>
+
+      <!-- STEP 7: MISCELLANEOUS REVENUE -->
+      <div class="step-page" data-step="7">
+        <div class="page-title"><i class="fa-solid fa-coins"></i> Miscellaneous Revenue</div>
+        <div class="page-subtitle"></div>
+
+        <div id="miscRevenueAlert"></div>
+
+        <div class="table-scroll">
+          <table class="data-table" id="miscRevenueTable">
+            <thead>
+              <tr>
+                <th style="width:28%">Description</th>
+                <th style="width:20%">Category</th>
+                <th style="width:16%">Amount</th>
+                <th style="width:16%">Frequency</th>
+                <th style="width:16%">Annual Amount</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="miscRevenueTableBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-secondary btn-sm" onclick="addMiscRevenueRow()"><i class="fa-solid fa-plus"></i> Add Revenue Row</button>
+        </div>
+
+        <div class="totals-row">
+          <div class="total-item"><span class="label">Monthly Equivalent</span><span class="value" id="miscMonthlyEquivalent">$0.00</span></div>
+          <div class="total-item"><span class="label">Total Annual Misc. Revenue</span><span class="value" id="miscAnnualTotal">$0.00</span></div>
+        </div>
+      </div>
+
+      <!-- STEP 8: WATER LOSS -->
+      <div class="step-page" data-step="8">
+        <div class="page-title"><i class="fa-solid fa-droplet"></i> Water Loss</div>
+        <div class="page-subtitle"></div>
+
+        <div class="section">
+          <div class="section-title">Include Water Loss in this Analysis?</div>
+          <div class="yesno-group">
+            <div class="yesno-option" id="waterLossYes" onclick="setWaterLossInclude('yes')">Yes</div>
+            <div class="yesno-option" id="waterLossNo" onclick="setWaterLossInclude('no')">No</div>
+          </div>
+          <p class="hint" style="margin-top:10px;display:block;"></p>
+        </div>
+
+        <div id="waterLossSection" style="display:none;">
+          <div id="waterLossAlert"></div>
+          <div class="section-title">Enter Loss As</div>
+          <div class="yesno-group">
+            <div class="yesno-option" id="waterLossMethodPct" onclick="setWaterLossMethod('pct')">Percentage</div>
+            <div class="yesno-option" id="waterLossMethodGal" onclick="setWaterLossMethod('gal')">Gallons</div>
+          </div>
+          <div class="form-grid" style="margin-top:14px;">
+            <div class="form-group" id="waterLossPctGroup">
+              <label>Annual Water Loss (%)</label>
+              <input type="number" min="0" max="100" step="0.01" id="waterLossAnnualPctInput" oninput="onWaterLossFieldChange()">
+            </div>
+            <div class="form-group" id="waterLossGalGroup">
+              <label>Annual Water Loss (gallons)</label>
+              <input type="number" min="0" id="waterLossAnnualGalInput" oninput="onWaterLossFieldChange()">
+            </div>
+          </div>
+          <div class="hint" style="margin-top:8px;display:block;"></div>
+        </div>
+      </div>
+
+      <!-- STEP 9: SUMMARY & RESULTS -->
+      <div class="step-page" data-step="9">
+        <div class="page-title"><i class="fa-solid fa-chart-line"></i> Summary &amp; Results</div>
+        <div class="page-subtitle"></div>
+
+        <div style="margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="saveProgress()"><i class="fa-solid fa-floppy-disk"></i> Save This Session?</button>
+          <button class="btn btn-secondary" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Export to Excel</button>
+          <button class="btn btn-secondary" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> Export to PDF</button>
+        </div>
+        <p class="hint" style="margin:-14px 0 20px;display:block;"></p>
+
+        <div id="resultsAlert"></div>
+
+        <div class="metric-grid" id="metricGrid"></div>
+
+        <div class="section" id="rateResultsSection">
+          <div class="section-title">Rate Results <span class="badge" id="rateModelBadge"></span></div>
+          <div id="rateResultsContent"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Assessment Fee Results</div>
+          <div class="totals-row">
+            <div class="total-item"><span class="label">Assessment Fee %</span><span class="value" id="assessmentResultPct">0%</span></div>
+            <div class="total-item"><span class="label">Annual Amount</span><span class="value" id="assessmentResultAnnual">$0.00</span></div>
+            <div class="total-item"><span class="label">% of Total Revenue</span><span class="value" id="assessmentResultShare">0%</span></div>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-box">
+            <h4>Operating Expense Breakdown</h4>
+            <div class="chart-canvas-wrap"><canvas id="expenseChart"></canvas></div>
+            <div class="chart-detail" id="expenseChartDetail">Click a segment to see details.</div>
+          </div>
+          <div class="chart-box">
+            <h4>Water Production Breakdown</h4>
+            <div class="chart-canvas-wrap"><canvas id="waterProductionChart"></canvas></div>
+            <div class="chart-detail" id="waterProductionChartDetail">Click a segment to see details.</div>
+          </div>
+          <div class="chart-box">
+            <h4>Revenue Breakdown</h4>
+            <div class="chart-canvas-wrap"><canvas id="revenueChart"></canvas></div>
+            <div class="chart-detail" id="revenueChartDetail">Click a segment to see details.</div>
+          </div>
+          <div class="chart-box">
+            <h4>Revenue vs. Expenses</h4>
+            <div class="chart-canvas-wrap"><canvas id="revExpChart"></canvas></div>
+            <div class="chart-detail" id="revExpChartDetail">Click a bar to see details.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="nav-footer">
+      <div class="left-actions">
+        <button class="btn btn-secondary" id="btnPrevious" onclick="previousStep()"><i class="fa-solid fa-arrow-left"></i> Previous</button>
+        <button class="btn btn-secondary" id="btnResetStep" onclick="resetCurrentStep()"><i class="fa-solid fa-arrow-rotate-left"></i> Reset This Page</button>
+      </div>
+      <div class="right-actions">
+        <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Next <i class="fa-solid fa-arrow-right"></i></button>
+        <button class="btn btn-primary" id="btnCalculate" style="display:none;" onclick="goToStepAndCalculate(9)">Calculate Results <i class="fa-solid fa-calculator"></i></button>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="resetModal">
+  <div class="modal-box">
+    <h3>Reset all data?</h3>
+    <p>This clears every field you've entered across all 9 steps and cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('resetModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="resetTool()">Reset Everything</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG / CONSTANTS
+   ========================================================================= */
+
+// Approved standard meter sizes & AWWA equivalent factors.
+const METER_SIZES = [
+  {size:'5/8" X 3/4"', factor:1},
+  {size:'3/4"', factor:1.5},
+  {size:'1"', factor:2.5},
+  {size:'1-1/2"', factor:5},
+  {size:'2"', factor:8},
+  {size:'3" Displacement', factor:9},
+  {size:'3" Compound', factor:16},
+  {size:'3" Turbine', factor:17.5},
+  {size:'4" Compound', factor:25},
+  {size:'4" Turbine', factor:30},
+  {size:'6" Compound', factor:50},
+  {size:'6" Turbine', factor:62.5},
+  {size:'8" Compound', factor:80},
+  {size:'10" Compound', factor:115}
+];
+
+const EXPENSE_CATEGORIES = ['Facilities Operation','Facilities Maintenance','Admin','Miscellaneous','Other'];
+const MISC_REVENUE_CATEGORIES = ['Grant','Interest on Cash Flow','Donations','Other'];
+
+const FREQUENCIES = ['Monthly','Quarterly','Annual'];
+
+const STORAGE_KEY = 'civitasWaterRateTool_v1';
+const TOTAL_STEPS = 9;
+const STEP_TITLES = [
+  'Customer & Connections',
+  'Meter Distribution',
+  'Rate Model',
+  'Rate Details',
+  'Assessment Fee',
+  'Operating Expenses',
+  'Miscellaneous Revenue',
+  'Water Loss',
+  'Summary & Results'
+];
+
+// The tool uses a single billing unit throughout: $ per 1,000 gallons.
+const BILLING_UNIT_GAL = 1000;
+
+/* =========================================================================
+   STATE
+   ========================================================================= */
+
+function defaultState(){
+  return {
+    currentStep: 1,
+    customerInfo: {
+      totalCustomers:'', activeCustomers:'', monthlyWaterSold:''
+    },
+    meters: [
+      {id:uid(), size:'', count:0, factor:'', customSize:false}
+    ],
+    rateModel: {
+      type:'',
+      fixed:{baseCharge:0, volumetricRate:0, minimumCharge:0, includedConsumption:0},
+      tiers:[
+        {id:uid(), name:'1', start:0, end:2000, rate:0, customers:0, waterSold:0}
+      ],
+      tierUnitCostDifference:1,
+      assessmentFeePct:0.5
+    },
+    operatingExpenses: {
+      contingencyPct: 10,
+      rows: []
+    },
+    miscellaneousRevenue: [],
+    waterLoss: {
+      include:'no',
+      method:'pct',
+      annualGal:'',
+      annualPct:''
+    },
+    results: {}
+  };
+}
+
+let appState = defaultState();
+let charts = {expense:null, waterProduction:null, revenue:null, revExp:null};
+
+function uid(){
+  return 'id_' + Math.random().toString(36).slice(2,10) + Math.random().toString(36).slice(2,6);
+}
+
+/* =========================================================================
+   PERSISTENCE
+   ========================================================================= */
+
+function saveState(showToast){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    if(showToast) showToastMsg('', 'success');
+  }catch(e){
+    showToastMsg('', 'danger');
+  }
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      appState = Object.assign(defaultState(), parsed);
+      // Defensive merges for nested structures added after a save might predate them
+      if(!appState.customerInfo) appState.customerInfo = defaultState().customerInfo;
+      if(!appState.waterLoss || appState.waterLoss.annualGal === undefined){
+        const legacy = appState.waterLoss;
+        appState.waterLoss = defaultState().waterLoss;
+        // Migrate old per-month entries into a single annual figure.
+        if(legacy && Array.isArray(legacy.months)){
+          let totalGal = 0, pctSum = 0, pctCount = 0;
+          legacy.months.forEach(m=>{
+            totalGal += Number(m.gal)||0;
+            if(m.pct !== '' && m.pct != null){ pctSum += Number(m.pct)||0; pctCount++; }
+          });
+          if(totalGal > 0) appState.waterLoss.annualGal = totalGal;
+          if(pctCount > 0) appState.waterLoss.annualPct = Math.round((pctSum/pctCount)*100)/100;
+          if(legacy.include) appState.waterLoss.include = legacy.include;
+        }
+      }
+      if(!appState.waterLoss.method){
+        appState.waterLoss.method = appState.waterLoss.annualPct !== '' ? 'pct' : 'gal';
+      }
+      if(!appState.operatingExpenses) appState.operatingExpenses = defaultState().operatingExpenses;
+      if(!appState.rateModel) appState.rateModel = defaultState().rateModel;
+      return true;
+    }
+  }catch(e){ /* ignore corrupt storage */ }
+  return false;
+}
+
+function saveProgress(){
+  saveState(true);
+}
+
+function resetTool(){
+  localStorage.removeItem(STORAGE_KEY);
+  appState = defaultState();
+  closeModal('resetModal');
+  goToStep(1, true);
+  renderAll();
+  showHome();
+  showToastMsg('', 'success');
+}
+
+function resetCurrentStep(){
+  const step = appState.currentStep;
+  const def = defaultState();
+  const stepLabel = STEP_TITLES[step-1] || 'this page';
+  if(!confirm('Reset all fields on "'+stepLabel+'"? This cannot be undone.')) return;
+
+  if(step === 1){
+    appState.customerInfo = def.customerInfo;
+    renderPage1();
+  } else if(step === 2){
+    appState.meters = def.meters;
+    renderMeterTable();
+  } else if(step === 4){
+    appState.rateModel.fixed = def.rateModel.fixed;
+    appState.rateModel.tiers = def.rateModel.tiers;
+    appState.rateModel.tierUnitCostDifference = def.rateModel.tierUnitCostDifference;
+    renderRateDetails();
+    updateAssessmentFeeDisplay();
+  } else if(step === 5){
+    appState.rateModel.assessmentFeePct = def.rateModel.assessmentFeePct;
+    renderAssessmentFeePage();
+  } else if(step === 6){
+    appState.operatingExpenses = def.operatingExpenses;
+    renderExpenseTable();
+  } else if(step === 7){
+    appState.miscellaneousRevenue = def.miscellaneousRevenue;
+    renderMiscRevenueTable();
+  } else if(step === 8){
+    appState.waterLoss = def.waterLoss;
+    renderPage6();
+  }
+  showToastMsg('', 'success');
+}
+
+/* =========================================================================
+   HELPERS
+   ========================================================================= */
+
+function formatCurrency(n){
+  if(n === '' || n === null || n === undefined) return '';
+  const num = Number(n);
+  if(!isFinite(num)) return '$0.00';
+  return '$' + num.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function parseCurrencyInput(str){
+  if(str === null || str === undefined) return 0;
+  const cleaned = String(str).replace(/[^0-9.\-]/g,'');
+  const num = parseFloat(cleaned);
+  return isFinite(num) ? num : 0;
+}
+
+// Like parseCurrencyInput, but preserves a genuinely empty field as '' instead
+// of coercing it to 0, so required-field validation can tell "not entered"
+// apart from an explicitly entered 0.
+function parseCurrencyInputOrBlank(str){
+  if(str === null || str === undefined || String(str).trim() === '') return '';
+  return parseCurrencyInput(str);
+}
+
+function formatNumber(n, decimals){
+  const num = Number(n);
+  if(!isFinite(num)) return '0';
+  return num.toLocaleString('en-US', {minimumFractionDigits:decimals||0, maximumFractionDigits:decimals||2});
+}
+
+function periodsPerYear(freq){
+  if(freq === 'Monthly') return 12;
+  if(freq === 'Quarterly') return 4;
+  return 1; // Annual
+}
+
+function toAnnual(amount, freq){
+  return (Number(amount)||0) * periodsPerYear(freq);
+}
+
+function showToastMsg(msg, type){
+  const container = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' '+type : '');
+  el.innerHTML = '<i class="fa-solid fa-circle-info"></i> ' + msg;
+  container.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(30px)'; setTimeout(()=>el.remove(),300); }, 3000);
+}
+
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function openResetModal(){ openModal('resetModal'); }
+
+// Reformats an input's value while preserving the caret's distance from the
+// end of the string, so inserting commas/symbols doesn't jump the cursor.
+function reformatLive(el, buildFn){
+  const cursorFromEnd = el.value.length - el.selectionStart;
+  el.value = buildFn(el.value);
+  const pos = Math.max(0, el.value.length - cursorFromEnd);
+  el.setSelectionRange(pos, pos);
+}
+
+function liveCurrencyText(raw){
+  let digits = String(raw).replace(/[^0-9.]/g,'');
+  const firstDot = digits.indexOf('.');
+  if(firstDot !== -1) digits = digits.slice(0,firstDot+1) + digits.slice(firstDot+1).replace(/\./g,'');
+  let [intPart, decPart] = digits.split('.');
+  intPart = intPart.replace(/^0+(?=\d)/,'');
+  if(decPart !== undefined) decPart = decPart.slice(0,2);
+  if(intPart === '' && decPart === undefined) return '';
+  const groupedInt = intPart === '' ? '0' : Number(intPart).toLocaleString('en-US');
+  return '$' + groupedInt + (decPart !== undefined ? '.'+decPart : '');
+}
+
+function liveNumberText(raw){
+  let digits = String(raw).replace(/[^0-9.]/g,'');
+  const firstDot = digits.indexOf('.');
+  if(firstDot !== -1) digits = digits.slice(0,firstDot+1) + digits.slice(firstDot+1).replace(/\./g,'');
+  let [intPart, decPart] = digits.split('.');
+  intPart = intPart.replace(/^0+(?=\d)/,'');
+  if(intPart === '' && decPart === undefined) return '';
+  const groupedInt = intPart === '' ? '0' : Number(intPart).toLocaleString('en-US');
+  return groupedInt + (decPart !== undefined ? '.'+decPart : '');
+}
+
+// Currency-input formatting: $ and commas appear live as you type, normalized on blur.
+function bindCurrencyInputs(root){
+  (root||document).querySelectorAll('input.currency-input').forEach(inp=>{
+    if(inp._currencyBound) return;
+    inp._currencyBound = true;
+    inp.addEventListener('focus', function(){ this.select(); });
+    inp.addEventListener('input', function(){ reformatLive(this, liveCurrencyText); });
+    inp.addEventListener('blur', function(){
+      const raw = parseCurrencyInputOrBlank(this.value);
+      this.value = formatCurrency(raw);
+    });
+  });
+}
+
+function setCurrencyValue(el, value){
+  el.value = value === '' ? '' : formatCurrency(value || 0);
+}
+
+// Comma-grouped (non-currency) number input formatting: commas appear live as you type.
+function bindNumberCommaInputs(root){
+  (root||document).querySelectorAll('input.number-commas').forEach(inp=>{
+    if(inp._commaBound) return;
+    inp._commaBound = true;
+    inp.addEventListener('focus', function(){ this.select(); });
+    inp.addEventListener('input', function(){ reformatLive(this, liveNumberText); });
+    inp.addEventListener('blur', function(){
+      const num = parseFloat(this.value.replace(/,/g,''));
+      this.value = isFinite(num) ? formatNumber(num) : '';
+    });
+  });
+}
+
+/* =========================================================================
+   NAVIGATION
+   ========================================================================= */
+
+
+
+
+
+const HOME_OVERVIEW = {icon:'fa-house', color:'#F4B183', desc:'This is the homepage of the tool.'};
+
+const STEP_OVERVIEW = [
+  {icon:'fa-address-card', color:'#A9D18E', desc:'This step captures total customers, active customers, and monthly water sold.'},
+  {icon:'fa-gauge', color:'#9DC3E6', desc:'This step captures meter counts by approved standard size.'},
+  {icon:'fa-sliders', color:'#FFD966', desc:'This step is where you choose Fixed Rate or Tier-Based Rate.'},
+  {icon:'fa-sliders', color:'#FFC38C', desc:'This step captures the inputs for your selected rate model.'},
+  {icon:'fa-percent', color:'#C9A6E0', desc:'This step captures the assessment fee percentage applied to rate revenue.'},
+  {icon:'fa-file-invoice-dollar', color:'#B7B7B7', desc:'This step captures annual operating expenses and the contingency percentage.'},
+  {icon:'fa-coins', color:'#8FE3E3', desc:'This step captures any revenue not related to water sales.'},
+  {icon:'fa-droplet', color:'#74C7EC', desc:'This step captures information on water loss.'},
+  {icon:'fa-chart-line', color:'#D4A72C', desc:'This step displays the results of the rate study tool.'}
+];
+
+/* =========================================================================
+   LANDING / INSTRUCTIONS VIEW
+   ========================================================================= */
+
+function stepOverviewCardHtml(icon, color, title, desc){
+  return '<div class="step-overview-card" style="background:'+color+';">'+
+    '<span class="icon-badge"><i class="fa-solid '+icon+'"></i></span>'+
+    '<span class="text"><span class="title">'+title+'</span><span class="desc">'+desc+'</span></span>'+
+  '</div>';
+}
+
+function renderStepOverview(){
+  const grid = document.getElementById('stepOverviewGrid');
+  if(!grid) return;
+  grid.innerHTML = stepOverviewCardHtml(HOME_OVERVIEW.icon, HOME_OVERVIEW.color, 'Home', HOME_OVERVIEW.desc) +
+    STEP_OVERVIEW.map((s,i)=>stepOverviewCardHtml(s.icon, s.color, (i+1)+'. '+STEP_TITLES[i], s.desc)).join('');
+}
+
+function hideAllViews(){
+  document.getElementById('homeView').style.display = 'none';
+  document.getElementById('instructionsView').style.display = 'none';
+  document.getElementById('wizardView').style.display = 'none';
+}
+
+function showHome(){
+  hideAllViews();
+  document.getElementById('homeView').style.display = 'block';
+}
+
+function showInstructions(){
+  hideAllViews();
+  document.getElementById('instructionsView').style.display = 'block';
+  const hasSaved = !!localStorage.getItem(STORAGE_KEY);
+  document.getElementById('btnContinueAnalysis').style.display = hasSaved ? 'inline-flex' : 'none';
+  document.getElementById('btnStartAnalysis').textContent = hasSaved ? 'Start New Analysis' : 'Start Analysis';
+}
+
+function homeStart(){
+  const hasSaved = !!localStorage.getItem(STORAGE_KEY);
+  if(hasSaved) continueTool();
+  else startTool();
+}
+
+function startTool(){
+  // Starting fresh discards any in-progress session, same as the Reset action.
+  const hasSaved = !!localStorage.getItem(STORAGE_KEY);
+  if(hasSaved){
+    localStorage.removeItem(STORAGE_KEY);
+    appState = defaultState();
+    renderAll();
+  }
+  hideAllViews();
+  document.getElementById('wizardView').style.display = 'block';
+  goToStep(1);
+}
+
+function continueTool(){
+  hideAllViews();
+  document.getElementById('wizardView').style.display = 'block';
+  renderStep();
+}
+
+function renderStep(){
+  document.querySelectorAll('.step-page').forEach(p=>{
+    p.classList.toggle('active', Number(p.dataset.step) === appState.currentStep);
+  });
+  document.getElementById('btnPrevious').disabled = appState.currentStep === 1;
+  const isLast = appState.currentStep === TOTAL_STEPS;
+  document.getElementById('btnNext').style.display = isLast ? 'none' : 'inline-flex';
+  document.getElementById('btnCalculate').style.display = (appState.currentStep === 8) ? 'inline-flex' : 'none';
+  document.getElementById('btnResetStep').style.display = (isLast || appState.currentStep === 3) ? 'none' : 'inline-flex';
+  if(isLast){
+    // Deferred one frame: the step-page just flipped from display:none to
+    // display:block above. Chart.js measures the canvas at chart-creation
+    // time, and doing that in the same tick as the display change can catch
+    // the container mid-layout (still reporting zero size), producing blank
+    // charts. Waiting a frame lets the browser finish laying out the page first.
+    requestAnimationFrame(()=>calculateAll(false));
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function goToStep(n, skipValidation){
+  appState.currentStep = n;
+  renderStep();
+}
+
+function goToStepAndCalculate(n){
+  const res = validateStep(8);
+  if(!res.valid){ renderValidation(8, res); return; }
+  goToStep(n);
+}
+
+function nextStep(){
+  const res = validateStep(appState.currentStep);
+  if(!res.valid){ renderValidation(appState.currentStep, res); return; }
+  if(appState.currentStep < TOTAL_STEPS) goToStep(appState.currentStep+1);
+}
+
+function previousStep(){
+  if(appState.currentStep > 1) goToStep(appState.currentStep-1);
+}
+
+function renderValidation(step, res){
+  document.querySelectorAll('.step-page[data-step="'+step+'"] .field-error').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('.step-page[data-step="'+step+'"] input, .step-page[data-step="'+step+'"] select').forEach(e=>e.classList.remove('invalid'));
+  (res.fieldErrors||[]).forEach(fe=>{
+    const errEl = document.getElementById('err-'+fe.field);
+    if(errEl) errEl.classList.add('show');
+    const inputEl = document.getElementById(fe.field);
+    if(inputEl) inputEl.classList.add('invalid');
+  });
+  if(res.messages && res.messages.length){
+    showToastMsg(res.messages[0], 'danger');
+  }
+}
+
+/* =========================================================================
+   VALIDATION
+   ========================================================================= */
+
+function validateStep(step){
+  if(step === 1) return validatePage1();
+  if(step === 2) return validatePage2();
+  if(step === 3) return validateRateModelChoice();
+  if(step === 4) return validateRateDetails();
+  if(step === 5) return validateAssessmentFee();
+  if(step === 6) return validatePage4();
+  if(step === 7) return validatePage5();
+  if(step === 8) return validatePage6();
+  return {valid:true};
+}
+
+function validatePage1(){
+  const fieldErrors = [], messages = [];
+  const ci = appState.customerInfo;
+  const total = Number(ci.totalCustomers);
+  if(!(total > 0)){ fieldErrors.push({field:'totalCustomers'}); messages.push(''); }
+  const active = Number(ci.activeCustomers);
+  if(ci.activeCustomers === '' || active < 0 || active > total){ fieldErrors.push({field:'activeCustomers'}); messages.push(''); }
+  const sold = Number(ci.monthlyWaterSold);
+  if(!(sold >= 0) || ci.monthlyWaterSold === ''){ fieldErrors.push({field:'monthlyWaterSold'}); messages.push(''); }
+  return {valid: fieldErrors.length===0, fieldErrors, messages};
+}
+
+function validatePage2(){
+  const messages = [];
+  const rows = appState.meters;
+  if(rows.length === 0) messages.push('');
+  if(rows.some(m=>!m.size)) messages.push('');
+  if(rows.some(m=>m.count === '')) messages.push('');
+  if(rows.some(m=>m.factor === '')) messages.push('');
+  const validRows = rows.filter(m=>m.size && Number(m.count) > 0);
+  if(rows.length > 0 && validRows.length === 0) messages.push('');
+  const anyNegative = rows.some(m=>Number(m.count) < 0);
+  if(anyNegative) messages.push('');
+  return {valid: messages.length===0, messages};
+}
+
+function validateRateModelChoice(){
+  const messages = [];
+  if(!appState.rateModel.type) messages.push('');
+  return {valid: messages.length===0, messages};
+}
+
+function validateRateDetails(){
+  const messages = [];
+  const rm = appState.rateModel;
+  if(rm.type === 'tier'){
+    const tiers = rm.tiers;
+    if(tiers.length === 0) messages.push('');
+    for(let i=0;i<tiers.length;i++){
+      const t = tiers[i];
+      const isLast = i === tiers.length-1;
+      const isFirst = i === 0;
+      if(!t.name || !String(t.name).trim()) messages.push('');
+      if(t.start === '') messages.push('');
+      if(isFirst && t.rate === '') messages.push('');
+      if(t.customers === '') messages.push('');
+      if(Number(t.rate) < 0) messages.push('');
+      const end = t.end === '' || t.end === null ? null : Number(t.end);
+      if(!isLast && end === null) messages.push('');
+      if(end !== null && end <= Number(t.start)) messages.push('');
+      if(i > 0){
+        const prev = tiers[i-1];
+        const prevEnd = prev.end === '' || prev.end === null ? Infinity : Number(prev.end);
+        if(Number(t.start) < Number(prev.start)) messages.push('');
+        if(prevEnd !== Infinity && Number(t.start) !== prevEnd + 1){
+          messages.push('');
+        }
+      }
+    }
+    if(rm.tierUnitCostDifference === '') messages.push('');
+  } else {
+    if(rm.fixed.baseCharge === '') messages.push('');
+    if(rm.fixed.volumetricRate === '') messages.push('');
+    if(rm.fixed.minimumCharge === '') messages.push('');
+    if(Number(rm.fixed.volumetricRate) < 0 || Number(rm.fixed.baseCharge) < 0) messages.push('');
+  }
+  return {valid: messages.length===0, messages};
+}
+
+function validateAssessmentFee(){
+  const messages = [];
+  const rm = appState.rateModel;
+  if(rm.assessmentFeePct === '') messages.push('');
+  if(Number(rm.assessmentFeePct) < 0) messages.push('');
+  return {valid: messages.length===0, messages};
+}
+
+function validatePage4(){
+  const messages = [];
+  const rows = appState.operatingExpenses.rows;
+  if(rows.some(r=>!r.description || !r.description.trim())) messages.push('');
+  if(rows.some(r=>!r.category || !String(r.category).trim())) messages.push('');
+  if(rows.some(r=>r.amount === '')) messages.push('');
+  const anyNeg = rows.some(r=>Number(r.amount) < 0);
+  if(anyNeg) messages.push('');
+  if(appState.operatingExpenses.contingencyPct === '') messages.push('');
+  return {valid: messages.length===0, messages};
+}
+
+function validatePage5(){
+  const messages = [];
+  const rows = appState.miscellaneousRevenue;
+  if(rows.some(r=>!r.description || !r.description.trim())) messages.push('');
+  if(rows.some(r=>!r.category || !String(r.category).trim())) messages.push('');
+  if(rows.some(r=>r.amount === '')) messages.push('');
+  const anyNeg = rows.some(r=>Number(r.amount) < 0);
+  if(anyNeg) messages.push('');
+  return {valid: messages.length===0, messages};
+}
+
+function validatePage6(){
+  const messages = [];
+  const wl = appState.waterLoss;
+  if(wl.include === 'yes'){
+    if(wl.method === 'gal'){
+      if(wl.annualGal === '') messages.push('');
+      else if(Number(wl.annualGal) < 0) messages.push('');
+    } else {
+      if(wl.annualPct === '') messages.push('');
+      else if(Number(wl.annualPct) < 0 || Number(wl.annualPct) > 100) messages.push('');
+    }
+  }
+  return {valid: messages.length===0, messages};
+}
+
+/* =========================================================================
+   PAGE 1: CUSTOMER & CONNECTIONS
+   ========================================================================= */
+
+function renderPage1(){
+  const ci = appState.customerInfo;
+  document.getElementById('totalCustomers').value = ci.totalCustomers===0?0:(ci.totalCustomers||'');
+  document.getElementById('activeCustomers').value = ci.activeCustomers===0?0:(ci.activeCustomers||'');
+  document.getElementById('monthlyWaterSold').value = ci.monthlyWaterSold===''?'':formatNumber(ci.monthlyWaterSold||0);
+  bindNumberCommaInputs(document);
+}
+
+function onField1Change(){
+  const ci = appState.customerInfo;
+  let tc = Number(document.getElementById('totalCustomers').value);
+  if(tc < 0) tc = 0;
+  ci.totalCustomers = document.getElementById('totalCustomers').value === '' ? '' : tc;
+  let ac = Number(document.getElementById('activeCustomers').value);
+  if(ac < 0) ac = 0;
+  ci.activeCustomers = document.getElementById('activeCustomers').value === '' ? '' : ac;
+  const mwsRaw = document.getElementById('monthlyWaterSold').value.replace(/,/g,'');
+  let mws = Number(mwsRaw);
+  if(mws < 0) mws = 0;
+  ci.monthlyWaterSold = mwsRaw === '' ? '' : mws;
+  updateMeterTotals();
+}
+
+function escapeHtml(str){
+  return String(str==null?'':str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+/* =========================================================================
+   PAGE 2: METER DISTRIBUTION
+   ========================================================================= */
+
+function meterSizeCellHtml(row){
+  let html = '<select data-field="size" onchange="onMeterRowChange(this)">';
+  html += '<option value=""'+(!row.customSize && row.size===''?' selected':'')+' disabled>Select Meter Size</option>';
+  METER_SIZES.forEach(m=>{
+    html += '<option value="'+escapeHtml(m.size)+'"'+(!row.customSize && m.size===row.size?' selected':'')+'>'+m.size+'</option>';
+  });
+  html += '<option value="__custom__"'+(row.customSize?' selected':'')+'>Custom...</option>';
+  html += '</select>';
+  if(row.customSize){
+    html += '<input type="text" data-field="customSizeText" value="'+escapeHtml(row.size)+'" placeholder="Enter meter size" oninput="onMeterRowChange(this)" style="margin-top:6px;">';
+  }
+  return html;
+}
+
+function renderMeterTable(){
+  const tbody = document.getElementById('meterTableBody');
+  tbody.innerHTML = '';
+  appState.meters.forEach(row=>{
+    const tr = document.createElement('tr');
+    tr.dataset.id = row.id;
+    tr.innerHTML =
+      '<td>'+meterSizeCellHtml(row)+'</td>'+
+      '<td><input type="number" min="0" step="1" data-field="count" value="'+row.count+'" oninput="onMeterRowChange(this)"></td>'+
+      '<td><input type="number" min="0" step="0.1" data-field="factor" value="'+row.factor+'" oninput="onMeterRowChange(this)"></td>'+
+      '<td><button class="btn-icon" onclick="removeMeterRow(\''+row.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
+    tbody.appendChild(tr);
+  });
+  updateMeterTotals();
+}
+
+function onMeterRowChange(el){
+  const tr = el.closest('tr');
+  const id = tr.dataset.id;
+  const row = appState.meters.find(m=>m.id===id);
+  if(!row) return;
+  const field = el.dataset.field;
+  if(field === 'size'){
+    if(el.value === '__custom__'){
+      row.customSize = true;
+      row.size = '';
+      row.factor = '';
+    } else {
+      row.customSize = false;
+      row.size = el.value;
+      const preset = METER_SIZES.find(m=>m.size===el.value);
+      row.factor = preset ? preset.factor : '';
+    }
+    renderMeterTable();
+  } else if(field === 'customSizeText'){
+    row.size = el.value;
+    updateMeterTotals();
+  } else if(field === 'count'){
+    const raw = el.value;
+    let v = raw === '' ? '' : Number(raw);
+    if(v !== '' && v < 0) v = 0;
+    row.count = v;
+    if(v !== '') el.value = v;
+    updateMeterTotals();
+  } else if(field === 'factor'){
+    const raw = el.value;
+    let v = raw === '' ? '' : Number(raw);
+    if(v !== '' && v < 0) v = 0;
+    row.factor = v;
+    if(v !== '') el.value = v;
+    updateMeterTotals();
+  }
+}
+
+function addMeterRow(){
+  appState.meters.push({id:uid(), size:'', count:0, factor:'', customSize:false});
+  renderMeterTable();
+}
+
+function removeMeterRow(id){
+  appState.meters = appState.meters.filter(m=>m.id!==id);
+  renderMeterTable();
+}
+
+function updateMeterTotals(){
+  const totalCount = appState.meters.reduce((a,m)=>a+(Number(m.count)||0),0);
+  document.getElementById('meterTotalCount').textContent = formatNumber(totalCount);
+  document.getElementById('meterSummaryCount').textContent = formatNumber(totalCount);
+  const activeCustomers = Number(appState.customerInfo.activeCustomers)||0;
+  document.getElementById('meterSummaryConnections').textContent = formatNumber(activeCustomers);
+
+  // Duplicate meter-size detection -> combine hint.
+  const counts = {};
+  appState.meters.forEach(m=>{ if(m.size) counts[m.size] = (counts[m.size]||0)+1; });
+  const dupes = Object.keys(counts).filter(k=>counts[k]>1);
+
+  const alertBox = document.getElementById('meterAlert');
+  let html = '';
+  const res = validatePage2();
+  if(res.messages.length){
+    html += '<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>';
+  }
+  if(dupes.length){
+    html += '<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>';
+  }
+  if(activeCustomers > 0 && totalCount !== activeCustomers){
+    html += '<div class="alert alert-info"><i class="fa-solid fa-circle-info"></i></div>';
+  }
+  alertBox.innerHTML = html;
+}
+
+/* =========================================================================
+   PAGE 3: RATE MODEL SELECTION
+   ========================================================================= */
+
+function renderRateModelChoice(){
+  const rm = appState.rateModel;
+  document.querySelectorAll('#rateModelToggle .rate-choice-card').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.model === rm.type);
+  });
+}
+
+function setRateModel(type){
+  appState.rateModel.type = type;
+  renderRateModelChoice();
+  renderRateDetails();
+}
+
+/* =========================================================================
+   PAGE 4: RATE DETAILS
+   ========================================================================= */
+
+function renderRateDetails(){
+  const rm = appState.rateModel;
+  document.getElementById('fixedRateSection').style.display = rm.type==='fixed' ? 'block' : 'none';
+  document.getElementById('tierRateSection').style.display = rm.type==='tier' ? 'block' : 'none';
+
+  setCurrencyValue(document.getElementById('fixedBaseCharge'), rm.fixed.baseCharge);
+  setCurrencyValue(document.getElementById('fixedVolumetricRate'), rm.fixed.volumetricRate);
+  setCurrencyValue(document.getElementById('fixedMinimumCharge'), rm.fixed.minimumCharge);
+  setCurrencyValue(document.getElementById('tierUnitCostDifference'), rm.tierUnitCostDifference);
+
+  renderTierTable();
+  bindCurrencyInputs(document.getElementById('fixedRateSection'));
+  bindCurrencyInputs(document.getElementById('tierRateSection'));
+}
+
+/* =========================================================================
+   PAGE 5: ASSESSMENT FEE
+   ========================================================================= */
+
+function renderAssessmentFeePage(){
+  document.getElementById('assessmentFeePct').value = appState.rateModel.assessmentFeePct;
+  updateAssessmentFeeDisplay();
+}
+
+function onFixedRateChange(){
+  const f = appState.rateModel.fixed;
+  f.baseCharge = parseCurrencyInputOrBlank(document.getElementById('fixedBaseCharge').value);
+  f.volumetricRate = parseCurrencyInputOrBlank(document.getElementById('fixedVolumetricRate').value);
+  f.minimumCharge = parseCurrencyInputOrBlank(document.getElementById('fixedMinimumCharge').value);
+  updateAssessmentFeeDisplay();
+}
+
+// Tier 1's rate is the only manually-entered rate; every later tier is priced
+// automatically at the previous tier's rate plus the unit cost difference.
+function recomputeTierRates(){
+  const tiers = appState.rateModel.tiers;
+  const diff = Number(appState.rateModel.tierUnitCostDifference)||0;
+  for(let i=1;i<tiers.length;i++){
+    tiers[i].rate = (Number(tiers[i-1].rate)||0) + diff;
+  }
+}
+
+function renderTierTable(){
+  recomputeTierRates();
+  const tbody = document.getElementById('tierTableBody');
+  tbody.innerHTML = '';
+  const tiers = appState.rateModel.tiers;
+  tiers.forEach((t,idx)=>{
+    const isLast = idx === tiers.length-1;
+    const isFirst = idx === 0;
+    const tr = document.createElement('tr');
+    tr.dataset.id = t.id;
+    tr.innerHTML =
+      '<td><input type="text" data-field="name" value="'+escapeHtml(t.name)+'" oninput="onTierRowChange(this)"></td>'+
+      '<td><input type="number" min="0" data-field="start" value="'+t.start+'" oninput="onTierRowChange(this)"></td>'+
+      '<td><input type="number" min="0" data-field="end" value="'+(t.end===null?'':t.end)+'" placeholder="'+(isLast?'Open-ended':'')+'" oninput="onTierRowChange(this)"></td>'+
+      (isFirst
+        ? '<td><input type="text" class="currency-input" data-field="rate" value="'+formatCurrency(t.rate)+'" oninput="onTierRowChange(this)"></td>'
+        : '<td>'+formatCurrency(t.rate)+' <span class="hint"></span></td>') +
+      '<td><input type="number" min="0" data-field="customers" value="'+t.customers+'" oninput="onTierRowChange(this)"></td>'+
+      '<td><button class="btn-icon" onclick="removeTierRow(\''+t.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
+    tbody.appendChild(tr);
+  });
+  bindCurrencyInputs(tbody);
+  runTierValidation();
+  updateAssessmentFeeDisplay();
+}
+
+
+function onTierRowChange(el){
+  const tr = el.closest('tr');
+  const t = appState.rateModel.tiers.find(x=>x.id===tr.dataset.id);
+  if(!t) return;
+  const field = el.dataset.field;
+  if(field === 'name') t.name = el.value;
+  else if(field === 'end') t.end = el.value === '' ? null : Number(el.value);
+  else if(field === 'rate'){
+    t.rate = parseCurrencyInputOrBlank(el.value);
+  } else {
+    const raw = el.value;
+    let v = raw === '' ? '' : Number(raw);
+    if(v !== '' && v < 0) v = 0;
+    t[field] = v;
+    if(v !== '') el.value = v;
+  }
+  if(field === 'rate'){
+    renderTierTable(); // re-cascade later tiers off the new Tier 1 rate
+  } else {
+    runTierValidation();
+    updateAssessmentFeeDisplay();
+  }
+}
+
+function onTierUnitCostDifferenceChange(){
+  const raw = document.getElementById('tierUnitCostDifference').value;
+  appState.rateModel.tierUnitCostDifference = parseCurrencyInputOrBlank(raw);
+  renderTierTable();
+}
+
+function addTierRow(){
+  const tiers = appState.rateModel.tiers;
+  const prev = tiers[tiers.length-1];
+  const newStart = prev && prev.end !== null ? Number(prev.end)+1 : (prev ? Number(prev.start)+1000 : 0);
+  tiers.push({id:uid(), name:String(tiers.length+1), start:newStart, end:null, rate:0, customers:0, waterSold:0});
+  renderTierTable();
+}
+
+function removeTierRow(id){
+  appState.rateModel.tiers = appState.rateModel.tiers.filter(t=>t.id!==id);
+  renderTierTable();
+}
+
+function runTierValidation(){
+  const res = validateRateDetails();
+  const alertBox = document.getElementById('tierAlert');
+  if(appState.rateModel.type==='tier' && res.messages.length){
+    alertBox.innerHTML = '<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>';
+  } else {
+    alertBox.innerHTML = '';
+  }
+}
+
+function onAssessmentFeeChange(){
+  const raw = document.getElementById('assessmentFeePct').value;
+  let v = raw === '' ? '' : Number(raw);
+  if(v !== '' && v < 0) v = 0;
+  appState.rateModel.assessmentFeePct = v;
+  updateAssessmentFeeDisplay();
+}
+
+function computeAssessmentFeeAnnual(){
+  const pct = Number(appState.rateModel.assessmentFeePct)||0;
+  return (pct/100) * estimateRateRevenueForAssessment();
+}
+
+// Rate revenue estimate used as the base for the assessment fee percentage --
+// computed before the assessment fee is added to total revenue.
+function estimateRateRevenueForAssessment(){
+  const rm = appState.rateModel;
+  const ci = appState.customerInfo;
+  const activeCustomers = Number(ci.activeCustomers)||0;
+  const monthlyWaterSold = Number(ci.monthlyWaterSold)||0;
+  if(rm.type === 'fixed'){
+    return computeFixedRateRevenue(rm.fixed, activeCustomers, monthlyWaterSold).totalAnnual;
+  }
+  const wl = getWaterLossSummary();
+  return computeTierRevenue(rm.tiers, wl).totalAnnual;
+}
+
+function updateAssessmentFeeDisplay(){
+  const el = document.getElementById('assessmentFeeAnnual');
+  if(el) el.textContent = formatCurrency(computeAssessmentFeeAnnual());
+}
+
+/* =========================================================================
+   PAGE 4: OPERATING EXPENSES
+   ========================================================================= */
+
+function renderExpenseTable(){
+  const tbody = document.getElementById('expenseTableBody');
+  tbody.innerHTML = '';
+  appState.operatingExpenses.rows.forEach(row=>{
+    const tr = document.createElement('tr');
+    tr.dataset.id = row.id;
+    tr.innerHTML =
+      '<td><input type="text" data-field="description" value="'+escapeHtml(row.description)+'" oninput="onExpenseRowChange(this)"></td>'+
+      '<td>'+categorySelectHtml(EXPENSE_CATEGORIES, row.category, 'onExpenseRowChange', false)+'</td>'+
+      '<td><input type="text" class="currency-input" data-field="amount" value="'+formatCurrency(row.amount)+'" oninput="onExpenseRowChange(this)"></td>'+
+      '<td><select data-field="frequency" onchange="onExpenseRowChange(this)">'+FREQUENCIES.map(f=>'<option value="'+f+'"'+(f===row.frequency?' selected':'')+'>'+f+'</option>').join('')+'</select></td>'+
+      '<td class="row-annual">'+formatCurrency(toAnnual(row.amount,row.frequency))+'</td>'+
+      '<td><button class="btn-icon" onclick="removeExpenseRow(\''+row.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
+    tbody.appendChild(tr);
+  });
+  bindCurrencyInputs(tbody);
+  document.getElementById('expenseContingencyPct').value = appState.operatingExpenses.contingencyPct;
+  onExpenseTotalsChange();
+}
+
+function categorySelectHtml(categories, selected, handlerName, allowCustom){
+  const isCustom = allowCustom !== false && selected && !categories.includes(selected);
+  let html = '<select data-field="category" onchange="'+handlerName+'(this)">';
+  categories.forEach(c=>{ html += '<option value="'+c+'"'+(c===selected?' selected':'')+'>'+c+'</option>'; });
+  if(allowCustom !== false){
+    html += '<option value="__custom__"'+(isCustom?' selected':'')+'>Custom...</option>';
+  }
+  html += '</select>';
+  if(isCustom){
+    html += '<input type="text" data-field="customCategory" value="'+escapeHtml(selected)+'" oninput="'+handlerName+'(this)" style="margin-top:6px;">';
+  }
+  return html;
+}
+
+function onExpenseRowChange(el){
+  const tr = el.closest('tr');
+  const row = appState.operatingExpenses.rows.find(r=>r.id===tr.dataset.id);
+  if(!row) return;
+  const field = el.dataset.field;
+  if(field === 'amount'){
+    row.amount = parseCurrencyInputOrBlank(el.value);
+  } else if(field === 'category'){
+    if(el.value === '__custom__'){
+      row.category = 'Other';
+      renderExpenseTable();
+      return;
+    }
+    row.category = el.value;
+  } else if(field === 'customCategory'){
+    row.category = el.value;
+  } else {
+    row[field] = el.value;
+  }
+  const annualCell = tr.querySelector('.row-annual');
+  if(annualCell) annualCell.textContent = formatCurrency(toAnnual(row.amount, row.frequency));
+  onExpenseTotalsChange();
+}
+
+function addExpenseRow(){
+  appState.operatingExpenses.rows.push({id:uid(), description:'', category:'Facilities Operation', amount:0, frequency:'Annual'});
+  renderExpenseTable();
+}
+
+function removeExpenseRow(id){
+  appState.operatingExpenses.rows = appState.operatingExpenses.rows.filter(r=>r.id!==id);
+  renderExpenseTable();
+}
+
+function onExpenseTotalsChange(){
+  const rawPct = document.getElementById('expenseContingencyPct').value;
+  let pct = rawPct === '' ? '' : Number(rawPct);
+  if(pct !== '' && pct < 0) pct = 0;
+  appState.operatingExpenses.contingencyPct = pct;
+  const subtotalAnnual = appState.operatingExpenses.rows.reduce((a,r)=>a+toAnnual(r.amount,r.frequency),0);
+  const grandTotal = subtotalAnnual*(1+(Number(pct)||0)/100);
+  document.getElementById('expenseMonthlyEquivalent').textContent = formatCurrency(subtotalAnnual/12);
+  document.getElementById('expenseSubtotalAnnual').textContent = formatCurrency(subtotalAnnual);
+  document.getElementById('expenseGrandTotal').textContent = formatCurrency(grandTotal);
+  const alertBox = document.getElementById('expenseAlert');
+  const res = validatePage4();
+  alertBox.innerHTML = res.messages.length ? '<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>' : '';
+}
+
+/* =========================================================================
+   PAGE 5: MISCELLANEOUS REVENUE
+   ========================================================================= */
+
+function renderMiscRevenueTable(){
+  const tbody = document.getElementById('miscRevenueTableBody');
+  tbody.innerHTML = '';
+  appState.miscellaneousRevenue.forEach(row=>{
+    const tr = document.createElement('tr');
+    tr.dataset.id = row.id;
+    tr.innerHTML =
+      '<td><input type="text" data-field="description" value="'+escapeHtml(row.description)+'" oninput="onMiscRevenueRowChange(this)"></td>'+
+      '<td>'+categorySelectHtml(MISC_REVENUE_CATEGORIES, row.category, 'onMiscRevenueRowChange')+'</td>'+
+      '<td><input type="text" class="currency-input" data-field="amount" value="'+formatCurrency(row.amount)+'" oninput="onMiscRevenueRowChange(this)"></td>'+
+      '<td><select data-field="frequency" onchange="onMiscRevenueRowChange(this)">'+FREQUENCIES.map(f=>'<option value="'+f+'"'+(f===row.frequency?' selected':'')+'>'+f+'</option>').join('')+'</select></td>'+
+      '<td class="row-annual">'+formatCurrency(toAnnual(row.amount,row.frequency))+'</td>'+
+      '<td><button class="btn-icon" onclick="removeMiscRevenueRow(\''+row.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
+    tbody.appendChild(tr);
+  });
+  bindCurrencyInputs(tbody);
+  updateMiscRevenueTotals();
+}
+
+function onMiscRevenueRowChange(el){
+  const tr = el.closest('tr');
+  const row = appState.miscellaneousRevenue.find(r=>r.id===tr.dataset.id);
+  if(!row) return;
+  const field = el.dataset.field;
+  if(field === 'amount') row.amount = parseCurrencyInputOrBlank(el.value);
+  else if(field === 'category'){
+    if(el.value === '__custom__'){ row.category='Other'; renderMiscRevenueTable(); return; }
+    row.category = el.value;
+  } else if(field === 'customCategory') row.category = el.value;
+  else row[field] = el.value;
+  const annualCell = tr.querySelector('.row-annual');
+  if(annualCell) annualCell.textContent = formatCurrency(toAnnual(row.amount,row.frequency));
+  updateMiscRevenueTotals();
+}
+
+function addMiscRevenueRow(){
+  appState.miscellaneousRevenue.push({id:uid(), description:'', category:'Grant', amount:0, frequency:'Annual'});
+  renderMiscRevenueTable();
+}
+
+function removeMiscRevenueRow(id){
+  appState.miscellaneousRevenue = appState.miscellaneousRevenue.filter(r=>r.id!==id);
+  renderMiscRevenueTable();
+}
+
+function updateMiscRevenueTotals(){
+  const annual = appState.miscellaneousRevenue.reduce((a,r)=>a+toAnnual(r.amount,r.frequency),0);
+  document.getElementById('miscMonthlyEquivalent').textContent = formatCurrency(annual/12);
+  document.getElementById('miscAnnualTotal').textContent = formatCurrency(annual);
+  const alertBox = document.getElementById('miscRevenueAlert');
+  if(alertBox){
+    const res = validatePage5();
+    alertBox.innerHTML = res.messages.length ? '<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>' : '';
+  }
+}
+
+/* =========================================================================
+   PAGE 6: WATER LOSS
+   ========================================================================= */
+
+function renderPage6(){
+  const wl = appState.waterLoss;
+  document.getElementById('waterLossYes').classList.toggle('active', wl.include==='yes');
+  document.getElementById('waterLossNo').classList.toggle('active', wl.include==='no');
+  document.getElementById('waterLossSection').style.display = wl.include==='yes' ? 'block' : 'none';
+  renderWaterLossForm();
+}
+
+function setWaterLossInclude(val){
+  appState.waterLoss.include = val;
+  renderPage6();
+}
+
+function setWaterLossMethod(val){
+  appState.waterLoss.method = val;
+  renderPage6();
+}
+
+function renderWaterLossForm(){
+  const wl = appState.waterLoss;
+  document.getElementById('waterLossMethodPct').classList.toggle('active', wl.method!=='gal');
+  document.getElementById('waterLossMethodGal').classList.toggle('active', wl.method==='gal');
+  document.getElementById('waterLossPctGroup').style.display = wl.method==='gal' ? 'none' : 'block';
+  document.getElementById('waterLossGalGroup').style.display = wl.method==='gal' ? 'block' : 'none';
+  document.getElementById('waterLossAnnualGalInput').value = wl.annualGal===''?'':wl.annualGal;
+  document.getElementById('waterLossAnnualPctInput').value = wl.annualPct===''?'':wl.annualPct;
+  updateWaterLossTotals();
+}
+
+function onWaterLossFieldChange(){
+  const wl = appState.waterLoss;
+  if(wl.method === 'gal'){
+    const raw = document.getElementById('waterLossAnnualGalInput').value;
+    let gal = raw === '' ? '' : Number(raw);
+    if(gal !== '' && gal < 0) gal = 0;
+    wl.annualGal = gal;
+  } else {
+    const raw = document.getElementById('waterLossAnnualPctInput').value;
+    let pct = raw === '' ? '' : Number(raw);
+    if(pct !== '' && pct < 0) pct = 0;
+    wl.annualPct = pct;
+  }
+  updateWaterLossTotals();
+}
+
+// Only one of gallons/percentage is ever user-entered (per `method`); the
+// other is derived here from annual water sold so production/rate math and
+// reporting both stay consistent regardless of which figure the user had on hand.
+//
+// `include` only controls which rate-setting basis calculateAll() picks (sold
+// vs. produced) -- totalGal/avgPct below are NOT zeroed when include is
+// false: the physical loss volume still affects Water Produced and Cost per
+// 1,000 Gallons either way; only the required-rate denominator depends on the toggle.
+function getWaterLossSummary(){
+  const wl = appState.waterLoss;
+  const annualSold = (Number(appState.customerInfo.monthlyWaterSold)||0)*12;
+  let totalGal, avgPct;
+  if(wl.method === 'gal'){
+    totalGal = Number(wl.annualGal)||0;
+    const impliedBase = annualSold + totalGal;
+    avgPct = impliedBase > 0 ? (totalGal/impliedBase)*100 : 0;
+  } else {
+    avgPct = wl.annualPct==='' ? 0 : Number(wl.annualPct)||0;
+    totalGal = avgPct > 0 && avgPct < 100 ? annualSold*avgPct/(100-avgPct) : 0;
+  }
+  return {
+    include: wl.include==='yes',
+    totalGal, avgPct
+  };
+}
+
+function updateWaterLossTotals(){
+  const alertBox = document.getElementById('waterLossAlert');
+  const res = validatePage6();
+  alertBox.innerHTML = res.messages.length ? '<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>' : '';
+}
+
+/* =========================================================================
+   CALCULATION ENGINE
+   ========================================================================= */
+
+function computeFixedRateRevenue(fixed, activeCustomers, monthlyWaterSold){
+  const baseCharge = Number(fixed.baseCharge)||0;
+  const volumetricRate = Number(fixed.volumetricRate)||0;
+  const minimumCharge = Number(fixed.minimumCharge)||0;
+  const includedConsumption = Number(fixed.includedConsumption)||0;
+
+  const baseChargeAnnual = baseCharge*activeCustomers*12;
+  const avgMonthlyConsumptionPerConn = activeCustomers>0 ? monthlyWaterSold/activeCustomers : 0;
+  const billableMonthlyPerConn = Math.max(0, avgMonthlyConsumptionPerConn - includedConsumption);
+  const volumetricMonthlyPerConn = (billableMonthlyPerConn/BILLING_UNIT_GAL)*volumetricRate;
+  const monthlyBillPerConn = baseCharge + volumetricMonthlyPerConn;
+  const effectiveMonthlyBillPerConn = Math.max(monthlyBillPerConn, minimumCharge);
+  const totalAnnual = effectiveMonthlyBillPerConn*activeCustomers*12;
+  const volumetricAnnual = Math.max(0, totalAnnual - baseChargeAnnual);
+
+  return {
+    baseChargeAnnual, volumetricAnnual, totalAnnual,
+    averageCustomerBill: effectiveMonthlyBillPerConn
+  };
+}
+
+// The assessment fee is reported as its own line (see computeAssessmentFeeAnnual)
+// and added on top in calculateAll(), rather than folded into each tier's rate --
+// so the per-tier "Revenue" below is the pre-assessment-fee amount.
+function computeTierRevenue(tiers, waterLossSummary){
+  const grossFactor = waterLossSummary.include ? 1/(1-(waterLossSummary.avgPct/100)) : 1;
+  const rows = tiers.map(t=>{
+    const monthlyVolume = Number(t.waterSold)||0;
+    const grossAnnualVolume = monthlyVolume*12*grossFactor;
+    const revenue = (grossAnnualVolume/BILLING_UNIT_GAL)*(Number(t.rate)||0);
+    return {tier:t, monthlyVolume, grossAnnualVolume, revenue};
+  });
+  const totalAnnual = rows.reduce((a,r)=>a+r.revenue,0);
+  rows.forEach(r=>{ r.pctOfTotal = totalAnnual>0 ? r.revenue/totalAnnual*100 : 0; });
+  return {rows, totalAnnual};
+}
+
+function calculateAll(showToast){
+  const ci = appState.customerInfo;
+  const totalCustomers = Number(ci.totalCustomers)||0;
+  const activeCustomers = Number(ci.activeCustomers)||0;
+  const monthlyWaterSold = Number(ci.monthlyWaterSold)||0;
+  const annualWaterSold = monthlyWaterSold*12;
+
+  const waterLossSummary = getWaterLossSummary();
+  const avgLossPct = waterLossSummary.avgPct||0;
+  // Production is always grossed up by loss %, regardless of whether that
+  // loss is billed to customers -- only the required-rate basis below reacts to that toggle.
+  const annualWaterProduced = avgLossPct < 100 ? annualWaterSold/(1-avgLossPct/100) : annualWaterSold;
+  const annualWaterLossGal = waterLossSummary.totalGal;
+
+  const totalMeters = appState.meters.reduce((a,m)=>a+(Number(m.count)||0),0);
+  const totalMeterEquivalents = appState.meters.reduce((a,m)=>a+(Number(m.count)||0)*(Number(m.factor)||0),0);
+
+  const expenseRows = appState.operatingExpenses.rows;
+  const expenseSubtotal = expenseRows.reduce((a,r)=>a+toAnnual(r.amount,r.frequency),0);
+  const contingencyPct = Number(appState.operatingExpenses.contingencyPct)||0;
+  const totalAnnualExpenses = expenseSubtotal*(1+contingencyPct/100);
+
+  const annualMiscRevenue = appState.miscellaneousRevenue.reduce((a,r)=>a+toAnnual(r.amount,r.frequency),0);
+
+  const rm = appState.rateModel;
+  const fixedResult = computeFixedRateRevenue(rm.fixed, activeCustomers, monthlyWaterSold);
+  const tierResult = computeTierRevenue(rm.tiers, waterLossSummary);
+  const actualRateRevenue = rm.type==='fixed' ? fixedResult.totalAnnual : tierResult.totalAnnual;
+
+  const totalAssessmentFees = computeAssessmentFeeAnnual();
+
+  // NOTE: this does not net out any meter-based/flat service-fee revenue the
+  // utility might already collect outside its water-sale rates -- if so, the
+  // revenue actually still needed from rates is lower than this figure.
+  const revenueRequirement = totalAnnualExpenses - annualMiscRevenue;
+
+  const includeWaterLossInRates = waterLossSummary.include;
+  const rateBasedOnSold = annualWaterSold>0 ? revenueRequirement/annualWaterSold*1000 : 0;
+  const rateBasedOnProduced = annualWaterProduced>0 ? revenueRequirement/annualWaterProduced*1000 : 0;
+  const requiredAverageRate = includeWaterLossInRates ? rateBasedOnSold : rateBasedOnProduced;
+
+  const costPer1000Gal = annualWaterProduced>0 ? totalAnnualExpenses/annualWaterProduced*1000 : 0;
+
+  const totalRevenue = actualRateRevenue + annualMiscRevenue + totalAssessmentFees;
+  const netSurplusDeficit = totalRevenue - totalAnnualExpenses;
+
+  const expenseByCategory = {};
+  expenseRows.forEach(r=>{
+    const cat = r.category || 'Other';
+    expenseByCategory[cat] = (expenseByCategory[cat]||0) + toAnnual(r.amount,r.frequency);
+  });
+
+  appState.results = {
+    totalCustomers, activeCustomers, totalMeters, totalMeterEquivalents,
+    annualWaterSold, annualWaterProduced, annualWaterLossGal, avgLossPct,
+    totalAnnualExpenses, expenseSubtotal, contingencyPct, expenseByCategory,
+    annualMiscRevenue,
+    totalAssessmentFees,
+    revenueRequirement, requiredAverageRate, costPer1000Gal,
+    rateModelType: rm.type,
+    fixedResult, tierResult, actualRateRevenue,
+    totalRevenue, netSurplusDeficit,
+    includeWaterLossInRates
+  };
+
+  renderResults();
+  if(showToast) showToastMsg('', 'success');
+  return appState.results;
+}
+
+/* =========================================================================
+   PAGE 7: SUMMARY & RESULTS
+   ========================================================================= */
+
+function metricCard(label, value, sub, negative){
+  return '<div class="metric-card'+(negative?' negative':'')+'"><div class="metric-label">'+label+'</div><div class="metric-value'+(negative?' negative':'')+'">'+value+'</div>'+(sub?'<div class="metric-sub">'+sub+'</div>':'')+'</div>';
+}
+
+function renderResults(){
+  const r = appState.results;
+  if(!r || Object.keys(r).length===0) return;
+
+  const alertBox = document.getElementById('resultsAlert');
+  const p1 = validatePage1(), p2 = validatePage2(), p4 = validatePage4();
+  const blockingMsgs = [...(p1.messages||[]), ...(p2.messages||[]), ...(p4.messages||[])];
+  alertBox.innerHTML = blockingMsgs.length ? '<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>' : '';
+
+  const grid = document.getElementById('metricGrid');
+  grid.innerHTML =
+    metricCard('Total Annual Operating Expenses', formatCurrency(r.totalAnnualExpenses)) +
+    metricCard('Miscellaneous Annual Revenue', formatCurrency(r.annualMiscRevenue)) +
+    metricCard('Total Water Production (Annual)', formatNumber(r.annualWaterProduced)+' gal') +
+    metricCard('Total Water Sales (Annual)', formatNumber(r.annualWaterSold)+' gal') +
+    metricCard('Active Customers', formatNumber(r.activeCustomers));
+
+  document.getElementById('rateModelBadge').className = 'badge ' + (r.rateModelType==='fixed'?'badge-fixed':'badge-tier');
+  document.getElementById('rateModelBadge').textContent = r.rateModelType==='fixed' ? 'Fixed Rate' : 'Tier-Based Rate';
+
+  const rateContent = document.getElementById('rateResultsContent');
+  if(r.rateModelType === 'fixed'){
+    rateContent.innerHTML =
+      '<div class="totals-row">'+
+      '<div class="total-item"><span class="label">Base-Charge Revenue</span><span class="value">'+formatCurrency(r.fixedResult.baseChargeAnnual)+'</span></div>'+
+      '<div class="total-item"><span class="label">Volumetric Revenue</span><span class="value">'+formatCurrency(r.fixedResult.volumetricAnnual)+'</span></div>'+
+      '<div class="total-item"><span class="label">Total Fixed-Rate Revenue</span><span class="value">'+formatCurrency(r.fixedResult.totalAnnual)+'</span></div>'+
+      '<div class="total-item"><span class="label">Average Customer Bill (Monthly)</span><span class="value">'+formatCurrency(r.fixedResult.averageCustomerBill)+'</span></div>'+
+      '</div>';
+  } else {
+    let html = '<div class="table-scroll"><table class="data-table"><thead><tr><th>Tier</th><th>Customers</th><th>Consumption Volume (annual, gal-equiv)</th><th>Rate ($/1,000 gal)</th><th>Revenue</th><th>% of Total</th></tr></thead><tbody>';
+    r.tierResult.rows.forEach(row=>{
+      html += '<tr><td>'+escapeHtml(row.tier.name)+'</td><td>'+formatNumber(row.tier.customers)+'</td><td>'+formatNumber(row.grossAnnualVolume)+'</td><td>'+formatCurrency(row.tier.rate)+'</td><td>'+formatCurrency(row.revenue)+'</td><td>'+formatNumber(row.pctOfTotal,1)+'%</td></tr>';
+    });
+    html += '</tbody><tfoot><tr><td colspan="4">Total Tier-Based Revenue</td><td>'+formatCurrency(r.tierResult.totalAnnual)+'</td><td>100%</td></tr></tfoot></table></div>';
+    rateContent.innerHTML = html;
+  }
+
+  const assessSharePct = r.totalRevenue>0 ? r.totalAssessmentFees/r.totalRevenue*100 : 0;
+  document.getElementById('assessmentResultPct').textContent = formatNumber(appState.rateModel.assessmentFeePct,2)+'%';
+  document.getElementById('assessmentResultAnnual').textContent = formatCurrency(r.totalAssessmentFees);
+  document.getElementById('assessmentResultShare').textContent = formatNumber(assessSharePct,1)+'%';
+
+  renderCharts(r);
+}
+
+/* =========================================================================
+   CHARTS
+   ========================================================================= */
+
+const CHART_PALETTE = ['#4472C4','#ED7D31','#FFC000','#548235'];
+
+// Registered globally but off by default; each pie/doughnut chart below turns
+// it on explicitly via percentDataLabels() so percentages show directly on
+// the slices, not just on hover. Tiny slices skip the label to avoid clutter.
+if(window.ChartDataLabels){
+  Chart.register(ChartDataLabels);
+  Chart.defaults.set('plugins.datalabels', {display:false});
+}
+
+function percentDataLabels(total){
+  return {
+    display:true,
+    color:'#fff',
+    textStrokeColor:'rgba(0,0,0,.45)',
+    textStrokeWidth:3,
+    font:{weight:'700', size:11},
+    formatter:(value)=>{
+      const pct = total>0 ? (value/total*100) : 0;
+      return pct < 4 ? '' : formatNumber(pct,1)+'%';
+    }
+  };
+}
+
+function destroyChart(key){
+  if(charts[key]){ charts[key].destroy(); charts[key]=null; }
+}
+
+function showChartEmpty(canvasId, msg){
+  const canvas = document.getElementById(canvasId);
+  const wrap = canvas.parentElement;
+  canvas.style.display='none';
+  let empty = wrap.querySelector('.chart-empty');
+  if(!empty){
+    empty = document.createElement('div');
+    empty.className = 'chart-empty';
+    wrap.appendChild(empty);
+  }
+  empty.textContent = msg;
+}
+
+function hideChartEmpty(canvasId){
+  const canvas = document.getElementById(canvasId);
+  canvas.style.display='block';
+  const wrap = canvas.parentElement;
+  const empty = wrap.querySelector('.chart-empty');
+  if(empty) empty.remove();
+}
+
+function renderCharts(r){
+  renderExpenseChart(r);
+  renderWaterProductionChart(r);
+  renderRevenueChart(r);
+  renderRevExpChart(r);
+}
+
+function renderWaterProductionChart(r){
+  destroyChart('waterProduction');
+  const entries = [
+    ['Water Sold', r.annualWaterSold],
+    ['Water Lost', r.annualWaterLossGal]
+  ].filter(([,v])=>v>0);
+  if(entries.length===0){ showChartEmpty('waterProductionChart','No water production data to display yet.'); return; }
+  hideChartEmpty('waterProductionChart');
+  const total = entries.reduce((a,[,v])=>a+v,0);
+  const ctx = document.getElementById('waterProductionChart').getContext('2d');
+  charts.waterProduction = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels:entries.map(e=>e[0]), datasets:[{data:entries.map(e=>e[1]), backgroundColor:[CHART_PALETTE[0], CHART_PALETTE[1]]}]},
+    options:{
+      plugins:{
+        tooltip:{callbacks:{label:(ctx)=>{
+          const v = ctx.parsed; const pct = total>0?(v/total*100):0;
+          return ctx.label+': '+formatNumber(v)+' gal ('+formatNumber(pct,1)+'%)';
+        }}},
+        legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}},
+        datalabels: percentDataLabels(total)
+      },
+      onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const i = elements[0].index;
+        const v = entries[i][1]; const pct = total>0?(v/total*100):0;
+        document.getElementById('waterProductionChartDetail').textContent = entries[i][0]+': '+formatNumber(v)+' gal ('+formatNumber(pct,1)+'% of total production)';
+      }
+    }
+  });
+}
+
+function renderExpenseChart(r){
+  destroyChart('expense');
+  const entries = Object.entries(r.expenseByCategory).filter(([,v])=>v>0);
+  if(entries.length===0){ showChartEmpty('expenseChart','No expense data to display yet.'); return; }
+  hideChartEmpty('expenseChart');
+  const total = entries.reduce((a,[,v])=>a+v,0);
+  const ctx = document.getElementById('expenseChart').getContext('2d');
+  charts.expense = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels:entries.map(e=>e[0]), datasets:[{data:entries.map(e=>e[1]), backgroundColor:CHART_PALETTE}]},
+    options:{
+      plugins:{
+        tooltip:{callbacks:{label:(ctx)=>{
+          const v = ctx.parsed; const pct = total>0?(v/total*100):0;
+          return ctx.label+': '+formatCurrency(v)+' ('+formatNumber(pct,1)+'%)';
+        }}},
+        legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}},
+        datalabels: percentDataLabels(total)
+      },
+      onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const i = elements[0].index;
+        const v = entries[i][1]; const pct = total>0?(v/total*100):0;
+        document.getElementById('expenseChartDetail').textContent = entries[i][0]+': '+formatCurrency(v)+' ('+formatNumber(pct,1)+'% of total expenses)';
+      }
+    }
+  });
+}
+
+function renderRevenueChart(r){
+  destroyChart('revenue');
+  const entries = [
+    ['Rate Revenue', r.actualRateRevenue],
+    ['Miscellaneous Revenue', r.annualMiscRevenue],
+    ['Assessment Fees', r.totalAssessmentFees]
+  ].filter(([,v])=>v>0);
+  if(entries.length===0){ showChartEmpty('revenueChart','No revenue data to display yet.'); return; }
+  hideChartEmpty('revenueChart');
+  const total = entries.reduce((a,[,v])=>a+v,0);
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  charts.revenue = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels:entries.map(e=>e[0]), datasets:[{data:entries.map(e=>e[1]), backgroundColor:CHART_PALETTE}]},
+    options:{
+      plugins:{
+        tooltip:{callbacks:{label:(ctx)=>{
+          const v=ctx.parsed; const pct= total>0?(v/total*100):0;
+          return ctx.label+': '+formatCurrency(v)+' ('+formatNumber(pct,1)+'%)';
+        }}},
+        legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}},
+        datalabels: percentDataLabels(total)
+      },
+      onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const i = elements[0].index;
+        const v = entries[i][1]; const pct = total>0?(v/total*100):0;
+        document.getElementById('revenueChartDetail').textContent = entries[i][0]+': '+formatCurrency(v)+' ('+formatNumber(pct,1)+'% of total revenue)';
+      }
+    }
+  });
+}
+
+function renderRevExpChart(r){
+  destroyChart('revExp');
+  if(r.totalRevenue<=0 && r.totalAnnualExpenses<=0){ showChartEmpty('revExpChart','No data to display yet.'); return; }
+  hideChartEmpty('revExpChart');
+  const ctx = document.getElementById('revExpChart').getContext('2d');
+  const labels = ['Total Revenue','Total Expenses'];
+  const data = [r.totalRevenue, r.totalAnnualExpenses];
+  charts.revExp = new Chart(ctx, {
+    type:'bar',
+    data:{labels, datasets:[{label:'Annual $', data, backgroundColor:[CHART_PALETTE[0], CHART_PALETTE[3]]}]},
+    options:{
+      plugins:{
+        tooltip:{callbacks:{label:(ctx)=>formatCurrency(ctx.parsed.y)}},
+        legend:{display:false}
+      },
+      scales:{y:{beginAtZero:true, ticks:{callback:(v)=>'$'+formatNumber(v)}}},
+      onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const i = elements[0].index;
+        document.getElementById('revExpChartDetail').textContent = labels[i]+': '+formatCurrency(data[i]);
+      }
+    }
+  });
+}
+
+/* =========================================================================
+   EXPORT: EXCEL (SheetJS)
+   ========================================================================= */
+
+function exportExcel(){
+  calculateAll(false);
+  const r = appState.results;
+  const ci = appState.customerInfo;
+  const wb = XLSX.utils.book_new();
+
+  const infoSheet = [
+    ['Water Rate Tool - Export'],
+    ['Generated', new Date().toLocaleString()],
+    [],
+    ['Total Number of Customers', ci.totalCustomers],
+    ['Active Customers', ci.activeCustomers],
+    ['Total Water Sold per Month (gal)', ci.monthlyWaterSold]
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(infoSheet), 'Customer Info');
+
+  const meterSheet = [['Meter Size','Count','AWWA Factor','Meter Equivalents']];
+  appState.meters.forEach(m=>meterSheet.push([m.size, m.count, m.factor, (Number(m.count)||0)*(Number(m.factor)||0)]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(meterSheet), 'Meters');
+
+  const rateSheet = [['Rate Model', appState.rateModel.type], ['Billing Unit', '$ / 1,000 gal']];
+  if(appState.rateModel.type==='fixed'){
+    const f = appState.rateModel.fixed;
+    rateSheet.push(['Base Charge', f.baseCharge],['Volumetric Rate', f.volumetricRate],['Minimum Charge', f.minimumCharge],['Included Consumption', f.includedConsumption]);
+  } else {
+    rateSheet.push(['Unit Cost Difference Between Tiers', appState.rateModel.tierUnitCostDifference]);
+    rateSheet.push([],['Tier','Start','End','Rate','Customers','Water Sold (gal/month)']);
+    appState.rateModel.tiers.forEach(t=>rateSheet.push([t.name,t.start,t.end===null?'and above':t.end,t.rate,t.customers,t.waterSold]));
+  }
+  rateSheet.push([],['Assessment Fee (%)', appState.rateModel.assessmentFeePct],['Assessment Fee Annual Amount', r.totalAssessmentFees]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rateSheet), 'Cost Model');
+
+  const expenseSheet = [['Description','Category','Amount','Frequency','Annual Amount']];
+  appState.operatingExpenses.rows.forEach(row=>expenseSheet.push([row.description,row.category,row.amount,row.frequency,toAnnual(row.amount,row.frequency)]));
+  expenseSheet.push([],['Contingency %', appState.operatingExpenses.contingencyPct],['Total Annual Expenses', r.totalAnnualExpenses]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(expenseSheet), 'Expenses');
+
+  const miscSheet = [['Description','Category','Amount','Frequency','Annual Amount']];
+  appState.miscellaneousRevenue.forEach(row=>miscSheet.push([row.description,row.category,row.amount,row.frequency,toAnnual(row.amount,row.frequency)]));
+  miscSheet.push([],['Total Annual Misc Revenue', r.annualMiscRevenue]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(miscSheet), 'Misc Revenue');
+
+  const wlSheet = [
+    ['Include Water Loss', appState.waterLoss.include],
+    ['Loss Entry Method', appState.waterLoss.method==='gal' ? 'Gallons' : 'Percentage'],
+    ['Entered Value', appState.waterLoss.method==='gal' ? appState.waterLoss.annualGal : appState.waterLoss.annualPct],
+    [],
+    ['Total Annual Loss (gal)', r.annualWaterLossGal],
+    ['Avg Loss %', r.avgLossPct]
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wlSheet), 'Water Loss');
+
+  const summarySheet = [
+    ['Metric','Value'],
+    ['Total Annual Operating Expenses', r.totalAnnualExpenses],
+    ['Estimated Annual Water-Sales Revenue', r.actualRateRevenue],
+    ['Miscellaneous Annual Revenue', r.annualMiscRevenue],
+    ['Total Annual Revenue', r.totalRevenue],
+    ['Annual Assessment Fees', r.totalAssessmentFees],
+    ['Total Water Production (Annual, gal)', r.annualWaterProduced],
+    ['Total Water Sales (Annual, gal)', r.annualWaterSold],
+    ['Estimated Annual Water Loss (gal)', r.annualWaterLossGal],
+    ['Net Annual Surplus / Deficit', r.netSurplusDeficit],
+    ['Cost per 1,000 Gallons', r.costPer1000Gal],
+    ['Revenue Requirement', r.revenueRequirement],
+    ['Required Average Rate (/1,000 gal)', r.requiredAverageRate],
+    ['Total Customers', r.totalCustomers],
+    ['Active Customers', r.activeCustomers],
+    ['Total Meter Equivalents', r.totalMeterEquivalents]
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summarySheet), 'Summary');
+
+  XLSX.writeFile(wb, 'Civitas_Water_Rate_Analysis_'+new Date().toISOString().split('T')[0]+'.xlsx');
+  showToastMsg('', 'success');
+}
+
+/* =========================================================================
+   EXPORT: PDF (jsPDF + autoTable)
+   ========================================================================= */
+
+function exportPDF(){
+  calculateAll(false);
+  const r = appState.results;
+  const ci = appState.customerInfo;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text('Water Rate Tool - Results Report', 14, 18);
+  doc.setFontSize(10);
+  doc.text('Generated '+new Date().toLocaleDateString(), 14, 25);
+
+  doc.autoTable({
+    startY:32,
+    head:[['Metric','Value']],
+    body:[
+      ['Total Annual Operating Expenses', formatCurrency(r.totalAnnualExpenses)],
+      ['Estimated Annual Water-Sales Revenue', formatCurrency(r.actualRateRevenue)],
+      ['Miscellaneous Annual Revenue', formatCurrency(r.annualMiscRevenue)],
+      ['Total Annual Revenue', formatCurrency(r.totalRevenue)],
+      ['Annual Assessment Fees', formatCurrency(r.totalAssessmentFees)],
+      ['Total Water Production (Annual)', formatNumber(r.annualWaterProduced)+' gal'],
+      ['Total Water Sales (Annual)', formatNumber(r.annualWaterSold)+' gal'],
+      ['Estimated Annual Water Loss', formatNumber(r.annualWaterLossGal)+' gal'],
+      ['Net Annual Surplus / Deficit', formatCurrency(r.netSurplusDeficit)],
+      ['Cost per 1,000 Gallons', formatCurrency(r.costPer1000Gal)],
+      ['Revenue Requirement', formatCurrency(r.revenueRequirement)],
+      ['Required Average Rate (/1,000 gal)', formatCurrency(r.requiredAverageRate)],
+      ['Total Customers', formatNumber(r.totalCustomers)],
+      ['Active Customers', formatNumber(r.activeCustomers)],
+      ['Total Meter Equivalents', formatNumber(r.totalMeterEquivalents,2)]
+    ],
+    styles:{fontSize:9}, headStyles:{fillColor:[75,46,131]}
+  });
+
+  let nextY = doc.lastAutoTable.finalY + 10;
+  if(r.rateModelType==='tier'){
+    doc.setFontSize(12); doc.text('Tier-Based Rate Results', 14, nextY); nextY += 4;
+    doc.autoTable({
+      startY:nextY,
+      head:[['Tier','Customers','Volume (annual)','Rate','Revenue','% of Total']],
+      body:r.tierResult.rows.map(row=>[row.tier.name, formatNumber(row.tier.customers), formatNumber(row.grossAnnualVolume), formatCurrency(row.tier.rate), formatCurrency(row.revenue), formatNumber(row.pctOfTotal,1)+'%']),
+      styles:{fontSize:9}, headStyles:{fillColor:[75,46,131]}
+    });
+    nextY = doc.lastAutoTable.finalY + 10;
+  } else {
+    doc.setFontSize(12); doc.text('Fixed-Rate Results', 14, nextY); nextY += 4;
+    doc.autoTable({
+      startY:nextY,
+      head:[['Component','Annual Amount']],
+      body:[
+        ['Base-Charge Revenue', formatCurrency(r.fixedResult.baseChargeAnnual)],
+        ['Volumetric Revenue', formatCurrency(r.fixedResult.volumetricAnnual)],
+        ['Total Fixed-Rate Revenue', formatCurrency(r.fixedResult.totalAnnual)],
+        ['Average Customer Bill (Monthly)', formatCurrency(r.fixedResult.averageCustomerBill)]
+      ],
+      styles:{fontSize:9}, headStyles:{fillColor:[75,46,131]}
+    });
+    nextY = doc.lastAutoTable.finalY + 10;
+  }
+
+  if(nextY > 250){ doc.addPage(); nextY = 18; }
+  doc.setFontSize(12); doc.text('Assessment Fee Results', 14, nextY); nextY += 4;
+  const assessPct = r.totalRevenue>0 ? r.totalAssessmentFees/r.totalRevenue*100 : 0;
+  doc.autoTable({
+    startY:nextY,
+    head:[['Assessment Fee %','Annual Amount','% of Total Revenue']],
+    body:[[formatNumber(appState.rateModel.assessmentFeePct,2)+'%', formatCurrency(r.totalAssessmentFees), formatNumber(assessPct,1)+'%']],
+    styles:{fontSize:9}, headStyles:{fillColor:[75,46,131]}
+  });
+
+  // Embed chart snapshots if available.
+  try{
+    ['expenseChart','waterProductionChart','revenueChart','revExpChart'].forEach(id=>{
+      const canvas = document.getElementById(id);
+      if(canvas && canvas.style.display !== 'none'){
+        const imgData = canvas.toDataURL('image/png');
+        doc.addPage();
+        doc.setFontSize(11);
+        doc.text(id, 14, 16);
+        doc.addImage(imgData, 'PNG', 14, 22, 180, 100);
+      }
+    });
+  }catch(e){ /* chart image export best-effort */ }
+
+  doc.save('Civitas_Water_Rate_Analysis_'+new Date().toISOString().split('T')[0]+'.pdf');
+  showToastMsg('', 'success');
+}
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+
+function renderAll(){
+  renderPage1();
+  renderMeterTable();
+  renderRateModelChoice();
+  renderRateDetails();
+  renderAssessmentFeePage();
+  renderExpenseTable();
+  renderMiscRevenueTable();
+  renderPage6();
+  renderStep();
+  if(Object.keys(appState.results||{}).length) renderResults();
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  loadState();
+  renderAll();
+  renderStepOverview();
+  showHome();
+
+  ['resetModal'].forEach(id=>{
+    document.getElementById(id).addEventListener('click', function(e){
+      if(e.target === this) closeModal(id);
+    });
+  });
+});
+</script>
+</body>
+</html>
