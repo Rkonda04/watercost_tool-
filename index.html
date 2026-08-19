@@ -1,0 +1,3028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Water Rate Tool - Civitas Engineering</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{
+  --color-primary:#4B2E83;
+  --color-primary-dark:#34205C;
+  --color-accent:#6C3FA6;
+  --color-accent2:#8B5FC4;
+  --bg:#f5f3f9;
+  --card-bg:#ffffff;
+  --text:#1f2d3a;
+  --muted:#65788a;
+  --danger:#c0392b;
+  --danger-bg:#fdecea;
+  --warning:#b9770e;
+  --warning-bg:#fef5e7;
+  --success:#1e8449;
+  --success-bg:#eafaf1;
+  --border:#e2dcec;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:20px;
+  line-height:1.5;
+}
+.app-shell{max-width:1180px;margin:0 auto;}
+.card{background:var(--card-bg);border-radius:14px;box-shadow:0 10px 40px rgba(75,46,131,0.14);overflow:hidden;}
+.header{
+  background:linear-gradient(120deg,var(--color-primary-dark) 0%,var(--color-primary) 55%,var(--color-accent) 100%);
+  color:#fff;padding:28px 32px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+}
+.header img{height:52px;width:auto;object-fit:contain;}
+.header-text h1{font-size:24px;font-weight:700;letter-spacing:.2px;}
+.header-text p{font-size:13.5px;opacity:.88;margin-top:2px;}
+.header-actions{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;}
+.btn{
+  border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;transition:transform .12s ease,box-shadow .12s ease,background .12s ease;
+  white-space:nowrap;
+}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--color-accent);color:#fff;}
+.btn-primary:hover{background:#5A3390;}
+.btn-secondary{background:#fff;color:var(--color-primary);border:1.5px solid var(--color-primary);}
+.btn-secondary:hover{background:#f1ecf8;}
+.btn-ghost{background:rgba(255,255,255,0.14);color:#fff;border:1px solid rgba(255,255,255,0.4);}
+.btn-ghost:hover{background:rgba(255,255,255,0.24);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{background:#a53125;}
+.btn-sm{padding:6px 12px;font-size:12.5px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-icon{background:none;border:none;color:var(--danger);cursor:pointer;font-size:15px;padding:6px 8px;border-radius:6px;}
+.btn-icon:hover{background:var(--danger-bg);}
+
+
+
+.page-body{padding:32px;min-height:420px;}
+.step-page{display:none;}
+.step-page.active{display:block;animation:fadein .25s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.page-title{font-size:20px;font-weight:700;color:var(--color-primary-dark);margin-bottom:4px;display:flex;align-items:center;gap:10px;justify-content:space-between;}
+.page-title>span{display:flex;align-items:center;gap:10px;}
+.page-subtitle{font-size:13.5px;color:var(--muted);margin-bottom:24px;}
+
+.section{margin-bottom:30px;}
+.section-title{font-size:14.5px;font-weight:700;color:var(--color-primary);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px;justify-content:space-between;}
+
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{font-size:12.5px;font-weight:700;color:var(--text);}
+.form-group .hint{font-size:11.5px;color:var(--muted);font-weight:400;}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  border:1.5px solid var(--color-accent);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--text);
+  background:#fff;font-family:inherit;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(20,160,152,.12);}
+input[readonly]{background:var(--border);color:var(--muted);cursor:not-allowed;}
+input.invalid,select.invalid{border-color:var(--danger);background:var(--danger-bg);}
+textarea{resize:vertical;min-height:70px;}
+
+.field-error{font-size:11.5px;color:var(--danger);font-weight:600;display:none;}
+.field-error.show{display:block;}
+
+.alert{border-radius:10px;padding:12px 16px;font-size:13px;font-weight:600;display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;}
+.alert i{margin-top:2px;}
+.alert-danger{background:var(--danger-bg);color:var(--danger);}
+.alert-warning{background:var(--warning-bg);color:var(--warning);}
+.alert-success{background:var(--success-bg);color:var(--success);}
+.alert-info{background:#ede7f6;color:var(--color-primary);}
+
+table.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+table.data-table th{
+  background:#f5f2fa;color:var(--color-primary-dark);font-weight:700;text-align:left;padding:10px 10px;
+  border-bottom:2px solid var(--border);white-space:nowrap;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;
+}
+table.data-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+table.data-table td input, table.data-table td select{width:100%;min-width:90px;padding:7px 9px;font-size:13px;}
+table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px solid var(--border);}
+.table-scroll{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+
+.yesno-group{display:flex;gap:12px;}
+.yesno-option{padding:10px 24px;border-radius:8px;border:1.5px solid var(--border);font-weight:700;cursor:pointer;color:var(--muted);}
+.yesno-option.active{border-color:var(--color-accent);background:#f3e9fb;color:var(--color-accent);}
+
+/* Compact inline #/% switch used inside table headers (e.g. tier customers/water-sold columns) */
+.col-toggle{display:inline-flex;margin-left:8px;border:1px solid var(--border);border-radius:6px;overflow:hidden;vertical-align:middle;}
+.col-toggle button{border:none;background:#fff;color:var(--muted);font-size:10.5px;font-weight:700;text-transform:none;letter-spacing:0;padding:3px 7px;cursor:pointer;}
+.col-toggle button:first-child{border-right:1px solid var(--border);}
+.col-toggle button.active{background:var(--color-accent);color:#fff;}
+
+/* Compact segmented switch for a standalone field (e.g. $ vs % entry mode) -- same idea as
+   .col-toggle but sized to sit under a label instead of inline in a table header. */
+.field-toggle{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:6px;}
+.field-toggle button{border:none;background:#fff;color:var(--muted);font-size:12px;font-weight:700;padding:5px 12px;cursor:pointer;}
+.field-toggle button:first-child{border-right:1px solid var(--border);}
+.field-toggle button.active{background:var(--color-accent);color:#fff;}
+
+.rate-choice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:640px;}
+.rate-choice-card{position:relative;border:1.5px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;background:#fff;transition:all .15s ease;}
+.rate-choice-card:hover{border-color:var(--color-accent2);}
+.rate-choice-check{position:absolute;top:14px;right:14px;font-size:19px;color:var(--border);}
+.rate-choice-icon{font-size:22px;color:var(--color-accent);margin-bottom:12px;}
+.rate-choice-title{font-size:15px;font-weight:800;color:var(--text);}
+.rate-choice-card.selected{border-color:var(--color-accent);background:#f3e9fb;box-shadow:0 0 0 3px rgba(108,63,166,.12);}
+.rate-choice-card.selected .rate-choice-check{color:var(--color-accent);}
+
+.totals-row{display:flex;gap:24px;flex-wrap:wrap;margin-top:14px;padding:14px 18px;background:#f5f2fa;border-radius:10px;}
+.totals-row .total-item{display:flex;flex-direction:column;gap:2px;}
+.totals-row .total-item .label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+.totals-row .total-item .value{font-size:18px;font-weight:700;color:var(--color-primary-dark);}
+
+.nav-footer{display:flex;justify-content:space-between;align-items:center;padding:20px 32px;background:#faf9fc;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px;}
+.nav-footer .left-actions, .nav-footer .right-actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+.toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.toast{background:var(--color-primary-dark);color:#fff;padding:12px 20px;border-radius:8px;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px;animation:slidein .25s ease;}
+.toast.success{background:var(--success);}
+.toast.danger{background:var(--danger);}
+@keyframes slidein{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(7,51,73,.55);z-index:9998;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:#fff;border-radius:14px;padding:28px;max-width:420px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-box.modal-wide{max-width:820px;max-height:85vh;overflow-y:auto;}
+.modal-box h3{font-size:17px;margin-bottom:10px;color:var(--color-primary-dark);}
+.modal-box p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:30px;}
+.metric-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;}
+.metric-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--color-accent);}
+.metric-card.negative::before{background:var(--danger);}
+.metric-card .metric-label{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;}
+.metric-card .metric-value{font-size:22px;font-weight:800;color:var(--color-primary-dark);}
+.metric-card .metric-value.negative{color:var(--danger);}
+.metric-card .metric-sub{font-size:11.5px;color:var(--muted);margin-top:4px;}
+
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:22px;margin-bottom:30px;}
+.chart-box{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;}
+.chart-box h4{font-size:13.5px;font-weight:700;color:var(--color-primary-dark);margin-bottom:12px;}
+.chart-canvas-wrap{position:relative;height:260px;}
+.chart-detail{margin-top:12px;padding:10px 14px;background:#f5f2fa;border-radius:8px;font-size:12.5px;color:var(--text);min-height:20px;font-weight:600;}
+.chart-empty{display:flex;align-items:center;justify-content:center;height:260px;color:var(--muted);font-size:13px;font-style:italic;}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-fixed{background:#ede7f6;color:var(--color-accent2);}
+.badge-tier{background:#f3e9fb;color:var(--color-accent);}
+
+.connection-type-row, .dyn-row{display:flex;gap:10px;align-items:center;margin-bottom:8px;}
+.connection-type-row input[type=text]{flex:2;}
+.connection-type-row input[type=number]{flex:1;}
+
+.step-overview-grid{display:flex;flex-direction:column;gap:10px;}
+.step-overview-card{border-radius:10px;padding:14px 20px;color:#1f2d3a;display:flex;align-items:center;gap:18px;}
+.step-overview-card .icon-badge{flex:none;width:46px;height:46px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;color:var(--color-primary-dark);box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.step-overview-card .text{display:flex;flex-direction:column;gap:2px;}
+.step-overview-card .title{font-size:14.5px;font-weight:800;}
+.step-overview-card .desc{font-size:12.5px;line-height:1.4;}
+
+.landing-cta{display:flex;gap:12px;justify-content:center;margin-top:10px;padding-top:20px;border-top:1px solid var(--border);flex-wrap:wrap;}
+
+.home-view{padding:70px 32px 90px;text-align:center;}
+.home-title{font-size:26px;font-weight:800;color:var(--color-primary-dark);}
+.home-subtitle{font-size:14px;color:var(--muted);margin-top:6px;}
+.home-btn-row{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-top:56px;}
+.btn-home{min-width:150px;padding:22px 30px;font-size:16px;border-radius:10px;flex-direction:column;gap:10px;box-shadow:0 4px 10px rgba(75,46,131,0.08);}
+.btn-home i{font-size:22px;}
+
+@media (max-width:720px){
+  .header{padding:20px;}
+  .header h1{font-size:19px;}
+  .page-body{padding:18px;}
+  .nav-footer{padding:16px 18px;}
+}
+</style>
+</head>
+<body>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="app-shell">
+  <div class="card">
+    <div class="header">
+      <a href="https://www.civitasengr.com/" target="_blank" rel="noopener">
+        <img src="./Civitas_Logo_White.png" alt="Civitas Engineering Group">
+      </a>
+      <div class="header-text">
+        <h1>Water Rate Tool</h1>
+   
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm" onclick="showHome()"><i class="fa-solid fa-house"></i> Home</button>
+        <button class="btn btn-ghost btn-sm" onclick="openResetModal()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+      </div>
+    </div>
+
+    <!-- HOME VIEW -->
+    <div id="homeView">
+      <div class="home-view">
+        <div class="home-title"> Water Rate Tool</div>
+        <div class="home-btn-row">
+          <button class="btn btn-secondary btn-home" id="btnHomeStart" onclick="homeStart()"><i class="fa-solid fa-play"></i> Start</button>
+          <button class="btn btn-secondary btn-home" onclick="showInstructions()"><i class="fa-solid fa-circle-question"></i> Instruction</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTRUCTIONS VIEW -->
+    <div id="instructionsView" style="display:none;">
+      <div class="page-body">
+        <div class="page-title"><i class="fa-solid fa-circle-question"></i> How to use the tool:</div>
+
+        <div class="section">
+          <div class="section-title">The tool has 9 steps in total:</div>
+          <div class="step-overview-grid" id="stepOverviewGrid"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Reference data</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="openModal('priceLibraryModal')"><i class="fa-solid fa-table-list"></i> Texas Price Reference Library</button>
+            <button class="btn btn-secondary btn-sm" onclick="openModal('wtpOmModal')"><i class="fa-solid fa-industry"></i> WTP O&amp;M Cost Benchmarks</button>
+          </div>
+        </div>
+
+        <div class="landing-cta">
+          <button class="btn btn-secondary" onclick="showHome()"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+          <button class="btn btn-primary" id="btnStartAnalysis" onclick="startTool()">Start Analysis <i class="fa-solid fa-arrow-right"></i></button>
+          <button class="btn btn-secondary" id="btnContinueAnalysis" style="display:none;" onclick="continueTool()">Continue Where You Left Off <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIZARD VIEW -->
+    <div id="wizardView" style="display:none;">
+
+    <div class="page-body">
+
+      <!-- STEP 1: CUSTOMER & CONNECTIONS -->
+      <div class="step-page" data-step="1">
+        <div class="page-title"><span><i class="fa-solid fa-address-card"></i> Customer &amp; Connections</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(1)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+
+        <div class="section">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Total number of customers *</label>
+              <input type="text" inputmode="numeric" class="number-commas" id="totalCustomers" oninput="onField1Change()">
+              <div class="field-error" id="err-totalCustomers"></div>
+            </div>
+            <div class="form-group">
+              <label>Active customers *</label>
+              <input type="text" inputmode="numeric" class="number-commas" id="activeCustomers" oninput="onField1Change()">
+              <div class="field-error" id="err-activeCustomers"></div>
+            </div>
+            <div class="form-group">
+              <label>Monthly Average Water Sold in gallons *</label>
+              <input type="text" inputmode="numeric" class="number-commas" id="monthlyWaterSold" oninput="onField1Change()">
+              <div class="field-error" id="err-monthlyWaterSold"></div>
+            </div>
+          </div>
+          <div class="alert alert-info" style="margin-top:16px;"><i class="fa-solid fa-circle-info"></i> These figures drive per-customer calculations and the required rate throughout the tool — update them any time your utility's customer base or usage changes.</div>
+        </div>
+      </div>
+
+      <!-- STEP 2: METER DISTRIBUTION -->
+      <div class="step-page" data-step="2">
+        <div class="page-title"><span><i class="fa-solid fa-gauge"></i> Meter Distribution</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(2)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+
+        <div id="meterAlert"></div>
+
+        <div class="table-scroll">
+          <table class="data-table" id="meterTable">
+            <thead>
+              <tr>
+                <th style="width:22%">Base Meter</th>
+                <th style="width:17%">Number of Active Meters</th>
+                <th style="width:19%">AWWA Equivalent Factor</th>
+                <th style="width:22%">Monthly Base Fee</th>
+                <th style="width:10%"></th>
+              </tr>
+            </thead>
+            <tbody id="meterTableBody"></tbody>
+            <tfoot>
+              <tr>
+                <td>Total</td>
+                <td id="meterTotalCount">0</td>
+                <td></td>
+                <td id="meterTotalBaseFeeRevenue">$0.00</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-secondary btn-sm" onclick="addMeterRow()"><i class="fa-solid fa-plus"></i> Add Meter Row</button>
+        </div>
+
+        <div class="totals-row">
+          <div class="total-item"><span class="label">Total Monthly Base Fee Revenue</span><span class="value" id="meterSummaryBaseFeeRevenue">$0.00</span></div>
+          <div class="total-item"><span class="label">Total Active Meters</span><span class="value" id="meterSummaryCount">0</span></div>
+          <div class="total-item"><span class="label">Active Customers</span><span class="value" id="meterSummaryConnections">0</span></div>
+        </div>
+      </div>
+
+      <!-- STEP 3: COST MODEL, RATE STRUCTURE, ASSESSMENT FEES -->
+      <div class="step-page" data-step="3">
+        <div class="page-title"><span><i class="fa-solid fa-sliders"></i> Rate Model</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(3)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+
+        <div class="section">
+          <div class="section-title">Choose a Rate Model</div>
+          <div class="rate-choice-grid" id="rateModelToggle">
+            <div class="rate-choice-card" data-model="fixed" onclick="setRateModel('fixed')">
+              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="rate-choice-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+              <div class="rate-choice-title">Fixed Rate</div>
+            </div>
+            <div class="rate-choice-card" data-model="tier" onclick="setRateModel('tier')">
+              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="rate-choice-icon"><i class="fa-solid fa-layer-group"></i></div>
+              <div class="rate-choice-title">Tier-Based Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: RATE DETAILS -->
+      <div class="step-page" data-step="4">
+        <div class="page-title"><span><i class="fa-solid fa-sliders"></i> Rate Details</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(4)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+
+        <div class="section" id="fixedRateSection">
+          <div class="section-title">Fixed-Rate Inputs</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Total Base Charge ($ / month)</label>
+              <input type="text" id="fixedBaseCharge" class="currency-input" readonly>
+              <span class="hint">Total of every meter row's Monthly Base Fee × count, from the Meter Distribution step.</span>
+            </div>
+            <div class="form-group">
+              <label>Volumetric Rate ($ / 1,000 gal)</label>
+              <input type="text" id="fixedVolumetricRate" class="currency-input" readonly>
+              <span class="hint">Calculated so the Base Charge, this rate, misc. revenue, and the assessment fee together cover total annual expenses.</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="section" id="tierRateSection" style="display:none;">
+          <div class="section-title">
+            <span>Consumption Tiers</span>
+          </div>
+          <div id="tierAlert"></div>
+          <div class="table-scroll">
+            <table class="data-table" id="tierTable">
+              <thead>
+                <tr>
+                  <th>Tier Name</th>
+                  <th>Start (gal)</th>
+                  <th>End (gal)</th>
+                  <th>
+                    <span>Unit Cost Increase</span>
+                    <span class="col-toggle" title="Enter each tier's increase over the previous tier's rate as a flat $ amount or a % increase">
+                      <button type="button" id="tierDiffMethodDollar" onclick="setTierDiffMethod('dollar')">$</button>
+                      <button type="button" id="tierDiffMethodPct" onclick="setTierDiffMethod('pct')">%</button>
+                    </span>
+                  </th>
+                  <th>
+                    <span id="tierCustomersHeaderLabel">No. of Customers</span>
+                    <span class="col-toggle" title="Enter directly, or as a % of Active Customers">
+                      <button type="button" id="tierCustomersMethodNumber" onclick="setTierCustomersMethod('number')">#</button>
+                      <button type="button" id="tierCustomersMethodPct" onclick="setTierCustomersMethod('pct')">%</button>
+                    </span>
+                  </th>
+                  <th>
+                    <span id="tierWaterSoldHeaderLabel">Water Sold (gal/mo)</span>
+                    <span class="col-toggle" title="Enter directly, or as a % of Monthly Average Water Sold">
+                      <button type="button" id="tierWaterSoldMethodGal" onclick="setTierWaterSoldMethod('gal')">#</button>
+                      <button type="button" id="tierWaterSoldMethodPct" onclick="setTierWaterSoldMethod('pct')">%</button>
+                    </span>
+                  </th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tierTableBody"></tbody>
+              <tfoot id="tierTableFoot"></tfoot>
+            </table>
+          </div>
+          <div style="margin-top:14px;">
+            <button class="btn btn-secondary btn-sm" onclick="addTierRow()"><i class="fa-solid fa-plus"></i> Add Tier</button>
+          </div>
+          <div class="totals-row" style="margin-top:14px;">
+            <div class="total-item"><span class="label">Active Customers</span><span class="value" id="tierRefActiveCustomers">0</span></div>
+            <div class="total-item"><span class="label">Monthly Avg. Water Sold, gal</span><span class="value" id="tierRefMonthlyWaterSold">0</span></div>
+          </div>
+          <div class="hint" style="margin-top:8px;display:block;">Tier 1's rate is calculated so Base Charge, tier revenue, misc. revenue, and the assessment fee together cover total annual expenses -- each later tier's rate is the previous tier's rate plus its own Unit Cost Increase (a flat $ amount, or a % increase).</div>
+        </div>
+      </div>
+
+      <!-- STEP 5: ASSESSMENT FEE -->
+      <div class="step-page" data-step="5">
+        <div class="page-title"><span><i class="fa-solid fa-percent"></i> Assessment Fee</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(5)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+
+        <div class="section">
+          <div class="section-title">Assessment Fee</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Assessment Fee (% of Revenue)</label>
+              <input type="number" min="0" step="0.01" id="assessmentFeePct" oninput="onAssessmentFeeChange()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6: OPERATING EXPENSES -->
+      <div class="step-page" data-step="6">
+        <div class="page-title"><span><i class="fa-solid fa-file-invoice-dollar"></i> Operating Expenses</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(6)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+
+        <div id="expenseAlert"></div>
+
+        <div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="openModal('priceLibraryModal')"><i class="fa-solid fa-table-list"></i> Texas Price Reference Library</button>
+          <button class="btn btn-secondary btn-sm" onclick="openModal('wtpOmModal')"><i class="fa-solid fa-industry"></i> WTP O&amp;M Cost Benchmarks</button>
+        </div>
+
+        <div class="table-scroll">
+          <table class="data-table" id="expenseTable">
+            <thead>
+              <tr>
+                <th style="width:26%">Description</th>
+                <th style="width:20%">Category</th>
+                <th style="width:14%">Amount</th>
+                <th style="width:14%">Frequency</th>
+                <th style="width:18%">Annual Expense</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="expenseTableBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-secondary btn-sm" onclick="addExpenseRow()"><i class="fa-solid fa-plus"></i> Add Expense Row</button>
+        </div>
+
+        <div class="section" style="margin-top:24px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Contingency / Inflation (%)</label>
+              <input type="number" min="0" step="0.1" id="expenseContingencyPct" oninput="onExpenseTotalsChange()">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:24px;">Annual Expenses Summary</div>
+        <div class="table-scroll">
+          <table class="data-table" id="expenseCategoryTable">
+            <thead>
+              <tr>
+                <th style="width:50%">Category</th>
+                <th style="width:25%">Annual Amount</th>
+                <th style="width:25%">% of Total</th>
+              </tr>
+            </thead>
+            <tbody id="expenseCategoryTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="totals-row">
+          <div class="total-item"><span class="label">Subtotal (Before Contingency)</span><span class="value" id="expenseSubtotalValue">$0.00</span></div>
+          <div class="total-item"><span class="label">Contingency Amount</span><span class="value" id="expenseContingencyAmount">$0.00</span></div>
+          <div class="total-item"><span class="label">Total Annual Expenses</span><span class="value" id="expenseGrandTotal">$0.00</span></div>
+        </div>
+      </div>
+
+      <!-- STEP 7: MISCELLANEOUS REVENUE -->
+      <div class="step-page" data-step="7">
+        <div class="page-title"><span><i class="fa-solid fa-coins"></i> Miscellaneous Revenue</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(7)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+
+        <div id="miscRevenueAlert"></div>
+
+        <div class="table-scroll">
+          <table class="data-table" id="miscRevenueTable">
+            <thead>
+              <tr>
+                <th style="width:28%">Description</th>
+                <th style="width:20%">Category</th>
+                <th style="width:16%">Amount</th>
+                <th style="width:16%">Frequency</th>
+                <th style="width:16%">Annual Amount</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="miscRevenueTableBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-secondary btn-sm" onclick="addMiscRevenueRow()"><i class="fa-solid fa-plus"></i> Add Revenue Row</button>
+        </div>
+
+        <div class="totals-row">
+          <div class="total-item"><span class="label">Monthly Equivalent</span><span class="value" id="miscMonthlyEquivalent">$0.00</span></div>
+          <div class="total-item"><span class="label">Total Annual Misc. Revenue</span><span class="value" id="miscAnnualTotal">$0.00</span></div>
+        </div>
+      </div>
+
+      <!-- STEP 8: WATER LOSS -->
+      <div class="step-page" data-step="8">
+        <div class="page-title"><span><i class="fa-solid fa-droplet"></i> Water Loss</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(8)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+
+        <div class="section">
+          <div class="section-title">Who will bear the water loss?</div>
+          <div class="yesno-group">
+            <div class="yesno-option" id="waterLossYes" onclick="setWaterLossInclude('yes')">User</div>
+            <div class="yesno-option" id="waterLossNo" onclick="setWaterLossInclude('no')">Supply Corporation / Utility</div>
+          </div>
+          <p class="hint" style="margin-top:10px;display:block;"></p>
+        </div>
+
+        <div id="waterLossSection" style="display:none;">
+          <div id="waterLossAlert"></div>
+          <div class="section-title">Enter Loss As</div>
+          <div class="yesno-group">
+            <div class="yesno-option" id="waterLossMethodPct" onclick="setWaterLossMethod('pct')">Percentage</div>
+            <div class="yesno-option" id="waterLossMethodGal" onclick="setWaterLossMethod('gal')">Gallons</div>
+          </div>
+          <div class="form-grid" style="margin-top:14px;">
+            <div class="form-group" id="waterLossPctGroup">
+              <label>Annual Water Loss (%)</label>
+              <input type="number" min="0" step="0.01" id="waterLossAnnualPctInput" oninput="onWaterLossFieldChange()">
+            </div>
+            <div class="form-group" id="waterLossGalGroup">
+              <label>Annual Water Loss (gallons)</label>
+              <input type="number" min="0" id="waterLossAnnualGalInput" oninput="onWaterLossFieldChange()">
+            </div>
+          </div>
+          <div class="hint" style="margin-top:8px;display:block;"></div>
+        </div>
+      </div>
+
+      <!-- STEP 9: SUMMARY & RESULTS -->
+      <div class="step-page" data-step="9">
+        <div class="page-title"><span><i class="fa-solid fa-chart-line"></i> Summary &amp; Results</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(9)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+
+        <div style="margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-secondary" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> Export to PDF</button>
+        </div>
+        <p class="hint" style="margin:-14px 0 20px;display:block;"></p>
+
+        <div id="resultsAlert"></div>
+
+        <div class="section" id="rateResultsSection">
+          <div class="section-title">Rate Results <span class="badge" id="rateModelBadge"></span></div>
+          <div id="rateResultsContent"></div>
+        </div>
+
+        <div class="metric-grid" id="metricGrid"></div>
+
+        <div class="chart-grid">
+          <div class="chart-box">
+            <h4>Operating Expense</h4>
+            <div class="chart-canvas-wrap"><canvas id="expenseChart"></canvas></div>
+            <div class="chart-detail" id="expenseChartDetail">Click a segment to see details.</div>
+          </div>
+          <div class="chart-box">
+            <h4>Water Production</h4>
+            <div class="chart-canvas-wrap"><canvas id="waterProductionChart"></canvas></div>
+            <div class="chart-detail" id="waterProductionChartDetail">Click a segment to see details.</div>
+          </div>
+          <div class="chart-box">
+            <h4>Revenue</h4>
+            <div class="chart-canvas-wrap"><canvas id="revenueChart"></canvas></div>
+            <div class="chart-detail" id="revenueChartDetail">Click a segment to see details.</div>
+          </div>
+          <div class="chart-box">
+            <h4>Revenue vs. Expenses</h4>
+            <div class="chart-canvas-wrap"><canvas id="revExpChart"></canvas></div>
+            <div class="chart-detail" id="revExpChartDetail">Click a bar to see details.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="nav-footer">
+      <div class="left-actions">
+        <button class="btn btn-secondary" id="btnPrevious" onclick="previousStep()"><i class="fa-solid fa-arrow-left"></i> Previous</button>
+        <button class="btn btn-secondary" id="btnResetStep" onclick="resetCurrentStep()"><i class="fa-solid fa-arrow-rotate-left"></i> Reset This Page</button>
+      </div>
+      <div class="right-actions">
+        <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Next <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="priceLibraryModal">
+  <div class="modal-box modal-wide">
+    <h3><i class="fa-solid fa-table-list"></i> Texas Price Reference Library</h3>
+    <p>Reference values compiled from current Texas market evidence and recent vendor awards. Use these as a sanity check when entering expense line items — actual costs vary by utility size, contract terms, and location. Values are not applied automatically.</p>
+    <div class="table-scroll" style="margin-bottom:20px;">
+      <table class="data-table" id="priceLibraryTable">
+        <thead>
+          <tr>
+            <th style="width:26%">Cost Item</th>
+            <th style="width:44%">Current Texas Market Evidence</th>
+            <th style="width:30%">Reference Price</th>
+          </tr>
+        </thead>
+        <tbody id="priceLibraryTableBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('priceLibraryModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="wtpOmModal">
+  <div class="modal-box modal-wide">
+    <h3><i class="fa-solid fa-industry"></i> WTP O&amp;M Cost Benchmarks</h3>
+    <p>Annual O&amp;M cost benchmarks by plant capacity and treatment level (source: TWDB). Use these as a sanity check when estimating operating expenses — actual costs vary by utility. Values are not applied automatically.</p>
+    <div class="table-scroll" style="margin-bottom:20px;">
+      <table class="data-table" id="wtpOmTable">
+        <thead>
+          <tr>
+            <th>WTP Capacity</th>
+            <th id="wtpOmHeadLevel0"></th>
+            <th id="wtpOmHeadLevel1"></th>
+            <th id="wtpOmHeadLevel2"></th>
+            <th id="wtpOmHeadLevel3"></th>
+          </tr>
+        </thead>
+        <tbody id="wtpOmTableBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('wtpOmModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="resetModal">
+  <div class="modal-box">
+    <h3>Reset all data?</h3>
+    <p>This clears every field you've entered across all 9 steps and cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('resetModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="resetTool()">Reset Everything</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="stepInstructionsModal">
+  <div class="modal-box">
+    <h3 id="stepInstructionsTitle"><i class="fa-solid fa-circle-info"></i> Instructions</h3>
+    <p id="stepInstructionsBody"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('stepInstructionsModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG / CONSTANTS
+   ========================================================================= */
+
+// Approved standard meter sizes & AWWA equivalent factors.
+const METER_SIZES = [
+  {size:'5/8" X 3/4"', factor:1},
+  {size:'3/4"', factor:1.5},
+  {size:'1"', factor:2.5},
+  {size:'1-1/2"', factor:5},
+  {size:'2"', factor:8},
+  {size:'3" Displacement', factor:9},
+  {size:'3" Compound', factor:16},
+  {size:'3" Turbine', factor:17.5},
+  {size:'4" Compound', factor:25},
+  {size:'4" Turbine', factor:30},
+  {size:'6" Compound', factor:50},
+  {size:'6" Turbine', factor:62.5},
+  {size:'8" Compound', factor:80},
+  {size:'10" Compound', factor:115}
+];
+
+// Reference-only price library (Texas market evidence). Shown to users as a lookup aid on the
+// Operating Expenses step; it does not validate or auto-fill any input.
+const PRICE_LIBRARY = [
+  {item:'Purchased treated water', evidence:'NTMWD: $4.14–$4.19/kgal; Houston standard contract treated water: $4.73–$5.29/kgal', price:'$4.50/kgal'},
+  {item:'Raw/untreated surface water', evidence:'Houston contract: $0.9936/kgal; non-contract: ~$1.71–$2.21/kgal depending volume', price:'$1.25/kgal'},
+  {item:'Electricity – small utility', evidence:'Texas commercial avg. 8.26¢/kWh', price:'$0.083/kWh'},
+  {item:'Electricity – large plant reference', evidence:'Texas industrial avg. 6.33¢/kWh', price:'$0.063/kWh'},
+  {item:'Water operator salary', evidence:'Current TX postings roughly $51k–$76k/year', price:'$55,000/year salary'},
+  {item:'Water operator loaded cost', evidence:'Benefits added', price:'~$90,000/FTE/year'},
+  {item:'WTP manager salary', evidence:'Sugar Land $87,485–$100,607', price:'$95,000/year salary'},
+  {item:'WTP manager loaded cost', evidence:'Benefits added', price:'~$155,000/FTE/year'},
+  {item:'Liquid chlorine', evidence:'Wichita Falls 2026 award', price:'$2,246/ton'},
+  {item:'Sodium hypochlorite 12.5%', evidence:'Wichita Falls 2026 award', price:'$2.18/gal'},
+  {item:'Ferric sulfate', evidence:'Wichita Falls 2026 award', price:'$2.0666/gal'},
+  {item:'Potable-water polymer', evidence:'Wichita Falls 2026 award', price:'$6.02/gal'},
+  {item:'Quicklime', evidence:'Wichita Falls 2026 award', price:'$309.30/ton'},
+  {item:'Carbon dioxide', evidence:'Wichita Falls 2026 award', price:'$295/ton'},
+  {item:'Liquid ammonium sulfate', evidence:'Wichita Falls 2026 award', price:'$1.65/gal'},
+  {item:'Caustic soda', evidence:'Wichita Falls 2026 award', price:'$1.2737/gal'},
+  {item:'Powdered activated carbon', evidence:'Wichita Falls 2026 award', price:'$1,580/ton'},
+  {item:'Potassium permanganate', evidence:'Wichita Falls 2026 award', price:'$2.055/lb'},
+  {item:'Copper sulfate', evidence:'Wichita Falls 2026 award', price:'$2.54/lb'},
+  {item:'Fluoride', evidence:'Wichita Falls 2026 award', price:'$7.14/gal'},
+  {item:'TCEQ PHS fee', evidence:'Current fee schedule', price:'$2.45/connection/year if >160 connections'}
+];
+
+// Reference-only WTP O&M annual cost benchmarks by plant capacity and treatment level (source: TWDB).
+// Shown as a lookup aid; it does not validate or auto-fill any input.
+const WTP_OM_BENCHMARKS = {
+  levels: ['Level 0 Disinfection','Level 1 GW Treatment','Level 2 Filtration','Level 3 Full Surface WTP'],
+  rows: [
+    {capacity:'0.1 MGD', values:['$20,000/yr','$110,000/yr','$160,000/yr','$210,000/yr']},
+    {capacity:'1 MGD', values:['$60,000/yr','$450,000/yr','$550,000/yr','$2.08 million/yr']},
+    {capacity:'10 MGD', values:['$400,000/yr','$1.88 million/yr','$3.13 million/yr','$4.91 million/yr']}
+  ]
+};
+
+const EXPENSE_CATEGORIES = ['Facilities Operation','Facilities Maintenance','Admin','Miscellaneous','Other'];
+const MISC_REVENUE_CATEGORIES = ['Grant','Interest on Cash Flow','Donations'];
+
+const FREQUENCIES = ['Monthly','Quarterly','Annual'];
+
+const STORAGE_KEY = 'civitasWaterRateTool_v1';
+const TOTAL_STEPS = 9;
+const STEP_TITLES = [
+  'Customer & Connections',
+  'Meter Distribution',
+  'Rate Model',
+  'Rate Details',
+  'Assessment Fee',
+  'Operating Expenses',
+  'Miscellaneous Revenue',
+  'Water Loss',
+  'Summary & Results'
+];
+
+// Per-step instructions text, shown in the Instructions button's modal on
+// each wizard page. Empty for now -- fill in per step as content is ready.
+const STEP_INSTRUCTIONS = ['','','','','','','','',''];
+
+// Opens the Instructions modal for a given step (1-9), titled with that
+// step's name and showing its STEP_INSTRUCTIONS entry (or a placeholder
+// if not yet written).
+function openStepInstructions(step){
+  document.getElementById('stepInstructionsTitle').innerHTML =
+    '<i class="fa-solid fa-circle-info"></i> Instructions -- ' + escapeHtml(STEP_TITLES[step-1] || '');
+  document.getElementById('stepInstructionsBody').textContent =
+    STEP_INSTRUCTIONS[step-1] || 'Instructions for this step are coming soon.';
+  openModal('stepInstructionsModal');
+}
+
+// The tool uses a single billing unit throughout: $ per 1,000 gallons.
+const BILLING_UNIT_GAL = 1000;
+
+/* =========================================================================
+   STATE
+   ========================================================================= */
+
+// Returns the app's default state -- nothing is pre-filled; every value must be explicitly entered by the user.
+function defaultState(){
+  return {
+    currentStep: 1,
+    customerInfo: {
+      totalCustomers:'', activeCustomers:'', monthlyWaterSold:''
+    },
+    meters: [
+      {id:uid(), size:'', count:'', factor:'', customSize:false, baseFee:''}
+    ],
+    rateModel: {
+      type:'',
+      fixed:{baseCharge:0, volumetricRate:0, includedConsumption:0},
+      tiers:[
+        {id:uid(), name:'1', start:'', end:null, rate:'', customers:'', waterSold:0, diffDollar:'', diffPct:''}
+      ],
+      tierDiffMethod:'dollar',
+      tierCustomersMethod:'number',
+      tierWaterSoldMethod:'gal',
+      assessmentFeePct:''
+    },
+    operatingExpenses: {
+      contingencyPct: '',
+      rows: []
+    },
+    miscellaneousRevenue: [],
+    waterLoss: {
+      include:'no',
+      method:'pct',
+      annualGal:'',
+      annualPct:''
+    },
+    results: {}
+  };
+}
+
+let appState = defaultState();
+let charts = {expense:null, waterProduction:null, revenue:null, revExp:null};
+
+// Generates a short random id used to key meter rows, tier rows, and other dynamic list items.
+function uid(){
+  return 'id_' + Math.random().toString(36).slice(2,10) + Math.random().toString(36).slice(2,6);
+}
+
+/* =========================================================================
+   PERSISTENCE
+   ========================================================================= */
+
+// Persists the full app state to localStorage; optionally shows a save-confirmation toast.
+function saveState(showToast){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    if(showToast) showToastMsg('Progress saved.', 'success');
+  }catch(e){
+    showToastMsg('Could not save progress. Your browser storage may be full or disabled.', 'danger');
+  }
+}
+
+// Loads app state from localStorage on startup, migrating older saved-state shapes to the current structure.
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      appState = Object.assign(defaultState(), parsed);
+      // Defensive merges for nested structures added after a save might predate them
+      if(!appState.customerInfo) appState.customerInfo = defaultState().customerInfo;
+      if(!appState.waterLoss || appState.waterLoss.annualGal === undefined){
+        const legacy = appState.waterLoss;
+        appState.waterLoss = defaultState().waterLoss;
+        // Migrate old per-month entries into a single annual figure.
+        if(legacy && Array.isArray(legacy.months)){
+          let totalGal = 0, pctSum = 0, pctCount = 0;
+          legacy.months.forEach(m=>{
+            totalGal += Number(m.gal)||0;
+            if(m.pct !== '' && m.pct != null){ pctSum += Number(m.pct)||0; pctCount++; }
+          });
+          if(totalGal > 0) appState.waterLoss.annualGal = totalGal;
+          if(pctCount > 0) appState.waterLoss.annualPct = Math.round((pctSum/pctCount)*100)/100;
+          if(legacy.include) appState.waterLoss.include = legacy.include;
+        }
+      }
+      if(!appState.waterLoss.method){
+        appState.waterLoss.method = appState.waterLoss.annualPct !== '' ? 'pct' : 'gal';
+      }
+      if(!appState.operatingExpenses) appState.operatingExpenses = defaultState().operatingExpenses;
+      if(!appState.rateModel) appState.rateModel = defaultState().rateModel;
+      if(!appState.rateModel.tierDiffMethod) appState.rateModel.tierDiffMethod = 'dollar';
+      // Older saved sessions had one global $/% difference for every tier instead of a
+      // per-tier value -- carry that forward as each tier's own starting value.
+      appState.rateModel.tiers.forEach(t=>{
+        if(t.diffDollar === undefined) t.diffDollar = appState.rateModel.tierUnitCostDifference !== undefined ? appState.rateModel.tierUnitCostDifference : '';
+        if(t.diffPct === undefined) t.diffPct = appState.rateModel.tierUnitCostDifferencePct !== undefined ? appState.rateModel.tierUnitCostDifferencePct : '';
+      });
+      delete appState.rateModel.tierUnitCostDifference;
+      delete appState.rateModel.tierUnitCostDifferencePct;
+      if(!appState.rateModel.tierCustomersMethod) appState.rateModel.tierCustomersMethod = 'number';
+      if(!appState.rateModel.tierWaterSoldMethod) appState.rateModel.tierWaterSoldMethod = 'gal';
+      return true;
+    }
+  }catch(e){ /* ignore corrupt storage */ }
+  return false;
+}
+
+// Autosave: any field edit anywhere in the wizard silently persists state
+// after a short pause, so a session can always be resumed via Continue Analysis.
+let autosaveTimer = null;
+document.addEventListener('input', ()=>{
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(()=>saveState(false), 500);
+});
+document.addEventListener('change', ()=>{
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(()=>saveState(false), 500);
+});
+
+// Clears saved state and returns the whole wizard to step 1.
+function resetTool(){
+  localStorage.removeItem(STORAGE_KEY);
+  appState = defaultState();
+  closeModal('resetModal');
+  goToStep(1, true);
+  renderAll();
+  showHome();
+  showToastMsg('All data has been reset.', 'success');
+}
+
+// Resets only the current step's fields back to their defaults, after a confirm prompt.
+function resetCurrentStep(){
+  const step = appState.currentStep;
+  const def = defaultState();
+  const stepLabel = STEP_TITLES[step-1] || 'this page';
+  if(!confirm('Reset all fields on "'+stepLabel+'"? This cannot be undone.')) return;
+
+  if(step === 1){
+    appState.customerInfo = def.customerInfo;
+    renderPage1();
+  } else if(step === 2){
+    appState.meters = def.meters;
+    renderMeterTable();
+  } else if(step === 4){
+    appState.rateModel.fixed = def.rateModel.fixed;
+    appState.rateModel.tiers = def.rateModel.tiers;
+    appState.rateModel.tierDiffMethod = def.rateModel.tierDiffMethod;
+    appState.rateModel.tierCustomersMethod = def.rateModel.tierCustomersMethod;
+    appState.rateModel.tierWaterSoldMethod = def.rateModel.tierWaterSoldMethod;
+    renderRateDetails();
+    updateAssessmentFeeDisplay();
+  } else if(step === 5){
+    appState.rateModel.assessmentFeePct = def.rateModel.assessmentFeePct;
+    renderAssessmentFeePage();
+  } else if(step === 6){
+    appState.operatingExpenses = def.operatingExpenses;
+    renderExpenseTable();
+  } else if(step === 7){
+    appState.miscellaneousRevenue = def.miscellaneousRevenue;
+    renderMiscRevenueTable();
+  } else if(step === 8){
+    appState.waterLoss = def.waterLoss;
+    renderPage6();
+  }
+  showToastMsg('Fields on "'+stepLabel+'" have been reset.', 'success');
+}
+
+/* =========================================================================
+   HELPERS
+   ========================================================================= */
+
+// Formats a number as a US-dollar string, e.g. 1234.5 -> "$1,234.50".
+function formatCurrency(n){
+  if(n === '' || n === null || n === undefined) return '';
+  const num = Number(n);
+  if(!isFinite(num)) return '$0.00';
+  return '$' + num.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+// Strips currency formatting from a string and returns its numeric value (0 if invalid).
+function parseCurrencyInput(str){
+  if(str === null || str === undefined) return 0;
+  const cleaned = String(str).replace(/[^0-9.\-]/g,'');
+  const num = parseFloat(cleaned);
+  return isFinite(num) ? num : 0;
+}
+
+// Like parseCurrencyInput, but preserves a genuinely empty field as '' instead
+// of coercing it to 0, so required-field validation can tell "not entered"
+// apart from an explicitly entered 0.
+// Like parseCurrencyInput, but returns '' for an empty field so "not entered" can be told apart from 0.
+function parseCurrencyInputOrBlank(str){
+  if(str === null || str === undefined || String(str).trim() === '') return '';
+  return parseCurrencyInput(str);
+}
+
+// Formats a number with thousands separators and the given number of decimal places.
+function formatNumber(n, decimals){
+  const num = Number(n);
+  if(!isFinite(num)) return '0';
+  return num.toLocaleString('en-US', {minimumFractionDigits:decimals||0, maximumFractionDigits:decimals||2});
+}
+
+// Converts a billing frequency (Monthly/Quarterly/Annual) into billing periods per year.
+function periodsPerYear(freq){
+  if(freq === 'Monthly') return 12;
+  if(freq === 'Quarterly') return 4;
+  return 1; // Annual
+}
+
+// Annualizes a recurring amount given its billing frequency.
+function toAnnual(amount, freq){
+  return (Number(amount)||0) * periodsPerYear(freq);
+}
+
+// Shows a temporary toast notification in the corner of the screen.
+function showToastMsg(msg, type){
+  const container = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' '+type : '');
+  el.innerHTML = '<i class="fa-solid fa-circle-info"></i> ' + msg;
+  container.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(30px)'; setTimeout(()=>el.remove(),300); }, 3000);
+}
+
+// Modal open/close helpers, and a shortcut for opening the reset-confirmation modal.
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function openResetModal(){ openModal('resetModal'); }
+
+// Renders the reference-only Texas price library table inside its modal. Called once at startup
+// since PRICE_LIBRARY is static and not tied to app state.
+function renderPriceLibrary(){
+  const tbody = document.getElementById('priceLibraryTableBody');
+  if(!tbody) return;
+  tbody.innerHTML = PRICE_LIBRARY.map(row => `
+    <tr>
+      <td>${row.item}</td>
+      <td>${row.evidence}</td>
+      <td><strong>${row.price}</strong></td>
+    </tr>
+  `).join('');
+}
+
+// Renders the reference-only WTP O&M cost benchmark table inside its modal. Called once at
+// startup since WTP_OM_BENCHMARKS is static and not tied to app state.
+function renderWtpOmBenchmarks(){
+  const tbody = document.getElementById('wtpOmTableBody');
+  if(!tbody) return;
+  WTP_OM_BENCHMARKS.levels.forEach((label, i) => {
+    document.getElementById('wtpOmHeadLevel'+i).textContent = label;
+  });
+  tbody.innerHTML = WTP_OM_BENCHMARKS.rows.map(row => `
+    <tr>
+      <td><strong>${row.capacity}</strong></td>
+      ${row.values.map((v,i) => i===row.values.length-1 ? `<td><strong>${v}</strong></td>` : `<td>${v}</td>`).join('')}
+    </tr>
+  `).join('');
+}
+
+// Reformats an input's value while preserving the caret's distance from the
+// end of the string, so inserting commas/symbols doesn't jump the cursor.
+// Reformats an input's value on every keystroke (via buildFn) while preserving the cursor's position relative to the end of the text.
+function reformatLive(el, buildFn){
+  const cursorFromEnd = el.value.length - el.selectionStart;
+  el.value = buildFn(el.value);
+  const pos = Math.max(0, el.value.length - cursorFromEnd);
+  el.setSelectionRange(pos, pos);
+}
+
+// Builds the partially-formatted currency text shown while the user is still typing.
+function liveCurrencyText(raw){
+  let digits = String(raw).replace(/[^0-9.]/g,'');
+  const firstDot = digits.indexOf('.');
+  if(firstDot !== -1) digits = digits.slice(0,firstDot+1) + digits.slice(firstDot+1).replace(/\./g,'');
+  let [intPart, decPart] = digits.split('.');
+  intPart = intPart.replace(/^0+(?=\d)/,'');
+  if(decPart !== undefined) decPart = decPart.slice(0,2);
+  if(intPart === '' && decPart === undefined) return '';
+  const groupedInt = intPart === '' ? '0' : Number(intPart).toLocaleString('en-US');
+  return '$' + groupedInt + (decPart !== undefined ? '.'+decPart : '');
+}
+
+// Builds the comma-grouped number text shown while the user is still typing.
+function liveNumberText(raw){
+  let digits = String(raw).replace(/[^0-9.]/g,'');
+  const firstDot = digits.indexOf('.');
+  if(firstDot !== -1) digits = digits.slice(0,firstDot+1) + digits.slice(firstDot+1).replace(/\./g,'');
+  let [intPart, decPart] = digits.split('.');
+  intPart = intPart.replace(/^0+(?=\d)/,'');
+  if(intPart === '' && decPart === undefined) return '';
+  const groupedInt = intPart === '' ? '0' : Number(intPart).toLocaleString('en-US');
+  return groupedInt + (decPart !== undefined ? '.'+decPart : '');
+}
+
+// Currency-input formatting: $ and commas appear live as you type, normalized on blur.
+// Wires up live formatting and on-blur normalization for every currency input under root.
+function bindCurrencyInputs(root){
+  (root||document).querySelectorAll('input.currency-input').forEach(inp=>{
+    if(inp._currencyBound) return;
+    inp._currencyBound = true;
+    inp.addEventListener('focus', function(){ this.select(); });
+    inp.addEventListener('input', function(){ reformatLive(this, liveCurrencyText); });
+    inp.addEventListener('blur', function(){
+      const raw = parseCurrencyInputOrBlank(this.value);
+      this.value = formatCurrency(raw);
+    });
+  });
+}
+
+// Sets an input's value to a formatted currency string, or blank if value is blank.
+function setCurrencyValue(el, value){
+  el.value = value === '' ? '' : formatCurrency(value || 0);
+}
+
+// Comma-grouped (non-currency) number input formatting: commas appear live as you type.
+// Wires up live comma-formatting for every plain (non-currency) number input under root.
+function bindNumberCommaInputs(root){
+  (root||document).querySelectorAll('input.number-commas').forEach(inp=>{
+    if(inp._commaBound) return;
+    inp._commaBound = true;
+    inp.addEventListener('focus', function(){ this.select(); });
+    inp.addEventListener('input', function(){ reformatLive(this, liveNumberText); });
+    inp.addEventListener('blur', function(){
+      const num = parseFloat(this.value.replace(/,/g,''));
+      this.value = isFinite(num) ? formatNumber(num) : '';
+    });
+  });
+}
+
+/* =========================================================================
+   NAVIGATION
+   ========================================================================= */
+
+
+
+
+
+const HOME_OVERVIEW = {icon:'fa-house', color:'#F4B183', desc:'This is the homepage of the tool.'};
+
+const STEP_OVERVIEW = [
+  {icon:'fa-address-card', color:'#A9D18E', desc:'This step captures total customers, active customers, and monthly water sold.'},
+  {icon:'fa-gauge', color:'#9DC3E6', desc:'This step captures meter counts by approved standard size.'},
+  {icon:'fa-sliders', color:'#FFD966', desc:'This step is where you choose Fixed Rate or Tier-Based Rate.'},
+  {icon:'fa-sliders', color:'#FFC38C', desc:'This step captures the inputs for your selected rate model.'},
+  {icon:'fa-percent', color:'#C9A6E0', desc:'This step captures the assessment fee percentage applied to rate revenue.'},
+  {icon:'fa-file-invoice-dollar', color:'#B7B7B7', desc:'This step captures annual operating expenses and the contingency percentage.'},
+  {icon:'fa-coins', color:'#8FE3E3', desc:'This step captures any revenue not related to water sales.'},
+  {icon:'fa-droplet', color:'#74C7EC', desc:'This step captures information on water loss.'},
+  {icon:'fa-chart-line', color:'#D4A72C', desc:'This step displays the results of the rate study tool.'}
+];
+
+/* =========================================================================
+   LANDING / INSTRUCTIONS VIEW
+   ========================================================================= */
+
+// Builds the HTML for one card in the home screen's step-overview grid.
+function stepOverviewCardHtml(icon, color, title, desc){
+  return '<div class="step-overview-card" style="background:'+color+';">'+
+    '<span class="icon-badge"><i class="fa-solid '+icon+'"></i></span>'+
+    '<span class="text"><span class="title">'+title+'</span><span class="desc">'+desc+'</span></span>'+
+  '</div>';
+}
+
+// Renders the home screen's step-overview grid from HOME_OVERVIEW/STEP_OVERVIEW.
+function renderStepOverview(){
+  const grid = document.getElementById('stepOverviewGrid');
+  if(!grid) return;
+  grid.innerHTML = stepOverviewCardHtml(HOME_OVERVIEW.icon, HOME_OVERVIEW.color, 'Home', HOME_OVERVIEW.desc) +
+    STEP_OVERVIEW.map((s,i)=>stepOverviewCardHtml(s.icon, s.color, (i+1)+'. '+STEP_TITLES[i], s.desc)).join('');
+}
+
+// Hides the home, instructions, and wizard views.
+function hideAllViews(){
+  document.getElementById('homeView').style.display = 'none';
+  document.getElementById('instructionsView').style.display = 'none';
+  document.getElementById('wizardView').style.display = 'none';
+}
+
+// Switches to the home/landing view.
+function showHome(){
+  hideAllViews();
+  document.getElementById('homeView').style.display = 'block';
+}
+
+// Switches to the instructions view and updates its Continue/Start button based on saved progress.
+function showInstructions(){
+  hideAllViews();
+  document.getElementById('instructionsView').style.display = 'block';
+  const hasSaved = !!localStorage.getItem(STORAGE_KEY);
+  document.getElementById('btnContinueAnalysis').style.display = hasSaved ? 'inline-flex' : 'none';
+  document.getElementById('btnStartAnalysis').textContent = hasSaved ? 'Start New Analysis' : 'Start Analysis';
+}
+
+// Home screen's Start button -- always starts a fresh analysis at step 1.
+// Resuming a saved session is handled separately by "Continue Where You Left
+// Off" on the Instructions view.
+function homeStart(){
+  startTool();
+}
+
+// Enters the wizard from scratch, discarding any saved session.
+function startTool(){
+  // Starting fresh discards any in-progress session, same as the Reset action.
+  const hasSaved = !!localStorage.getItem(STORAGE_KEY);
+  if(hasSaved){
+    localStorage.removeItem(STORAGE_KEY);
+    appState = defaultState();
+    renderAll();
+  }
+  hideAllViews();
+  document.getElementById('wizardView').style.display = 'block';
+  goToStep(1);
+}
+
+// Enters the wizard and resumes at the current step of a saved session.
+function continueTool(){
+  hideAllViews();
+  document.getElementById('wizardView').style.display = 'block';
+  renderStep();
+}
+
+// Shows the active step page and updates the Previous/Next/Calculate/Reset button visibility.
+function renderStep(){
+  document.querySelectorAll('.step-page').forEach(p=>{
+    p.classList.toggle('active', Number(p.dataset.step) === appState.currentStep);
+  });
+  document.getElementById('btnPrevious').disabled = appState.currentStep === 1;
+  const isLast = appState.currentStep === TOTAL_STEPS;
+  document.getElementById('btnNext').style.display = isLast ? 'none' : 'inline-flex';
+  document.getElementById('btnResetStep').style.display = (isLast || appState.currentStep === 3) ? 'none' : 'inline-flex';
+  if(isLast){
+    // Deferred one frame: the step-page just flipped from display:none to
+    // display:block above. Chart.js measures the canvas at chart-creation
+    // time, and doing that in the same tick as the display change can catch
+    // the container mid-layout (still reporting zero size), producing blank
+    // charts. Waiting a frame lets the browser finish laying out the page first.
+    requestAnimationFrame(()=>calculateAll(false));
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// Jumps directly to step n and renders it.
+function goToStep(n, skipValidation){
+  appState.currentStep = n;
+  renderStep();
+  saveState(false);
+}
+
+// Step 4 (Rate Details) has nothing left to configure for the Fixed-Rate
+// model -- Base Charge comes from the meters, Volumetric Rate is calculated,
+// and there's no Minimum Charge anymore -- so it's skipped in both directions.
+function nextStep(){
+  const res = validateStep(appState.currentStep);
+  if(!res.valid){ renderValidation(appState.currentStep, res); return; }
+  let n = appState.currentStep+1;
+  if(n===4 && appState.rateModel.type==='fixed') n = 5;
+  if(appState.currentStep < TOTAL_STEPS) goToStep(n);
+}
+
+// Goes back one step -- skipping Rate Details for the Fixed-Rate model.
+function previousStep(){
+  let n = appState.currentStep-1;
+  if(n===4 && appState.rateModel.type==='fixed') n = 3;
+  if(appState.currentStep > 1) goToStep(n);
+}
+
+// Displays field errors and a toast for a failed step validation.
+function renderValidation(step, res){
+  document.querySelectorAll('.step-page[data-step="'+step+'"] .field-error').forEach(e=>{e.classList.remove('show'); e.textContent='';});
+  document.querySelectorAll('.step-page[data-step="'+step+'"] input, .step-page[data-step="'+step+'"] select').forEach(e=>e.classList.remove('invalid'));
+  (res.fieldErrors||[]).forEach(fe=>{
+    const errEl = document.getElementById('err-'+fe.field);
+    if(errEl){ errEl.textContent = fe.message||''; errEl.classList.add('show'); }
+    const inputEl = document.getElementById(fe.field);
+    if(inputEl) inputEl.classList.add('invalid');
+  });
+  if(res.messages && res.messages.length){
+    showToastMsg(res.messages[0], 'danger');
+  }
+}
+
+/* =========================================================================
+   VALIDATION
+   ========================================================================= */
+
+// Dispatches to the validator function for the given step number.
+function validateStep(step){
+  if(step === 1) return validatePage1();
+  if(step === 2) return validatePage2();
+  if(step === 3) return validateRateModelChoice();
+  if(step === 4) return validateRateDetails();
+  if(step === 5) return validateAssessmentFee();
+  if(step === 6) return validatePage4();
+  if(step === 7) return validatePage5();
+  if(step === 8) return validatePage6();
+  return {valid:true};
+}
+
+// Validates the Customer & Connections step (total/active customers, water sold).
+function validatePage1(){
+  const fieldErrors = [], messages = [];
+  const ci = appState.customerInfo;
+  const total = Number(ci.totalCustomers);
+  if(!(total > 0)){ fieldErrors.push({field:'totalCustomers', message:'Total number of customers must be greater than 0.'}); messages.push('Total number of customers must be greater than 0.'); }
+  const active = Number(ci.activeCustomers);
+  if(ci.activeCustomers === '' || active < 0 || active > total){ fieldErrors.push({field:'activeCustomers', message:'Active customers must be between 0 and the total number of customers.'}); messages.push('Active customers must be between 0 and the total number of customers.'); }
+  const sold = Number(ci.monthlyWaterSold);
+  if(!(sold > 0)){ fieldErrors.push({field:'monthlyWaterSold', message:'Monthly average water sold must be greater than 0.'}); messages.push('Monthly average water sold must be greater than 0.'); }
+  return {valid: fieldErrors.length===0, fieldErrors, messages};
+}
+
+// Validates the Meter Distribution step (sizes, counts, factors, first row's base fee).
+function validatePage2(){
+  const messages = [];
+  const rows = appState.meters;
+  if(rows.length === 0) messages.push('Add at least one meter size to continue.');
+  if(rows.some(m=>!m.size)) messages.push('Select a meter size for every row.');
+  if(rows.some(m=>m.count === '')) messages.push('Enter a meter count for every row.');
+  if(rows.some(m=>m.factor === '')) messages.push('Enter an equivalency factor for every row.');
+  if(rows.length > 0 && rows[0].baseFee === '') messages.push('Enter the Monthly Base Fee for the first meter row.');
+  const validRows = rows.filter(m=>m.size && Number(m.count) > 0);
+  if(rows.length > 0 && validRows.length === 0) messages.push('At least one meter row needs a valid size and a count greater than 0.');
+  const anyNegative = rows.some(m=>Number(m.count) < 0);
+  if(anyNegative) messages.push('Meter counts cannot be negative.');
+  const activeCustomers = Number(appState.customerInfo.activeCustomers)||0;
+  const totalMeterCount = rows.reduce((a,m)=>a+(Number(m.count)||0),0);
+  if(activeCustomers > 0 && totalMeterCount !== activeCustomers){
+    messages.push('Total meter count ('+formatNumber(totalMeterCount)+') must equal Active Customers ('+formatNumber(activeCustomers)+') from the Customer & Connections step.');
+  }
+  return {valid: messages.length===0, messages};
+}
+
+// Validates that a rate model (Fixed or Tier) has been chosen.
+function validateRateModelChoice(){
+  const messages = [];
+  if(!appState.rateModel.type) messages.push('Select a rate model (Fixed Rate or Tier-Based) to continue.');
+  return {valid: messages.length===0, messages};
+}
+
+// Validates the Rate Details step: tier definitions, or the Fixed-Rate fields.
+function validateRateDetails(){
+  const messages = [];
+  const rm = appState.rateModel;
+  if(rm.type === 'tier'){
+    const tiers = rm.tiers;
+    if(tiers.length === 0) messages.push('Add at least one tier to continue.');
+    for(let i=0;i<tiers.length;i++){
+      const t = tiers[i];
+      const isLast = i === tiers.length-1;
+      if(t.start === '') messages.push('Tier '+(i+1)+' needs a starting usage value.');
+      if(t.customers === '') messages.push('Tier '+(i+1)+' needs a number of customers.');
+      if(t.waterSold === '') messages.push('Tier '+(i+1)+' needs a water sold value.');
+      const end = t.end === '' || t.end === null ? null : Number(t.end);
+      if(!isLast && end === null) messages.push('Tier '+(i+1)+' needs an ending usage value.');
+      if(end !== null && end <= Number(t.start)) messages.push('Tier '+(i+1)+"'s ending usage must be greater than its starting usage.");
+      if(i > 0){
+        const prev = tiers[i-1];
+        const prevEnd = prev.end === '' || prev.end === null ? Infinity : Number(prev.end);
+        if(Number(t.start) < Number(prev.start)) messages.push('Tier '+(i+1)+"'s starting usage cannot be less than the previous tier's starting usage.");
+        if(prevEnd !== Infinity && Number(t.start) !== prevEnd + 1){
+          messages.push('Tier '+(i+1)+' must start immediately after Tier '+i+' ends (at '+(prevEnd+1)+').');
+        }
+        if(rm.tierDiffMethod === 'pct'){
+          if(t.diffPct === '') messages.push('Tier '+(i+1)+' needs a unit cost increase (%).');
+          else if(Number(t.diffPct) <= -100) messages.push('Tier '+(i+1)+"'s % increase must be greater than -100%.");
+        } else {
+          if(t.diffDollar === '') messages.push('Tier '+(i+1)+' needs a unit cost increase ($).');
+        }
+      }
+    }
+    const custTotal = getTierCustomersTotal();
+    const custSum = tiers.reduce((a,t)=>a+(Number(t.customers)||0),0);
+    if(custTotal > 0 && custSum !== custTotal){
+      messages.push('Total tier customers ('+formatNumber(custSum)+') must equal Active Customers ('+formatNumber(custTotal)+') from the Customer & Connections step.');
+    }
+    const waterTotal = getTierWaterSoldTotal();
+    const waterSum = tiers.reduce((a,t)=>a+(Number(t.waterSold)||0),0);
+    if(waterTotal > 0 && waterSum !== waterTotal){
+      messages.push('Total tier water sold ('+formatNumber(waterSum)+') must equal Monthly Average Water Sold ('+formatNumber(waterTotal)+') from the Customer & Connections step.');
+    }
+  }
+  // Fixed-Rate model: Base Charge and Volumetric Rate are both calculated, not entered -- nothing to validate.
+  return {valid: messages.length===0, messages};
+}
+// the validateAssessmentFee function is the validation for page 5, which is the assessment fee page. 
+// Validates the Assessment Fee step.
+function validateAssessmentFee(){
+  const messages = [];
+  const rm = appState.rateModel;
+  if(rm.assessmentFeePct === '') messages.push('Enter an assessment fee percentage.');
+  if(Number(rm.assessmentFeePct) < 0) messages.push('Assessment fee percentage cannot be negative.');
+  if(rm.assessmentFeePct !== '' && Number(rm.assessmentFeePct) === 0) messages.push('Assessment fee percentage cannot be zero.');
+  return {valid: messages.length===0, messages};
+}
+//this validatepage4 function is the validation for page 6, which is the operating expenses page. 
+// Validates the Operating Expenses step.
+function validatePage4(){
+  const messages = [];
+  const rows = appState.operatingExpenses.rows;
+  if(rows.some(r=>!r.description || !r.description.trim())) messages.push('Enter a description for every expense row.');
+  if(rows.some(r=>!r.category || !String(r.category).trim())) messages.push('Select a category for every expense row.');
+  if(rows.some(r=>r.amount === '')) messages.push('Enter an amount for every expense row.');
+  const anyNeg = rows.some(r=>Number(r.amount) < 0);
+  if(anyNeg) messages.push('Expense amounts cannot be negative.');
+  if(appState.operatingExpenses.contingencyPct === '') messages.push('Enter a contingency percentage.');
+  return {valid: messages.length===0, messages};
+}
+// this validatepage5 function is the validation for page 7, which is the miscellaneous revenue page. 
+// Validates the Miscellaneous Revenue step.
+function validatePage5(){
+  const messages = [];
+  const rows = appState.miscellaneousRevenue;
+  if(rows.some(r=>!r.description || !r.description.trim())) messages.push('Enter a description for every revenue row.');
+  if(rows.some(r=>!r.category || !String(r.category).trim())) messages.push('Select a category for every revenue row.');
+  if(rows.some(r=>r.amount === '')) messages.push('Enter an amount for every revenue row.');
+  const anyNeg = rows.some(r=>Number(r.amount) < 0);
+  if(anyNeg) messages.push('Revenue amounts cannot be negative.');
+  return {valid: messages.length===0, messages};
+}
+// this code is the validation for page 6, which is the water loss page.
+// Validates the Water Loss step (required fields only when loss is included).
+function validatePage6(){
+  const messages = [];
+  const wl = appState.waterLoss;
+  if(wl.include === 'yes'){
+    if(wl.method === 'gal'){
+      if(wl.annualGal === '') messages.push('Enter the estimated annual water loss in gallons.');
+      else if(Number(wl.annualGal) < 0) messages.push('Annual water loss cannot be negative.');
+    } else {
+      if(wl.annualPct === '') messages.push('Enter the estimated annual water loss percentage.');
+      else if(Number(wl.annualPct) < 0) messages.push('Water loss percentage cannot be negative.');
+    }
+  }
+  return {valid: messages.length===0, messages};
+}
+
+/* =========================================================================
+   PAGE 1: CUSTOMER & CONNECTIONS
+   ========================================================================= */
+
+// Populates the Customer & Connections step's inputs from state.
+function renderPage1(){
+  const ci = appState.customerInfo;
+  document.getElementById('totalCustomers').value = ci.totalCustomers===''?'':formatNumber(ci.totalCustomers||0);
+  document.getElementById('activeCustomers').value = ci.activeCustomers===''?'':formatNumber(ci.activeCustomers||0);
+  document.getElementById('monthlyWaterSold').value = ci.monthlyWaterSold===''?'':formatNumber(ci.monthlyWaterSold||0);
+  bindNumberCommaInputs(document);
+}
+
+// Handles edits to the Customer & Connections inputs, clamping negatives and updating meter totals.
+function onField1Change(){
+  const ci = appState.customerInfo;
+  const tcRaw = document.getElementById('totalCustomers').value.replace(/,/g,'');
+  let tc = Number(tcRaw);
+  if(tc < 0) tc = 0;
+  ci.totalCustomers = tcRaw === '' ? '' : tc;
+  const acRaw = document.getElementById('activeCustomers').value.replace(/,/g,'');
+  let ac = Number(acRaw);
+  if(ac < 0) ac = 0;
+  ci.activeCustomers = acRaw === '' ? '' : ac;
+  const mwsRaw = document.getElementById('monthlyWaterSold').value.replace(/,/g,'');
+  let mws = Number(mwsRaw);
+  if(mws < 0) mws = 0;
+  ci.monthlyWaterSold = mwsRaw === '' ? '' : mws;
+  updateMeterTotals();
+  // Active Customers / Monthly Water Sold are the basis the tier table's %
+  // columns divide into -- re-render so those percentages and their
+  // enabled/disabled state stay in sync.
+  if(appState.rateModel.type === 'tier') renderTierTable();
+}
+
+// Escapes HTML special characters so untrusted text can be safely inserted into innerHTML.
+function escapeHtml(str){
+  return String(str==null?'':str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+// Builds the HTML for a warning/info alert box listing one or more messages.
+function alertHtml(type, icon, messages){
+  if(!messages || !messages.length) return '';
+  return '<div class="alert alert-'+type+'"><i class="fa-solid fa-'+icon+'"></i><div>'+messages.map(escapeHtml).join('<br>')+'</div></div>';
+}
+
+/* =========================================================================
+   PAGE 2: METER DISTRIBUTION
+   ========================================================================= */
+
+// Builds the meter-size dropdown (plus a custom-size input, if selected) for one meter table row.
+// The first row is the "base meter" every other row's factor and fee are calculated relative to,
+// so its placeholder calls that out instead of the generic "Select Meter Size".
+function meterSizeCellHtml(row, idx){
+  let html = '<select data-field="size" onchange="onMeterRowChange(this)">';
+  html += '<option value=""'+(!row.customSize && row.size===''?' selected':'')+' disabled>'+(idx===0?'Select Smallest Meter Size':'Select Meter Size')+'</option>';
+  METER_SIZES.forEach(m=>{
+    html += '<option value="'+escapeHtml(m.size)+'"'+(!row.customSize && m.size===row.size?' selected':'')+'>'+m.size+'</option>';
+  });
+  html += '<option value="__custom__"'+(row.customSize?' selected':'')+'>Custom...</option>';
+  html += '</select>';
+  if(row.customSize){
+    html += '<input type="text" data-field="customSizeText" value="'+escapeHtml(row.size)+'" placeholder="Enter meter size" oninput="onMeterRowChange(this)" style="margin-top:6px;">';
+  }
+  return html;
+}
+
+// Looks up a standard meter size's AWWA M1 capacity, expressed relative to a
+// 5/8" meter (the table's universal reference unit) -- e.g. 16 means that
+// size's capacity is 16x a 5/8" meter's capacity.
+function presetRelCapacity(size){
+  const preset = METER_SIZES.find(m=>m.size===size);
+  return preset ? preset.factor : null;
+}
+
+// The first meter row is the "base meter": every standard-size row's AWWA
+// Equivalent Factor is that size's AWWA M1 capacity divided by the base
+// row's capacity (Equivalent Meter Factor = capacity / capacity of base
+// meter), not always the 5/8" meter as the source workbook assumed.
+// Custom-size rows have no known capacity, so their factor stays exactly
+// what the user typed in. If the base row itself is a custom size (unknown
+// capacity), standard rows fall back to their 5/8"-relative AWWA capacity.
+function recomputeMeterFactors(){
+  const rows = appState.meters;
+  if(rows.length === 0) return;
+  const baseRow = rows[0];
+  const baseRel = baseRow.customSize ? null : presetRelCapacity(baseRow.size);
+  rows.forEach(row=>{
+    if(row.customSize) return;
+    const rel = presetRelCapacity(row.size);
+    if(rel === null){ row.factor = ''; return; }
+    row.factor = (baseRel && baseRel>0) ? Math.round(rel/baseRel*10000)/10000 : rel;
+  });
+}
+
+// The first meter row's Monthly Base Fee is the only manually-entered one;
+// every other row's fee scales off it in proportion to its own AWWA
+// equivalent factor relative to the first row's factor (generalizes the
+// source rate-study workbook's formula, which assumes the first row is
+// always the 1x/5-8" meter).
+function recomputeMeterBaseFees(){
+  const rows = appState.meters;
+  if(rows.length === 0) return;
+  const base = rows[0];
+  const baseFactor = Number(base.factor)||0;
+  const baseFee = Number(base.baseFee)||0;
+  for(let i=1;i<rows.length;i++){
+    const f = Number(rows[i].factor)||0;
+    rows[i].baseFee = baseFactor>0 ? baseFee*(f/baseFactor) : 0;
+  }
+}
+
+// Sums count x Monthly Base Fee across every meter row -- the Fixed-Rate model's total Base Charge.
+function getMonthlyBaseFeeRevenue(){
+  return appState.meters.reduce((a,m)=>a+(Number(m.count)||0)*(Number(m.baseFee)||0),0);
+}
+
+// Updates every non-first row's displayed base-fee cell in place, without
+// touching row 0's input -- rebuilding the whole tbody on every keystroke
+// (as renderMeterTable() does) would destroy and recreate that input,
+// dropping focus after a single character.
+function refreshMeterBaseFeeCells(){
+  const tbody = document.getElementById('meterTableBody');
+  if(!tbody) return;
+  appState.meters.forEach((row,idx)=>{
+    if(idx===0) return;
+    const tr = tbody.querySelector('tr[data-id="'+row.id+'"]');
+    const cell = tr && tr.children[3];
+    if(cell) cell.textContent = formatCurrency(row.baseFee);
+  });
+}
+
+// Rebuilds the meter table's rows from state.
+function renderMeterTable(){
+  recomputeMeterFactors();
+  recomputeMeterBaseFees();
+  const tbody = document.getElementById('meterTableBody');
+  tbody.innerHTML = '';
+  appState.meters.forEach((row,idx)=>{
+    const tr = document.createElement('tr');
+    tr.dataset.id = row.id;
+    // Standard-size rows show the factor rounded to 1 decimal for readability;
+    // the exact decimal in row.factor is still what every calculation uses.
+    const factorDisplay = row.customSize || row.factor==='' ? row.factor : Math.round(Number(row.factor)*10)/10;
+    tr.innerHTML =
+      '<td>'+meterSizeCellHtml(row, idx)+'</td>'+
+      '<td><input type="number" min="0" step="1" data-field="count" value="'+row.count+'" oninput="onMeterRowChange(this)"></td>'+
+      '<td><input type="number" min="0" step="0.1" data-field="factor" value="'+factorDisplay+'"'+(row.customSize?'':' readonly title="AWWA equivalency factor: this size\'s capacity divided by the first row\'s (base meter\'s) capacity"')+' oninput="onMeterRowChange(this)"></td>'+
+      (idx===0
+        ? '<td><input type="text" class="currency-input" data-field="baseFee" value="'+formatCurrency(row.baseFee)+'" oninput="onMeterRowChange(this)"></td>'
+        : '<td>'+formatCurrency(row.baseFee)+'</td>') +
+      '<td><button class="btn-icon" onclick="removeMeterRow(\''+row.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
+    tbody.appendChild(tr);
+  });
+  bindCurrencyInputs(tbody);
+  updateMeterTotals();
+}
+
+// Handles edits to a meter row's size/count/factor/base fee fields.
+function onMeterRowChange(el){
+  const tr = el.closest('tr');
+  const id = tr.dataset.id;
+  const row = appState.meters.find(m=>m.id===id);
+  if(!row) return;
+  const field = el.dataset.field;
+  if(field === 'size'){
+    if(el.value === '__custom__'){
+      row.customSize = true;
+      row.size = '';
+      row.factor = '';
+    } else {
+      row.customSize = false;
+      row.size = el.value;
+      const preset = METER_SIZES.find(m=>m.size===el.value);
+      row.factor = preset ? preset.factor : '';
+    }
+    renderMeterTable();
+  } else if(field === 'customSizeText'){
+    row.size = el.value;
+    updateMeterTotals();
+  } else if(field === 'count'){
+    const raw = el.value;
+    let v = raw === '' ? '' : Number(raw);
+    if(v !== '' && v < 0) v = 0;
+    row.count = v;
+    if(v !== '') el.value = v;
+    updateMeterTotals();
+  } else if(field === 'factor'){
+    const raw = el.value;
+    let v = raw === '' ? '' : Number(raw);
+    if(v !== '' && v < 0) v = 0;
+    row.factor = v;
+    if(v !== '') el.value = v;
+    recomputeMeterBaseFees();
+    refreshMeterBaseFeeCells(); // update the cascaded cells in place -- a full rebuild here would blow away focus mid-keystroke
+    updateMeterTotals();
+  } else if(field === 'baseFee'){
+    row.baseFee = parseCurrencyInputOrBlank(el.value);
+    recomputeMeterBaseFees();
+    refreshMeterBaseFeeCells(); // same as above: re-cascade without rebuilding the input the user is typing in
+    updateMeterTotals();
+  }
+}
+
+// Adds a new blank meter row.
+function addMeterRow(){
+  appState.meters.push({id:uid(), size:'', count:'', factor:'', customSize:false, baseFee:''});
+  renderMeterTable();
+}
+
+// Removes a meter row by id.
+function removeMeterRow(id){
+  appState.meters = appState.meters.filter(m=>m.id!==id);
+  renderMeterTable();
+}
+
+// Recomputes and displays meter totals, and re-derives the Fixed-Rate Base Charge from them.
+function updateMeterTotals(){
+  const totalCount = appState.meters.reduce((a,m)=>a+(Number(m.count)||0),0);
+  document.getElementById('meterTotalCount').textContent = formatNumber(totalCount);
+  document.getElementById('meterSummaryCount').textContent = formatNumber(totalCount);
+  const activeCustomers = Number(appState.customerInfo.activeCustomers)||0;
+  document.getElementById('meterSummaryConnections').textContent = formatNumber(activeCustomers);
+  const baseFeeRevenue = getMonthlyBaseFeeRevenue();
+  document.getElementById('meterTotalBaseFeeRevenue').textContent = formatCurrency(baseFeeRevenue);
+  document.getElementById('meterSummaryBaseFeeRevenue').textContent = formatCurrency(baseFeeRevenue);
+  appState.rateModel.fixed.baseCharge = baseFeeRevenue;
+  const fixedBaseChargeInput = document.getElementById('fixedBaseCharge');
+  if(fixedBaseChargeInput) setCurrencyValue(fixedBaseChargeInput, appState.rateModel.fixed.baseCharge);
+
+  // Duplicate meter-size detection -> combine hint.
+  const counts = {};
+  appState.meters.forEach(m=>{ if(m.size) counts[m.size] = (counts[m.size]||0)+1; });
+  const dupes = Object.keys(counts).filter(k=>counts[k]>1);
+
+  const alertBox = document.getElementById('meterAlert');
+  let html = '';
+  const res = validatePage2();
+  if(res.messages.length){
+    html += alertHtml('warning','triangle-exclamation', res.messages);
+  }
+  if(dupes.length){
+    html += alertHtml('warning','triangle-exclamation', ['You have multiple rows for the same meter size ('+dupes.join(', ')+'). Consider combining them into a single row.']);
+  }
+  alertBox.innerHTML = html;
+}
+
+/* =========================================================================
+   PAGE 3: RATE MODEL SELECTION
+   ========================================================================= */
+
+// Highlights the selected rate-model card (Fixed vs Tier).
+function renderRateModelChoice(){
+  const rm = appState.rateModel;
+  document.querySelectorAll('#rateModelToggle .rate-choice-card').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.model === rm.type);
+  });
+}
+
+// Sets the chosen rate model and re-renders the choice cards and rate details.
+function setRateModel(type){
+  appState.rateModel.type = type;
+  renderRateModelChoice();
+  renderRateDetails();
+}
+
+/* =========================================================================
+   PAGE 4: RATE DETAILS
+   ========================================================================= */
+
+// Shows the Fixed-Rate or Tier section depending on the chosen model, and refreshes the derived Base Charge.
+function renderRateDetails(){
+  const rm = appState.rateModel;
+  rm.fixed.baseCharge = getMonthlyBaseFeeRevenue();
+  document.getElementById('fixedRateSection').style.display = rm.type==='fixed' ? 'block' : 'none';
+  document.getElementById('tierRateSection').style.display = rm.type==='tier' ? 'block' : 'none';
+
+  setCurrencyValue(document.getElementById('fixedBaseCharge'), rm.fixed.baseCharge);
+  setCurrencyValue(document.getElementById('fixedVolumetricRate'), rm.fixed.volumetricRate);
+
+  const isPctDiff = rm.tierDiffMethod === 'pct';
+  document.getElementById('tierDiffMethodDollar').classList.toggle('active', !isPctDiff);
+  document.getElementById('tierDiffMethodPct').classList.toggle('active', isPctDiff);
+
+  renderTierTable();
+  bindCurrencyInputs(document.getElementById('fixedRateSection'));
+  bindCurrencyInputs(document.getElementById('tierRateSection'));
+}
+
+/* =========================================================================
+   PAGE 5: ASSESSMENT FEE
+   ========================================================================= */
+
+// Populates the Assessment Fee step's input from state.
+function renderAssessmentFeePage(){
+  document.getElementById('assessmentFeePct').value = appState.rateModel.assessmentFeePct;
+  updateAssessmentFeeDisplay();
+}
+
+// Tier 1's rate is solved in calculateAll(); every later tier is priced
+// automatically at the previous tier's rate plus that tier's own unit cost
+// increase -- either a flat $ amount added on, or a % increase applied, per tierDiffMethod.
+function recomputeTierRates(){
+  const tiers = appState.rateModel.tiers;
+  const rm = appState.rateModel;
+  if(rm.tierDiffMethod === 'pct'){
+    for(let i=1;i<tiers.length;i++){
+      const growth = 1 + (Number(tiers[i].diffPct)||0)/100;
+      tiers[i].rate = (Number(tiers[i-1].rate)||0) * growth;
+    }
+  } else {
+    for(let i=1;i<tiers.length;i++){
+      const diff = Number(tiers[i].diffDollar)||0;
+      tiers[i].rate = (Number(tiers[i-1].rate)||0) + diff;
+    }
+  }
+}
+
+// The Customers/Water Sold columns can be driven by either a raw count/gallon
+// figure or a % of the totals from the Customer & Connections step -- these
+// are the totals that % entry divides into (and that % display is a share of).
+function getTierCustomersTotal(){ return Number(appState.customerInfo.activeCustomers)||0; }
+function getTierWaterSoldTotal(){ return Number(appState.customerInfo.monthlyWaterSold)||0; }
+function round1(n){ return Math.round(n*10)/10; }
+
+// Rebuilds the tier table's rows from state.
+function renderTierTable(){
+  recomputeTierRates();
+  const rm = appState.rateModel;
+  const isCustPct = rm.tierCustomersMethod === 'pct';
+  const isWaterPct = rm.tierWaterSoldMethod === 'pct';
+  document.getElementById('tierCustomersMethodNumber').classList.toggle('active', !isCustPct);
+  document.getElementById('tierCustomersMethodPct').classList.toggle('active', isCustPct);
+  document.getElementById('tierWaterSoldMethodGal').classList.toggle('active', !isWaterPct);
+  document.getElementById('tierWaterSoldMethodPct').classList.toggle('active', isWaterPct);
+  document.getElementById('tierCustomersHeaderLabel').textContent = isCustPct ? 'No. of Customers (%)' : 'No. of Customers';
+  document.getElementById('tierWaterSoldHeaderLabel').textContent = isWaterPct ? 'Water Sold (%)' : 'Water Sold (gal/mo)';
+  document.getElementById('tierRefActiveCustomers').textContent = formatNumber(getTierCustomersTotal());
+  document.getElementById('tierRefMonthlyWaterSold').textContent = formatNumber(getTierWaterSoldTotal());
+
+  const isPctDiff = rm.tierDiffMethod === 'pct';
+  document.getElementById('tierDiffMethodDollar').classList.toggle('active', !isPctDiff);
+  document.getElementById('tierDiffMethodPct').classList.toggle('active', isPctDiff);
+
+  const tbody = document.getElementById('tierTableBody');
+  tbody.innerHTML = '';
+  const tiers = rm.tiers;
+  const custTotal = getTierCustomersTotal();
+  const waterTotal = getTierWaterSoldTotal();
+  tiers.forEach((t,idx)=>{
+    t.name = String(idx+1);
+    if(idx===0) t.start = 0;
+    const isLast = idx === tiers.length-1;
+    const custPct = (t.customers==='' || custTotal<=0) ? '' : round1(Number(t.customers)/custTotal*100);
+    const waterPct = (t.waterSold==='' || waterTotal<=0) ? '' : round1(Number(t.waterSold)/waterTotal*100);
+    const custCell = isCustPct
+      ? '<td><input type="number" min="0" step="0.1" data-field="customersPct" value="'+custPct+'"'+(custTotal<=0?' disabled title="Enter Active Customers on the Customer & Connections step first"':'')+' oninput="onTierRowChange(this)"></td>'
+      : '<td><input type="number" min="0" data-field="customers" value="'+t.customers+'" oninput="onTierRowChange(this)"></td>';
+    const waterCell = isWaterPct
+      ? '<td><input type="number" min="0" step="0.1" data-field="waterSoldPct" value="'+waterPct+'"'+(waterTotal<=0?' disabled title="Enter Monthly Average Water Sold on the Customer & Connections step first"':'')+' oninput="onTierRowChange(this)"></td>'
+      : '<td><input type="text" class="number-commas" data-field="waterSold" value="'+(t.waterSold===''?'':formatNumber(t.waterSold))+'" oninput="onTierRowChange(this)"></td>';
+    const diffCell = idx===0
+      ? '<td><input type="text" value="--" readonly title="Tier 1\'s rate is solved automatically -- there\'s no previous tier to increase from."></td>'
+      : (isPctDiff
+          ? '<td><input type="number" step="0.01" data-field="diffPct" value="'+(t.diffPct===''?'':t.diffPct)+'" oninput="onTierRowChange(this)"></td>'
+          : '<td><input type="text" class="currency-input" data-field="diffDollar" value="'+(t.diffDollar===''?'':formatCurrency(t.diffDollar))+'" oninput="onTierRowChange(this)"></td>');
+    const tr = document.createElement('tr');
+    tr.dataset.id = t.id;
+    tr.innerHTML =
+      '<td><input type="text" value="'+escapeHtml(t.name)+'" readonly></td>'+
+      (idx===0
+        ? '<td><input type="text" value="0" readonly></td>'
+        : '<td><input type="text" class="number-commas" data-field="start" value="'+(t.start===''?'':formatNumber(t.start))+'" oninput="onTierRowChange(this)"></td>')+
+      '<td><input type="text" class="number-commas" data-field="end" value="'+(t.end===null?'':formatNumber(t.end))+'" placeholder="'+(isLast?'and above':'')+'" oninput="onTierRowChange(this)"></td>'+
+      diffCell + custCell + waterCell +
+      '<td><button class="btn-icon" onclick="removeTierRow(\''+t.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
+    tbody.appendChild(tr);
+  });
+  bindCurrencyInputs(tbody);
+  bindNumberCommaInputs(tbody);
+  refreshTierTotalsRow();
+  runTierValidation();
+  updateAssessmentFeeDisplay();
+}
+
+// Switches between entering each tier's customer count as a raw number or a % of Active Customers.
+function setTierCustomersMethod(method){
+  appState.rateModel.tierCustomersMethod = method;
+  renderTierTable();
+}
+
+// Switches between entering each tier's water sold as raw gallons or a % of Monthly Average Water Sold.
+function setTierWaterSoldMethod(method){
+  appState.rateModel.tierWaterSoldMethod = method;
+  renderTierTable();
+}
+
+// Rebuilds the totals (tfoot) row: sums of whichever Customers/Water Sold columns are currently shown.
+function refreshTierTotalsRow(){
+  const tfoot = document.getElementById('tierTableFoot');
+  if(!tfoot) return;
+  const rm = appState.rateModel;
+  const tiers = rm.tiers;
+  const custTotal = getTierCustomersTotal();
+  const waterTotal = getTierWaterSoldTotal();
+  const custSum = tiers.reduce((a,t)=>a+(Number(t.customers)||0),0);
+  const waterSum = tiers.reduce((a,t)=>a+(Number(t.waterSold)||0),0);
+  const custPctSum = custTotal>0 ? round1(custSum/custTotal*100) : '-';
+  const waterPctSum = waterTotal>0 ? round1(waterSum/waterTotal*100) : '-';
+  const custCell = rm.tierCustomersMethod==='pct' ? custPctSum+(custPctSum==='-'?'':'%') : formatNumber(custSum);
+  const waterCell = rm.tierWaterSoldMethod==='pct' ? waterPctSum+(waterPctSum==='-'?'':'%') : formatNumber(waterSum);
+  tfoot.innerHTML = '<tr><td colspan="4">Total</td>'+
+    '<td>'+custCell+'</td>'+
+    '<td>'+waterCell+'</td>'+
+    '<td></td></tr>';
+}
+
+
+// Pushes a derived value into a row's other input (e.g. the % cell after the
+// count/gallons cell changes, or vice versa) without rebuilding the row, so
+// the field the user is actively typing in never loses focus/caret.
+function setTierSiblingField(tr, field, value){
+  const input = tr.querySelector('input[data-field="'+field+'"]');
+  if(input) input.value = value;
+}
+
+// Handles edits to a tier row's name/start/end/customers/waterSold fields
+// (and their % counterparts, which derive the underlying count/gallons from
+// the Customer & Connections step's totals). Rate isn't editable here -- it's
+// solved in calculateAll() (see the tier branch there).
+function onTierRowChange(el){
+  const tr = el.closest('tr');
+  const t = appState.rateModel.tiers.find(x=>x.id===tr.dataset.id);
+  if(!t) return;
+  const field = el.dataset.field;
+  if(field === 'end'){
+    t.end = el.value === '' ? null : Number(String(el.value).replace(/,/g,''));
+    // Keep the next tier's Start immediately after this tier's End, so the
+    // user doesn't have to update it by hand every time this one changes.
+    if(t.end !== null){
+      const idx = appState.rateModel.tiers.findIndex(x=>x.id===t.id);
+      const nextTier = appState.rateModel.tiers[idx+1];
+      if(nextTier){
+        nextTier.start = t.end + 1;
+        const nextRow = tr.nextElementSibling;
+        if(nextRow) setTierSiblingField(nextRow, 'start', formatNumber(nextTier.start));
+      }
+    }
+  }
+  else if(field === 'customers'){
+    let v = el.value === '' ? '' : Number(el.value);
+    if(v !== '' && v < 0) v = 0;
+    t.customers = v;
+    const total = getTierCustomersTotal();
+    setTierSiblingField(tr, 'customersPct', (v==='' || total<=0) ? '' : round1(v/total*100));
+  } else if(field === 'customersPct'){
+    const total = getTierCustomersTotal();
+    const pct = el.value === '' ? '' : Number(el.value);
+    if(total > 0 && pct !== ''){
+      t.customers = Math.round(pct/100*total);
+      setTierSiblingField(tr, 'customers', t.customers);
+    }
+  } else if(field === 'waterSold'){
+    const num = parseFloat(String(el.value).replace(/,/g,''));
+    const v = isFinite(num) ? Math.max(0,num) : '';
+    t.waterSold = v;
+    const total = getTierWaterSoldTotal();
+    setTierSiblingField(tr, 'waterSoldPct', (v==='' || total<=0) ? '' : round1(v/total*100));
+  } else if(field === 'waterSoldPct'){
+    const total = getTierWaterSoldTotal();
+    const pct = el.value === '' ? '' : Number(el.value);
+    if(total > 0 && pct !== ''){
+      t.waterSold = Math.round(pct/100*total);
+      setTierSiblingField(tr, 'waterSold', formatNumber(t.waterSold));
+    }
+  } else if(field === 'diffDollar'){
+    t.diffDollar = parseCurrencyInputOrBlank(el.value);
+  } else if(field === 'diffPct'){
+    t.diffPct = el.value === '' ? '' : Number(el.value);
+  } else {
+    const raw = String(el.value).replace(/,/g,'');
+    let v = raw === '' ? '' : Number(raw);
+    if(v !== '' && v < 0) v = 0;
+    t[field] = v;
+    if(v !== '') el.value = formatNumber(v);
+  }
+  recomputeTierRates();
+  refreshTierTotalsRow();
+  runTierValidation();
+  updateAssessmentFeeDisplay();
+}
+
+// Switches between entering each tier's unit cost increase as a flat $ amount or a % increase.
+function setTierDiffMethod(method){
+  appState.rateModel.tierDiffMethod = method;
+  renderRateDetails();
+}
+
+// Adds a new tier. If the last row is still open-ended ("and above", end not
+// yet set), the new tier is inserted just above it so that open-ended row
+// stays pinned last -- otherwise (every tier so far has an explicit end)
+// there's no open-ended row to preserve, so it's appended as usual.
+// The new tier's unit cost increase starts blank -- it's never inferred from
+// another tier, only from what the user enters for this one.
+function addTierRow(){
+  const tiers = appState.rateModel.tiers;
+  const lastIdx = tiers.length-1;
+  const lastIsOpenEnded = lastIdx >= 0 && tiers[lastIdx].end === null;
+  const insertIdx = lastIsOpenEnded ? lastIdx : tiers.length;
+  const prev = tiers[insertIdx-1];
+  const newStart = prev && prev.end !== null ? Number(prev.end)+1 : (prev ? Number(prev.start)+1000 : 0);
+  tiers.splice(insertIdx, 0, {id:uid(), name:String(tiers.length+1), start:newStart, end:null, rate:0, customers:'', waterSold:0,
+    diffDollar:'', diffPct:''});
+  renderTierTable();
+}
+
+// Removes a tier by id.
+function removeTierRow(id){
+  appState.rateModel.tiers = appState.rateModel.tiers.filter(t=>t.id!==id);
+  renderTierTable();
+}
+
+// Tier rates are a calculated output (not something the user directly enters), so a
+// negative result is only ever a heads-up, never something that should block navigation --
+// see negativeTierRateWarning().
+function tiersHaveNegativeRate(){
+  return appState.rateModel.type==='tier' && appState.rateModel.tiers.some(t=>Number(t.rate) < 0);
+}
+function negativeTierRateWarning(){
+  return 'One or more calculated unit costs (Cost per 1,000 Gal) came out negative. This usually means the unit cost difference between tiers is too large for the revenue currently needed from rates -- double-check the data entered on the Customer & Connections, Operating Expenses, and Consumption Tiers steps. This is just a heads-up and will not stop you from continuing.';
+}
+
+// Re-validates the Rate Details step and updates its warning banner.
+function runTierValidation(){
+  const res = validateRateDetails();
+  const alertBox = document.getElementById('tierAlert');
+  const displayMsgs = [...res.messages];
+  if(tiersHaveNegativeRate()) displayMsgs.push(negativeTierRateWarning());
+  if(appState.rateModel.type==='tier' && displayMsgs.length){
+    alertBox.innerHTML = alertHtml('warning','triangle-exclamation', displayMsgs);
+  } else {
+    alertBox.innerHTML = '';
+  }
+}
+
+// Handles edits to the Assessment Fee percentage.
+function onAssessmentFeeChange(){
+  const raw = document.getElementById('assessmentFeePct').value;
+  let v = raw === '' ? '' : Number(raw);
+  if(v !== '' && v < 0) v = 0;
+  appState.rateModel.assessmentFeePct = v;
+  updateAssessmentFeeDisplay();
+}
+
+// Computes the annual assessment-fee revenue from its percentage and the estimated rate revenue.
+function computeAssessmentFeeAnnual(){
+  const pct = Number(appState.rateModel.assessmentFeePct)||0;
+  return (pct/100) * estimateRateRevenueForAssessment();
+}
+
+// Rate revenue estimate used as the base for the assessment fee percentage --
+// computed before the assessment fee is added to total revenue.
+function estimateRateRevenueForAssessment(){
+  const rm = appState.rateModel;
+  const ci = appState.customerInfo;
+  const activeCustomers = Number(ci.activeCustomers)||0;
+  const monthlyWaterSold = Number(ci.monthlyWaterSold)||0;
+  if(rm.type === 'fixed'){
+    return computeFixedRateRevenue(rm.fixed, activeCustomers, monthlyWaterSold).totalAnnual;
+  }
+  const wl = getWaterLossSummary();
+  return computeTierRevenue(rm.tiers, wl).totalAnnual;
+}
+
+// Updates the assessment-fee annual-amount display, if that element exists on the page.
+function updateAssessmentFeeDisplay(){
+  const el = document.getElementById('assessmentFeeAnnual');
+  if(el) el.textContent = formatCurrency(computeAssessmentFeeAnnual());
+}
+
+/* =========================================================================
+   PAGE 4: OPERATING EXPENSES
+   ========================================================================= */
+
+// Rebuilds the operating-expenses table's rows from state.
+function renderExpenseTable(){
+  const tbody = document.getElementById('expenseTableBody');
+  tbody.innerHTML = '';
+  appState.operatingExpenses.rows.forEach(row=>{
+    const tr = document.createElement('tr');
+    tr.dataset.id = row.id;
+    tr.innerHTML =
+      '<td><input type="text" data-field="description" value="'+escapeHtml(row.description)+'" oninput="onExpenseRowChange(this)"></td>'+
+      '<td>'+categorySelectHtml(EXPENSE_CATEGORIES, row, 'onExpenseRowChange', false)+'</td>'+
+      '<td><input type="text" class="currency-input" data-field="amount" value="'+formatCurrency(row.amount)+'" oninput="onExpenseRowChange(this)"></td>'+
+      '<td><select data-field="frequency" onchange="onExpenseRowChange(this)">'+FREQUENCIES.map(f=>'<option value="'+f+'"'+(f===row.frequency?' selected':'')+'>'+f+'</option>').join('')+'</select></td>'+
+      '<td class="row-annual">'+formatCurrency(toAnnual(row.amount,row.frequency))+'</td>'+
+      '<td><button class="btn-icon" onclick="removeExpenseRow(\''+row.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
+    tbody.appendChild(tr);
+  });
+  bindCurrencyInputs(tbody);
+  document.getElementById('expenseContingencyPct').value = appState.operatingExpenses.contingencyPct;
+  onExpenseTotalsChange();
+}
+
+// Builds a category <select> (plus an optional custom-category input) shared by the expense and misc-revenue tables.
+// Whether the row is in "Custom..." mode is tracked by row.customCategory (a boolean flag), not by matching
+// row.category's text against the preset list -- that would collide with a preset named the same as typed text.
+function categorySelectHtml(categories, row, handlerName, allowCustom){
+  const isCustom = allowCustom !== false && !!row.customCategory;
+  let html = '<select data-field="category" onchange="'+handlerName+'(this)">';
+  categories.forEach(c=>{ html += '<option value="'+c+'"'+(!isCustom && c===row.category?' selected':'')+'>'+c+'</option>'; });
+  if(allowCustom !== false){
+    html += '<option value="__custom__"'+(isCustom?' selected':'')+'>Custom...</option>';
+  }
+  html += '</select>';
+  if(isCustom){
+    html += '<input type="text" data-field="customCategory" value="'+escapeHtml(row.category)+'" placeholder="Enter category" oninput="'+handlerName+'(this)" style="margin-top:6px;">';
+  }
+  return html;
+}
+
+// Handles edits to an expense row's description/category/amount/frequency.
+function onExpenseRowChange(el){
+  const tr = el.closest('tr');
+  const row = appState.operatingExpenses.rows.find(r=>r.id===tr.dataset.id);
+  if(!row) return;
+  const field = el.dataset.field;
+  if(field === 'amount'){
+    row.amount = parseCurrencyInputOrBlank(el.value);
+  } else if(field === 'category'){
+    if(el.value === '__custom__'){
+      row.category = 'Other';
+      renderExpenseTable();
+      return;
+    }
+    row.category = el.value;
+  } else if(field === 'customCategory'){
+    row.category = el.value;
+  } else {
+    row[field] = el.value;
+  }
+  const annualCell = tr.querySelector('.row-annual');
+  if(annualCell) annualCell.textContent = formatCurrency(toAnnual(row.amount, row.frequency));
+  onExpenseTotalsChange();
+}
+
+// Adds a new blank expense row.
+function addExpenseRow(){
+  appState.operatingExpenses.rows.push({id:uid(), description:'', category:'Facilities Operation', amount:0, frequency:'Annual'});
+  renderExpenseTable();
+}
+
+// Removes an expense row by id.
+function removeExpenseRow(id){
+  appState.operatingExpenses.rows = appState.operatingExpenses.rows.filter(r=>r.id!==id);
+  renderExpenseTable();
+}
+
+// Handles edits to the contingency percentage and recomputes expense totals.
+function onExpenseTotalsChange(){
+  const rawPct = document.getElementById('expenseContingencyPct').value;
+  let pct = rawPct === '' ? '' : Number(rawPct);
+  if(pct !== '' && pct < 0) pct = 0;
+  appState.operatingExpenses.contingencyPct = pct;
+  const alertBox = document.getElementById('expenseAlert');
+  const res = validatePage4();
+  alertBox.innerHTML = alertHtml('warning','triangle-exclamation', res.messages);
+  updateExpenseCategoryBreakdown();
+}
+
+// Recomputes and displays the per-category expense breakdown and grand totals.
+function updateExpenseCategoryBreakdown(){
+  const byCategory = {};
+  appState.operatingExpenses.rows.forEach(row=>{
+    const cat = row.category || 'Other';
+    byCategory[cat] = (byCategory[cat]||0) + toAnnual(row.amount, row.frequency);
+  });
+  const subtotal = Object.values(byCategory).reduce((a,v)=>a+v,0);
+  const contingencyPct = Number(appState.operatingExpenses.contingencyPct)||0;
+  const contingencyAmount = subtotal*(contingencyPct/100);
+
+  const orderedCats = EXPENSE_CATEGORIES.filter(c=>byCategory[c]!==undefined)
+    .concat(Object.keys(byCategory).filter(c=>!EXPENSE_CATEGORIES.includes(c)));
+
+  const tbody = document.getElementById('expenseCategoryTableBody');
+  if(tbody){
+    tbody.innerHTML = orderedCats.length ? orderedCats.map(cat=>{
+      const amt = byCategory[cat];
+      const pct = subtotal>0 ? amt/subtotal*100 : 0;
+      return '<tr><td>'+escapeHtml(cat)+'</td><td>'+formatCurrency(amt)+'</td><td>'+formatNumber(pct,1)+'%</td></tr>';
+    }).join('') : '<tr><td colspan="3" style="color:#888;">No expenses entered yet.</td></tr>';
+  }
+
+  const subtotalEl = document.getElementById('expenseSubtotalValue');
+  if(subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
+  const contingencyEl = document.getElementById('expenseContingencyAmount');
+  if(contingencyEl) contingencyEl.textContent = formatCurrency(contingencyAmount);
+  const totalEl = document.getElementById('expenseGrandTotal');
+  if(totalEl) totalEl.textContent = formatCurrency(subtotal+contingencyAmount);
+}
+
+/* =========================================================================
+   PAGE 5: MISCELLANEOUS REVENUE
+   ========================================================================= */
+
+// Rebuilds the miscellaneous-revenue table's rows from state.
+function renderMiscRevenueTable(){
+  const tbody = document.getElementById('miscRevenueTableBody');
+  tbody.innerHTML = '';
+  appState.miscellaneousRevenue.forEach(row=>{
+    const tr = document.createElement('tr');
+    tr.dataset.id = row.id;
+    tr.innerHTML =
+      '<td><input type="text" data-field="description" value="'+escapeHtml(row.description)+'" oninput="onMiscRevenueRowChange(this)"></td>'+
+      '<td>'+categorySelectHtml(MISC_REVENUE_CATEGORIES, row, 'onMiscRevenueRowChange')+'</td>'+
+      '<td><input type="text" class="currency-input" data-field="amount" value="'+formatCurrency(row.amount)+'" oninput="onMiscRevenueRowChange(this)"></td>'+
+      '<td><select data-field="frequency" onchange="onMiscRevenueRowChange(this)">'+FREQUENCIES.map(f=>'<option value="'+f+'"'+(f===row.frequency?' selected':'')+'>'+f+'</option>').join('')+'</select></td>'+
+      '<td class="row-annual">'+formatCurrency(toAnnual(row.amount,row.frequency))+'</td>'+
+      '<td><button class="btn-icon" onclick="removeMiscRevenueRow(\''+row.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
+    tbody.appendChild(tr);
+  });
+  bindCurrencyInputs(tbody);
+  updateMiscRevenueTotals();
+}
+
+// Handles edits to a misc-revenue row's description/category/amount/frequency.
+function onMiscRevenueRowChange(el){
+  const tr = el.closest('tr');
+  const row = appState.miscellaneousRevenue.find(r=>r.id===tr.dataset.id);
+  if(!row) return;
+  const field = el.dataset.field;
+  if(field === 'amount') row.amount = parseCurrencyInputOrBlank(el.value);
+  else if(field === 'category'){
+    if(el.value === '__custom__'){ row.customCategory = true; row.category=''; renderMiscRevenueTable(); return; }
+    // Switching away from Custom... needs a re-render too, so the leftover custom-text input is removed.
+    const wasCustom = row.customCategory;
+    row.customCategory = false;
+    row.category = el.value;
+    if(wasCustom){ renderMiscRevenueTable(); return; }
+  } else if(field === 'customCategory') row.category = el.value;
+  else row[field] = el.value;
+  const annualCell = tr.querySelector('.row-annual');
+  if(annualCell) annualCell.textContent = formatCurrency(toAnnual(row.amount,row.frequency));
+  updateMiscRevenueTotals();
+}
+
+// Adds a new blank misc-revenue row.
+function addMiscRevenueRow(){
+  appState.miscellaneousRevenue.push({id:uid(), description:'', category:'Grant', amount:0, frequency:'Annual'});
+  renderMiscRevenueTable();
+}
+
+// Removes a misc-revenue row by id.
+function removeMiscRevenueRow(id){
+  appState.miscellaneousRevenue = appState.miscellaneousRevenue.filter(r=>r.id!==id);
+  renderMiscRevenueTable();
+}
+
+// Recomputes and displays misc-revenue totals.
+function updateMiscRevenueTotals(){
+  const annual = appState.miscellaneousRevenue.reduce((a,r)=>a+toAnnual(r.amount,r.frequency),0);
+  document.getElementById('miscMonthlyEquivalent').textContent = formatCurrency(annual/12);
+  document.getElementById('miscAnnualTotal').textContent = formatCurrency(annual);
+  const alertBox = document.getElementById('miscRevenueAlert');
+  if(alertBox){
+    const res = validatePage5();
+    alertBox.innerHTML = alertHtml('warning','triangle-exclamation', res.messages);
+  }
+}
+
+/* =========================================================================
+   PAGE 6: WATER LOSS
+   ========================================================================= */
+
+// Shows/hides the Water Loss detail section and toggles the Yes/No buttons based on state.
+function renderPage6(){
+  const wl = appState.waterLoss;
+  document.getElementById('waterLossYes').classList.toggle('active', wl.include==='yes');
+  document.getElementById('waterLossNo').classList.toggle('active', wl.include==='no');
+  document.getElementById('waterLossSection').style.display = wl.include==='yes' ? 'block' : 'none';
+  renderWaterLossForm();
+}
+
+// Sets who bears the water loss (yes/no) and re-renders the step.
+function setWaterLossInclude(val){
+  appState.waterLoss.include = val;
+  renderPage6();
+}
+
+// Sets the water-loss entry method (percentage or gallons) and re-renders the step.
+function setWaterLossMethod(val){
+  appState.waterLoss.method = val;
+  renderPage6();
+}
+
+// Shows the percentage or gallons input group based on the chosen method, and populates it from state.
+function renderWaterLossForm(){
+  const wl = appState.waterLoss;
+  document.getElementById('waterLossMethodPct').classList.toggle('active', wl.method!=='gal');
+  document.getElementById('waterLossMethodGal').classList.toggle('active', wl.method==='gal');
+  document.getElementById('waterLossPctGroup').style.display = wl.method==='gal' ? 'none' : 'block';
+  document.getElementById('waterLossGalGroup').style.display = wl.method==='gal' ? 'block' : 'none';
+  document.getElementById('waterLossAnnualGalInput').value = wl.annualGal===''?'':wl.annualGal;
+  document.getElementById('waterLossAnnualPctInput').value = wl.annualPct===''?'':wl.annualPct;
+  updateWaterLossTotals();
+}
+
+// Handles edits to the annual water-loss gallons/percentage input.
+function onWaterLossFieldChange(){
+  const wl = appState.waterLoss;
+  if(wl.method === 'gal'){
+    const raw = document.getElementById('waterLossAnnualGalInput').value;
+    let gal = raw === '' ? '' : Number(raw);
+    if(gal !== '' && gal < 0) gal = 0;
+    wl.annualGal = gal;
+  } else {
+    const raw = document.getElementById('waterLossAnnualPctInput').value;
+    let pct = raw === '' ? '' : Number(raw);
+    if(pct !== '' && pct < 0) pct = 0;
+    wl.annualPct = pct;
+  }
+  updateWaterLossTotals();
+}
+
+// Only one of gallons/percentage is ever user-entered (per `method`); the
+// other is derived here from annual water sold so production/rate math and
+// reporting both stay consistent regardless of which figure the user had on hand.
+//
+// `include` only controls which rate-setting basis calculateAll() picks (sold
+// vs. produced) -- totalGal/avgPct below are NOT zeroed when include is
+// false: the physical loss volume still affects Water Produced and Cost per
+// 1,000 Gallons either way; only the required-rate denominator depends on the toggle.
+function getWaterLossSummary(){
+  const wl = appState.waterLoss;
+  const annualSold = (Number(appState.customerInfo.monthlyWaterSold)||0)*12;
+  let totalGal, avgPct;
+  if(wl.method === 'gal'){
+    totalGal = Number(wl.annualGal)||0;
+    const impliedBase = annualSold + totalGal;
+    avgPct = impliedBase > 0 ? (totalGal/impliedBase)*100 : 0;
+  } else {
+    avgPct = wl.annualPct==='' ? 0 : Number(wl.annualPct)||0;
+    totalGal = avgPct > 0 && avgPct < 100 ? annualSold*avgPct/(100-avgPct) : 0;
+  }
+  return {
+    include: wl.include==='yes',
+    totalGal, avgPct
+  };
+}
+
+// Re-validates the Water Loss step and updates its warning banner.
+function updateWaterLossTotals(){
+  const alertBox = document.getElementById('waterLossAlert');
+  const res = validatePage6();
+  alertBox.innerHTML = alertHtml('warning','triangle-exclamation', res.messages);
+}
+
+/* =========================================================================
+   CALCULATION ENGINE
+   ========================================================================= */
+
+// fixed.baseCharge is the TOTAL monthly base-fee revenue across all meters
+// (see getMonthlyBaseFeeRevenue) -- not a per-connection amount -- since
+// meter count won't always match active customer count. It's only divided
+// by active customers here to build the average per-customer bill; the
+// annual total is derived directly from the total, not reconstructed by
+// multiplying an average back out.
+function computeFixedRateRevenue(fixed, activeCustomers, monthlyWaterSold){
+  const baseChargeTotal = Number(fixed.baseCharge)||0;
+  const volumetricRate = Number(fixed.volumetricRate)||0;
+  const includedConsumption = Number(fixed.includedConsumption)||0;
+
+  const baseChargeAnnual = baseChargeTotal*12;
+  const avgBaseChargePerConn = activeCustomers>0 ? baseChargeTotal/activeCustomers : 0;
+  const avgMonthlyConsumptionPerConn = activeCustomers>0 ? monthlyWaterSold/activeCustomers : 0;
+  const billableMonthlyPerConn = Math.max(0, avgMonthlyConsumptionPerConn - includedConsumption);
+  const volumetricMonthlyPerConn = (billableMonthlyPerConn/BILLING_UNIT_GAL)*volumetricRate;
+  const volumetricAnnual = volumetricMonthlyPerConn*activeCustomers*12;
+  const totalAnnual = baseChargeAnnual + volumetricAnnual;
+
+  return {
+    baseChargeAnnual, volumetricAnnual, totalAnnual,
+    averageCustomerBill: avgBaseChargePerConn + volumetricMonthlyPerConn
+  };
+}
+
+// The assessment fee is reported as its own line (see computeAssessmentFeeAnnual)
+// and added on top in calculateAll(), rather than folded into each tier's rate --
+// so the per-tier "Revenue" below is the pre-assessment-fee amount.
+function computeTierRevenue(tiers, waterLossSummary){
+  const grossFactor = waterLossSummary.include ? 1/(1-(waterLossSummary.avgPct/100)) : 1;
+  const rows = tiers.map(t=>{
+    const monthlyVolume = Number(t.waterSold)||0;
+    const grossAnnualVolume = monthlyVolume*12*grossFactor;
+    const revenue = (grossAnnualVolume/BILLING_UNIT_GAL)*(Number(t.rate)||0);
+    return {tier:t, monthlyVolume, grossAnnualVolume, revenue};
+  });
+  const totalAnnual = rows.reduce((a,r)=>a+r.revenue,0);
+  rows.forEach(r=>{ r.pctOfTotal = totalAnnual>0 ? r.revenue/totalAnnual*100 : 0; });
+  return {rows, totalAnnual};
+}
+
+// The main calculation engine -- derives the revenue requirement, solves the Fixed-Rate volumetric rate, and builds appState.results for the Summary page.
+function calculateAll(showToast){
+  const ci = appState.customerInfo;
+  const totalCustomers = Number(ci.totalCustomers)||0;
+  const activeCustomers = Number(ci.activeCustomers)||0;
+  const monthlyWaterSold = Number(ci.monthlyWaterSold)||0;
+  const annualWaterSold = monthlyWaterSold*12;
+
+  appState.rateModel.fixed.baseCharge = getMonthlyBaseFeeRevenue();
+
+  const waterLossSummary = getWaterLossSummary();
+  const avgLossPct = waterLossSummary.avgPct||0;
+  // Production is always grossed up by loss %, regardless of whether that
+  // loss is billed to customers -- only the required-rate basis below reacts to that toggle.
+  const annualWaterProduced = avgLossPct < 100 ? annualWaterSold/(1-avgLossPct/100) : annualWaterSold;
+  const annualWaterLossGal = waterLossSummary.totalGal;
+
+  const totalMeters = appState.meters.reduce((a,m)=>a+(Number(m.count)||0),0);
+  const totalMeterEquivalents = appState.meters.reduce((a,m)=>a+(Number(m.count)||0)*(Number(m.factor)||0),0);
+
+  const expenseRows = appState.operatingExpenses.rows;
+  const expenseSubtotal = expenseRows.reduce((a,r)=>a+toAnnual(r.amount,r.frequency),0);
+  const contingencyPct = Number(appState.operatingExpenses.contingencyPct)||0;
+  const totalAnnualExpenses = expenseSubtotal*(1+contingencyPct/100);
+
+  const annualMiscRevenue = appState.miscellaneousRevenue.reduce((a,r)=>a+toAnnual(r.amount,r.frequency),0);
+
+  const rm = appState.rateModel;
+  const includeWaterLossInRates = waterLossSummary.include;
+
+  // Assessment fee is estimated off whatever rate revenue was computed last
+  // cycle (see estimateRateRevenueForAssessment).
+  const totalAssessmentFees = computeAssessmentFeeAnnual();
+
+  // Base Charge is the total monthly base-fee revenue from all meters (see
+  // getMonthlyBaseFeeRevenue). Matches DeBerry Rate Tool.xlsm's Calculations
+  // Sheet B4 ("Annual Revenue needed from water sales" = Total Expenses -
+  // Misc Revenue - Base Fee Revenue): assessment fees are NOT netted out here
+  // -- Excel instead layers them on as a (1+assessmentFee%) markup on top of
+  // cost recovery, so they show up as overcollection in the net surplus/deficit
+  // rather than reducing what the rate itself needs to cover.
+  const baseChargeAnnual = rm.fixed.baseCharge*12;
+  const annualRevenueNeededFromRates = Math.max(0, totalAnnualExpenses - annualMiscRevenue - baseChargeAnnual);
+
+  if(rm.type === 'fixed'){
+    const volumetricBasis = includeWaterLossInRates ? annualWaterSold : annualWaterProduced;
+    rm.fixed.volumetricRate = volumetricBasis>0 ? annualRevenueNeededFromRates/volumetricBasis*1000 : 0;
+  } else if(rm.type === 'tier' && rm.tiers.length){
+    // Tier 1's rate is solved the same way the Fixed-Rate volumetric rate is
+    // above -- every later tier prices off the previous tier's rate using that
+    // tier's OWN unit cost increase (+$diff or x(1+pct/100)), so each tier's
+    // rate is Tier 1's rate times/plus a fixed cumulative factor. Total tier
+    // revenue is still linear in Tier 1's rate either way and can be solved
+    // directly (no Solver needed).
+    const grossFactor = includeWaterLossInRates ? 1/(1-(avgLossPct/100)) : 1;
+    if(rm.tierDiffMethod === 'pct'){
+      let sumWeightedCoeff = 0, cumGrowth = 1;
+      rm.tiers.forEach((t,i)=>{
+        if(i>0) cumGrowth *= 1 + (Number(t.diffPct)||0)/100;
+        const coeff = (Number(t.waterSold)||0)*12*grossFactor/BILLING_UNIT_GAL;
+        sumWeightedCoeff += coeff*cumGrowth;
+      });
+      rm.tiers[0].rate = sumWeightedCoeff>0 ? annualRevenueNeededFromRates/sumWeightedCoeff : 0;
+    } else {
+      let sumCoeff = 0, sumWeightedDiff = 0, cumDiff = 0;
+      rm.tiers.forEach((t,i)=>{
+        if(i>0) cumDiff += Number(t.diffDollar)||0;
+        const coeff = (Number(t.waterSold)||0)*12*grossFactor/BILLING_UNIT_GAL;
+        sumCoeff += coeff;
+        sumWeightedDiff += coeff*cumDiff;
+      });
+      rm.tiers[0].rate = sumCoeff>0 ? (annualRevenueNeededFromRates - sumWeightedDiff)/sumCoeff : 0;
+    }
+    recomputeTierRates();
+  }
+
+  const fixedResult = computeFixedRateRevenue(rm.fixed, activeCustomers, monthlyWaterSold);
+  const tierResult = computeTierRevenue(rm.tiers, waterLossSummary);
+  const actualRateRevenue = rm.type==='fixed' ? fixedResult.totalAnnual : tierResult.totalAnnual;
+
+  // NOTE: this does not net out any meter-based/flat service-fee revenue the
+  // utility might already collect outside its water-sale rates -- if so, the
+  // revenue actually still needed from rates is lower than this figure.
+  const revenueRequirement = totalAnnualExpenses - annualMiscRevenue;
+
+  const rateBasedOnSold = annualWaterSold>0 ? revenueRequirement/annualWaterSold*1000 : 0;
+  const rateBasedOnProduced = annualWaterProduced>0 ? revenueRequirement/annualWaterProduced*1000 : 0;
+  const requiredAverageRate = includeWaterLossInRates ? rateBasedOnSold : rateBasedOnProduced;
+
+  const costPer1000Gal = annualWaterProduced>0 ? totalAnnualExpenses/annualWaterProduced*1000 : 0;
+
+  // Base Charge revenue is already folded into fixedResult.totalAnnual for the
+  // Fixed-Rate model -- computeTierRevenue doesn't include it, so add it here.
+  const totalRevenue = actualRateRevenue + annualMiscRevenue + totalAssessmentFees + (rm.type==='tier' ? baseChargeAnnual : 0);
+  const netSurplusDeficit = totalRevenue - totalAnnualExpenses;
+
+  const expenseByCategory = {};
+  expenseRows.forEach(r=>{
+    const cat = r.category || 'Other';
+    expenseByCategory[cat] = (expenseByCategory[cat]||0) + toAnnual(r.amount,r.frequency);
+  });
+
+  appState.results = {
+    totalCustomers, activeCustomers, totalMeters, totalMeterEquivalents,
+    annualWaterSold, annualWaterProduced, annualWaterLossGal, avgLossPct,
+    totalAnnualExpenses, expenseSubtotal, contingencyPct, expenseByCategory,
+    annualMiscRevenue,
+    totalAssessmentFees,
+    baseChargeAnnual, netExpensesForRateAnnual: annualRevenueNeededFromRates,
+    revenueRequirement, requiredAverageRate, costPer1000Gal,
+    rateModelType: rm.type,
+    fixedResult, tierResult, actualRateRevenue,
+    totalRevenue, netSurplusDeficit,
+    includeWaterLossInRates
+  };
+
+  renderResults();
+  if(showToast) showToastMsg('Results calculated successfully.', 'success');
+  return appState.results;
+}
+
+/* =========================================================================
+   PAGE 7: SUMMARY & RESULTS
+   ========================================================================= */
+
+// Builds the HTML for one metric tile on the Summary page.
+function metricCard(label, value, sub, negative){
+  return '<div class="metric-card'+(negative?' negative':'')+'"><div class="metric-label">'+label+'</div><div class="metric-value'+(negative?' negative':'')+'">'+value+'</div>'+(sub?'<div class="metric-sub">'+sub+'</div>':'')+'</div>';
+}
+
+// Renders the entire Summary & Results page from appState.results.
+function renderResults(){
+  const r = appState.results;
+  if(!r || Object.keys(r).length===0) return;
+
+  const alertBox = document.getElementById('resultsAlert');
+  const p1 = validatePage1(), p2 = validatePage2(), p4 = validatePage4();
+  const blockingMsgs = [...(p1.messages||[]), ...(p2.messages||[]), ...(p4.messages||[])];
+  alertBox.innerHTML = alertHtml('warning','triangle-exclamation', blockingMsgs);
+
+  const grid = document.getElementById('metricGrid');
+  grid.innerHTML =
+    metricCard('Base Revenue', formatCurrency(r.baseChargeAnnual)) +
+    metricCard('Total Annual Operating Expenses', formatCurrency(r.totalAnnualExpenses)) +
+    metricCard('Miscellaneous Annual Revenue', formatCurrency(r.annualMiscRevenue)) +
+    metricCard('Total Water Production (Annual)', formatNumber(r.annualWaterProduced)+' gal') +
+    metricCard('Total Water Sales (Annual)', formatNumber(r.annualWaterSold)+' gal') +
+    metricCard('Active Customers', formatNumber(r.activeCustomers));
+
+  document.getElementById('rateModelBadge').className = 'badge ' + (r.rateModelType==='fixed'?'badge-fixed':'badge-tier');
+  document.getElementById('rateModelBadge').textContent = r.rateModelType==='fixed' ? 'Fixed Rate' : 'Tier-Based Rate';
+
+  const rateContent = document.getElementById('rateResultsContent');
+  if(r.rateModelType === 'fixed'){
+    rateContent.innerHTML =
+      '<div class="totals-row">'+
+      '<div class="total-item"><span class="label">Volumetric Rate ($/1,000 gal)</span><span class="value">'+formatCurrency(appState.rateModel.fixed.volumetricRate)+'</span></div>'+
+      '</div>';
+  } else if(tiersHaveNegativeRate()){
+    // Negative calculated rates aren't a usable result -- show nothing but a single
+    // explanation instead of a table full of nonsensical negative costs.
+    rateContent.innerHTML = alertHtml('danger','triangle-exclamation', [negativeTierRateWarning()]);
+  } else {
+    const tierTableRows = r.tierResult.rows.map(row=>
+      '<tr><td>'+formatNumber(row.tier.start)+'</td><td>'+(row.tier.end===null?'and above':formatNumber(row.tier.end))+'</td><td>'+formatCurrency(row.tier.rate)+'</td><td>'+formatCurrency(row.revenue)+'</td></tr>'
+    ).join('');
+    rateContent.innerHTML =
+      '<div class="section-title">Customer Rates Table - Tier Model</div>'+
+      '<div class="table-scroll">'+
+      '<table class="data-table">'+
+      '<thead><tr><th>Tier Start (Gal)</th><th>Tier End (Gal)</th><th>Cost per 1,000 Gal</th><th>Revenue in Each Tier</th></tr></thead>'+
+      '<tbody>'+tierTableRows+'</tbody>'+
+      '<tfoot><tr><td colspan="3">Total</td><td>'+formatCurrency(r.tierResult.totalAnnual)+'</td></tr></tfoot>'+
+      '</table>'+
+      '</div>';
+  }
+
+  renderCharts(r);
+}
+
+/* =========================================================================
+   CHARTS
+   ========================================================================= */
+
+// Purple-anchored palette (purple -> mauve -> blue -> teal -> mustard) --
+// the first four hues live in the app's own cool/jewel family
+// (--color-accent, slot 1), with mustard as a deliberate warm contrast
+// note against them. Validated: worst adjacent CVD separation clears the
+// target (>=8) with this exact order.
+const CHART_PALETTE = ['#6C3FA6','#e87ba4','#2a78d6','#1baf7a','#c98500'];
+
+// Fixed color per expense category so the same category reads as the same
+// color in both the Operating Expense chart and the Revenue vs. Expenses
+// chart. Categories outside the known set (custom/"Other") fall back to a
+// neutral muted tone rather than colliding with a real category's color.
+const EXPENSE_CATEGORY_COLORS = {
+  'Facilities Operation': CHART_PALETTE[0],
+  'Facilities Maintenance': CHART_PALETTE[1],
+  'Admin': CHART_PALETTE[2],
+  'Miscellaneous': CHART_PALETTE[3]
+};
+function expenseCategoryColor(category){
+  return EXPENSE_CATEGORY_COLORS[category] || '#898781';
+}
+
+// Registered globally but off by default; each pie/doughnut chart below turns
+// it on explicitly via percentDataLabels() so percentages show directly on
+// the slices, not just on hover. Tiny slices skip the label to avoid clutter.
+if(window.ChartDataLabels){
+  Chart.register(ChartDataLabels);
+  Chart.defaults.set('plugins.datalabels', {display:false});
+}
+
+// Builds a full breakdown table for a clicked pie/doughnut segment -- every
+// category is listed (not just the one clicked), with the clicked row
+// highlighted, so a click reveals the whole picture rather than one line.
+function chartBreakdownTableHtml(entries, total, formatFn, clickedIndex){
+  let html = '<table class="data-table"><thead><tr><th>Category</th><th>Amount</th><th>%</th></tr></thead><tbody>';
+  entries.forEach(([label,v],i)=>{
+    const pct = total>0 ? v/total*100 : 0;
+    html += '<tr'+(i===clickedIndex?' style="background:#ede7f6;font-weight:700;"':'')+'><td>'+escapeHtml(label)+'</td><td>'+formatFn(v)+'</td><td>'+formatNumber(pct,1)+'%</td></tr>';
+  });
+  html += '</tbody><tfoot><tr><td>Total</td><td>'+formatFn(total)+'</td><td>100%</td></tr></tfoot></table>';
+  return html;
+}
+
+// Like chartBreakdownTableHtml, but for the Operating Expense chart specifically --
+// appends Subtotal/Inflation(Contingency)/New Total rows below the category
+// breakdown, since expense categories alone don't include the contingency markup.
+function expenseChartBreakdownHtml(entries, subtotal, contingencyAmount, grandTotal, clickedIndex){
+  let html = '<table class="data-table"><thead><tr><th>Category</th><th>Amount</th><th>%</th></tr></thead><tbody>';
+  entries.forEach(([label,v],i)=>{
+    const pct = subtotal>0 ? v/subtotal*100 : 0;
+    html += '<tr'+(i===clickedIndex?' style="background:#ede7f6;font-weight:700;"':'')+'><td>'+escapeHtml(label)+'</td><td>'+formatCurrency(v)+'</td><td>'+formatNumber(pct,1)+'%</td></tr>';
+  });
+  html += '</tbody><tfoot>'+
+    '<tr><td>Subtotal Expenses</td><td>'+formatCurrency(subtotal)+'</td><td>100%</td></tr>'+
+    '<tr><td>Inflation Amount</td><td>'+formatCurrency(contingencyAmount)+'</td><td></td></tr>'+
+    '<tr><td>New Total</td><td>'+formatCurrency(grandTotal)+'</td><td></td></tr>'+
+    '</tfoot></table>';
+  return html;
+}
+
+// Chart.js datalabels config that prints each slice's percentage directly on the chart (hidden for slices under 4%).
+function percentDataLabels(total){
+  return {
+    display:true,
+    color:'#fff',
+    textStrokeColor:'rgba(0,0,0,.45)',
+    textStrokeWidth:3,
+    font:{weight:'700', size:11},
+    formatter:(value)=>{
+      const pct = total>0 ? (value/total*100) : 0;
+      return pct < 4 ? '' : formatNumber(pct,1)+'%';
+    }
+  };
+}
+
+// Destroys an existing Chart.js instance before it's replaced.
+function destroyChart(key){
+  if(charts[key]){ charts[key].destroy(); charts[key]=null; }
+}
+
+// Hides a chart's canvas and shows an empty-state message instead.
+function showChartEmpty(canvasId, msg){
+  const canvas = document.getElementById(canvasId);
+  const wrap = canvas.parentElement;
+  canvas.style.display='none';
+  let empty = wrap.querySelector('.chart-empty');
+  if(!empty){
+    empty = document.createElement('div');
+    empty.className = 'chart-empty';
+    wrap.appendChild(empty);
+  }
+  empty.textContent = msg;
+}
+
+// Shows a chart's canvas again and removes any empty-state message.
+function hideChartEmpty(canvasId){
+  const canvas = document.getElementById(canvasId);
+  canvas.style.display='block';
+  const wrap = canvas.parentElement;
+  const empty = wrap.querySelector('.chart-empty');
+  if(empty) empty.remove();
+}
+
+// Renders all four Summary-page charts from the calculation results.
+function renderCharts(r){
+  renderExpenseChart(r);
+  renderWaterProductionChart(r);
+  renderRevenueChart(r);
+  renderRevExpChart(r);
+}
+
+// Renders the Water Production doughnut chart (Water Sold vs. Water Lost).
+function renderWaterProductionChart(r){
+  destroyChart('waterProduction');
+  const entries = [
+    ['Water Sold', r.annualWaterSold],
+    ['Water Lost', r.annualWaterLossGal]
+  ].filter(([,v])=>v>0);
+  if(entries.length===0){ showChartEmpty('waterProductionChart','No water production data to display yet.'); return; }
+  hideChartEmpty('waterProductionChart');
+  const total = entries.reduce((a,[,v])=>a+v,0);
+  const ctx = document.getElementById('waterProductionChart').getContext('2d');
+  charts.waterProduction = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels:entries.map(e=>e[0]), datasets:[{data:entries.map(e=>e[1]), backgroundColor:[CHART_PALETTE[0], CHART_PALETTE[1]]}]},
+    options:{
+      plugins:{
+        tooltip:{callbacks:{label:(ctx)=>{
+          const v = ctx.parsed; const pct = total>0?(v/total*100):0;
+          return ctx.label+': '+formatNumber(v)+' gal ('+formatNumber(pct,1)+'%)';
+        }}},
+        legend:{display:false},
+        datalabels: percentDataLabels(total)
+      },
+      onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const i = elements[0].index;
+        document.getElementById('waterProductionChartDetail').innerHTML = chartBreakdownTableHtml(entries, total, v=>formatNumber(v)+' gal', i);
+      }
+    }
+  });
+}
+
+// Renders the Operating Expense doughnut chart, broken down by category.
+function renderExpenseChart(r){
+  destroyChart('expense');
+  const entries = Object.entries(r.expenseByCategory).filter(([,v])=>v>0);
+  if(entries.length===0){ showChartEmpty('expenseChart','No expense data to display yet.'); return; }
+  hideChartEmpty('expenseChart');
+  const total = entries.reduce((a,[,v])=>a+v,0);
+  const ctx = document.getElementById('expenseChart').getContext('2d');
+  charts.expense = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels:entries.map(e=>e[0]), datasets:[{data:entries.map(e=>e[1]), backgroundColor:entries.map(([label])=>expenseCategoryColor(label))}]},
+    options:{
+      plugins:{
+        tooltip:{callbacks:{label:(ctx)=>{
+          const v = ctx.parsed; const pct = total>0?(v/total*100):0;
+          return ctx.label+': '+formatCurrency(v)+' ('+formatNumber(pct,1)+'%)';
+        }}},
+        legend:{display:false},
+        datalabels: percentDataLabels(total)
+      },
+      onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const i = elements[0].index;
+        const contingencyAmount = r.totalAnnualExpenses - r.expenseSubtotal;
+        document.getElementById('expenseChartDetail').innerHTML = expenseChartBreakdownHtml(entries, total, contingencyAmount, r.totalAnnualExpenses, i);
+      }
+    }
+  });
+}
+
+// Renders the Revenue doughnut chart (Water Sales Revenue, Misc Revenue).
+function renderRevenueChart(r){
+  destroyChart('revenue');
+  const entries = [
+    ['Water Sales Revenue', r.actualRateRevenue],
+    ['Miscellaneous Revenue', r.annualMiscRevenue]
+  ].filter(([,v])=>v>0);
+  if(entries.length===0){ showChartEmpty('revenueChart','No revenue data to display yet.'); return; }
+  hideChartEmpty('revenueChart');
+  const total = entries.reduce((a,[,v])=>a+v,0);
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  charts.revenue = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels:entries.map(e=>e[0]), datasets:[{data:entries.map(e=>e[1]), backgroundColor:CHART_PALETTE}]},
+    options:{
+      plugins:{
+        tooltip:{callbacks:{label:(ctx)=>{
+          const v=ctx.parsed; const pct= total>0?(v/total*100):0;
+          return ctx.label+': '+formatCurrency(v)+' ('+formatNumber(pct,1)+'%)';
+        }}},
+        legend:{display:false},
+        datalabels: percentDataLabels(total)
+      },
+      onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const i = elements[0].index;
+        document.getElementById('revenueChartDetail').innerHTML = chartBreakdownTableHtml(entries, total, formatCurrency, i);
+      }
+    }
+  });
+}
+
+// Renders the Revenue vs. Expenses stacked bar chart -- the Total Revenue bar
+// is split into Base/Water Sales/Misc Revenue and Assessment Fees (these four
+// always sum to totalRevenue for both rate models); the Total Expenses bar is
+// split into each individual expense category plus Contingency.
+function renderRevExpChart(r){
+  destroyChart('revExp');
+  if(r.totalRevenue<=0 && r.totalAnnualExpenses<=0){ showChartEmpty('revExpChart','No data to display yet.'); return; }
+  hideChartEmpty('revExpChart');
+
+  const baseRevenue = r.baseChargeAnnual;
+  const waterSalesRevenue = r.rateModelType==='fixed' ? r.fixedResult.volumetricAnnual : r.tierResult.totalAnnual;
+  const miscRevenue = r.annualMiscRevenue;
+  const assessmentFees = r.totalAssessmentFees;
+  const contingency = r.totalAnnualExpenses - r.expenseSubtotal;
+
+  const revenueEntries = [
+    ['Base Revenue', baseRevenue],
+    ['Water Sales Revenue', waterSalesRevenue],
+    ['Misc Revenue', miscRevenue],
+    ['Assessment Fees', assessmentFees]
+  ];
+  // Each expense category gets its own bar segment/legend entry, the same
+  // way the revenue side is already split -- instead of one lumped
+  // "Operating Expenses" block. Contingency stays its own segment since it
+  // isn't tied to any one category.
+  const expenseEntries = Object.entries(r.expenseByCategory).filter(([,v])=>v>0)
+    .concat([['Contingency', contingency]]);
+
+  const labels = ['Total Revenue','Total Expenses'];
+  // Water Sales Revenue and Misc Revenue keep the exact colors they use in
+  // the Revenue doughnut chart; expense categories keep the exact colors
+  // they use in the Operating Expense doughnut (via expenseCategoryColor).
+  // Contingency takes the one palette slot the 4 real categories don't use.
+  const segments = [
+    {label:'Base Revenue', color:CHART_PALETTE[3], values:[baseRevenue, 0]},
+    {label:'Water Sales Revenue', color:CHART_PALETTE[0], values:[waterSalesRevenue, 0]},
+    {label:'Misc Revenue', color:CHART_PALETTE[1], values:[miscRevenue, 0]},
+    {label:'Assessment Fees', color:CHART_PALETTE[4], values:[assessmentFees, 0]}
+  ].concat(expenseEntries.map(([label,amount])=>(
+    {label, color: label==='Contingency' ? CHART_PALETTE[4] : expenseCategoryColor(label), values:[0, amount]}
+  )));
+
+  const ctx = document.getElementById('revExpChart').getContext('2d');
+  charts.revExp = new Chart(ctx, {
+    type:'bar',
+    data:{labels, datasets:segments.map(s=>({label:s.label, data:s.values, backgroundColor:s.color}))},
+    options:{
+      interaction:{mode:'point', intersect:true},
+      plugins:{
+        tooltip:{callbacks:{label:(ctx)=>ctx.dataset.label+': '+formatCurrency(ctx.parsed.y)}},
+        // With one segment per expense category (on top of the 4 revenue
+        // segments), the bottom legend got too crowded -- segments are still
+        // identified on hover via the tooltip above, and on click via the
+        // breakdown table below the chart.
+        legend:{display:false}
+      },
+      scales:{
+        x:{stacked:true},
+        y:{stacked:true, beginAtZero:true, ticks:{callback:(v)=>'$'+formatNumber(v)}}
+      },
+      onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const barIndex = elements[0].index;
+        const datasetIndex = elements[0].datasetIndex;
+        const entries = barIndex===0 ? revenueEntries : expenseEntries;
+        const total = barIndex===0 ? r.totalRevenue : r.totalAnnualExpenses;
+        const clickedIdx = entries.findIndex(([label])=>label===segments[datasetIndex].label);
+        document.getElementById('revExpChartDetail').innerHTML = chartBreakdownTableHtml(entries, total, formatCurrency, clickedIdx);
+      }
+    }
+  });
+}
+
+/* =========================================================================
+   EXPORT: PDF (jsPDF + autoTable)
+   ========================================================================= */
+
+// Report-wide palette, matching the app's own --color-primary / --color-primary-dark / --muted.
+const PDF_PURPLE = [75,46,131];
+const PDF_PURPLE_DARK = [52,32,92];
+const PDF_TINT = [245,242,250];
+const PDF_MUTED = [101,120,138];
+const PDF_PAGE_W = 210, PDF_MARGIN = 14, PDF_CONTENT_W = PDF_PAGE_W - PDF_MARGIN*2;
+
+// Rasterizes an already-loaded <img> to a PNG data URL via an offscreen canvas,
+// so jsPDF's addImage always gets pixel data instead of relying on it to handle
+// an <img> element directly (which is finickier across jsPDF versions).
+function imageElementToDataURL(img){
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  canvas.getContext('2d').drawImage(img, 0, 0);
+  return canvas.toDataURL('image/png');
+}
+
+// Draws the purple branded banner (logo + title + subtitle) used on the report's first page.
+function pdfDrawHeader(doc, logoDataUrl, logoRatio, title, subtitle){
+  doc.setFillColor(...PDF_PURPLE);
+  doc.rect(0, 0, PDF_PAGE_W, 26, 'F');
+  let textX = PDF_MARGIN + 34;
+  if(logoDataUrl){
+    const h = 12, w = h*(logoRatio||3);
+    doc.addImage(logoDataUrl, 'PNG', PDF_MARGIN, 7, w, h);
+    textX = PDF_MARGIN + w + 10;
+  }
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(16);
+  doc.text(title, textX, 14);
+  doc.setFontSize(9.5);
+  doc.text(subtitle, textX, 20.5);
+  doc.setTextColor(0,0,0);
+}
+
+// Purple-dark section headings used above every table/chart group.
+function pdfSectionTitle(doc, text, y){
+  doc.setTextColor(...PDF_PURPLE_DARK);
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text(text, PDF_MARGIN, y);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(0,0,0);
+}
+
+// Shared autoTable look: purple header row, light-purple striping, consistent margins.
+function pdfTable(doc, startY, head, body){
+  doc.autoTable({
+    startY, head, body,
+    margin:{left:PDF_MARGIN, right:PDF_MARGIN},
+    styles:{fontSize:9, textColor:[31,45,58]},
+    headStyles:{fillColor:PDF_PURPLE, textColor:255, fontStyle:'bold'},
+    alternateRowStyles:{fillColor:PDF_TINT}
+  });
+  return doc.lastAutoTable.finalY;
+}
+
+// Stamps "<utility> | Generated <date> | Page X of Y" on every page, once the full page count is known.
+function pdfFinalizeFooters(doc){
+  const pageCount = doc.internal.getNumberOfPages();
+  const dateStr = new Date().toLocaleDateString();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    doc.setDrawColor(226,220,236);
+    doc.line(PDF_MARGIN, 289, PDF_PAGE_W-PDF_MARGIN, 289);
+    doc.setFontSize(8);
+    doc.setTextColor(...PDF_MUTED);
+    doc.text('Civitas Engineering Group — Water Rate Tool', PDF_MARGIN, 293);
+    doc.text('Generated '+dateStr, PDF_PAGE_W/2, 293, {align:'center'});
+    doc.text('Page '+i+' of '+pageCount, PDF_PAGE_W-PDF_MARGIN, 293, {align:'right'});
+    doc.setTextColor(0,0,0);
+  }
+}
+
+// Exports a results summary report, including chart snapshots, to a PDF.
+async function exportPDF(){
+  calculateAll(false);
+  const r = appState.results;
+  const ci = appState.customerInfo;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const logoImg = document.querySelector('.header img');
+  let logoDataUrl = null, logoRatio = 3;
+  try{
+    if(logoImg && logoImg.complete && logoImg.naturalWidth){
+      logoDataUrl = imageElementToDataURL(logoImg);
+      logoRatio = logoImg.naturalWidth/logoImg.naturalHeight;
+    }
+  }catch(e){ /* logo embed is best-effort */ }
+
+  pdfDrawHeader(doc, logoDataUrl, logoRatio, 'Water Rate Tool - Results Report', 'Generated '+new Date().toLocaleDateString());
+
+  let y = 36;
+  pdfSectionTitle(doc, 'Summary Metrics', y); y += 4;
+  y = pdfTable(doc, y, [['Metric','Value']], [
+    ['Total Annual Operating Expenses', formatCurrency(r.totalAnnualExpenses)],
+    ['Estimated Annual Water-Sales Revenue', formatCurrency(r.actualRateRevenue)],
+    ['Miscellaneous Annual Revenue', formatCurrency(r.annualMiscRevenue)],
+    ['Total Annual Revenue', formatCurrency(r.totalRevenue)],
+    ['Annual Assessment Fees', formatCurrency(r.totalAssessmentFees)],
+    ['Total Water Production (Annual)', formatNumber(r.annualWaterProduced)+' gal'],
+    ['Total Water Sales (Annual)', formatNumber(r.annualWaterSold)+' gal'],
+    ['Estimated Annual Water Loss', formatNumber(r.annualWaterLossGal)+' gal'],
+    ['Net Annual Surplus / Deficit', formatCurrency(r.netSurplusDeficit)],
+    ['Cost per 1,000 Gallons', formatCurrency(r.costPer1000Gal)],
+    ['Revenue Requirement', formatCurrency(r.revenueRequirement)],
+    ['Required Average Rate (/1,000 gal)', formatCurrency(r.requiredAverageRate)],
+    ['Total Customers', formatNumber(r.totalCustomers)],
+    ['Active Customers', formatNumber(r.activeCustomers)],
+    ['Total Meter Equivalents', formatNumber(r.totalMeterEquivalents,2)]
+  ]);
+
+  let nextY = y + 10;
+  if(r.rateModelType==='tier'){
+    pdfSectionTitle(doc, 'Tier-Based Rate Results', nextY); nextY += 4;
+    if(tiersHaveNegativeRate()){
+      doc.setTextColor(...PDF_MUTED);
+      doc.setFontSize(9);
+      const lines = doc.splitTextToSize(negativeTierRateWarning(), PDF_CONTENT_W);
+      doc.text(lines, PDF_MARGIN, nextY);
+      nextY += lines.length*4.2 + 6;
+      doc.setTextColor(0,0,0);
+    } else {
+      nextY = pdfTable(doc, nextY,
+        [['Tier','Customers','Volume (annual)','Rate','Revenue','% of Total']],
+        r.tierResult.rows.map(row=>[row.tier.name, formatNumber(row.tier.customers), formatNumber(row.grossAnnualVolume), formatCurrency(row.tier.rate), formatCurrency(row.revenue), formatNumber(row.pctOfTotal,1)+'%'])
+      ) + 10;
+    }
+  } else {
+    pdfSectionTitle(doc, 'Fixed-Rate Results', nextY); nextY += 4;
+    nextY = pdfTable(doc, nextY, [['Component','Amount']], [
+      ['Total Base Charge ($/month)', formatCurrency(appState.rateModel.fixed.baseCharge)],
+      ['Volumetric Rate ($/1,000 gal)', formatCurrency(appState.rateModel.fixed.volumetricRate)],
+      ['Base-Charge Revenue (Annual)', formatCurrency(r.fixedResult.baseChargeAnnual)],
+      ['Volumetric Revenue (Annual)', formatCurrency(r.fixedResult.volumetricAnnual)],
+      ['Total Fixed-Rate Revenue (Annual)', formatCurrency(r.fixedResult.totalAnnual)],
+      ['Average Customer Bill (Monthly)', formatCurrency(r.fixedResult.averageCustomerBill)]
+    ]) + 10;
+  }
+
+  if(nextY > 250){ doc.addPage(); nextY = 20; }
+  pdfSectionTitle(doc, 'Assessment Fee Results', nextY); nextY += 4;
+  const assessPct = r.totalRevenue>0 ? r.totalAssessmentFees/r.totalRevenue*100 : 0;
+  pdfTable(doc, nextY, [['Assessment Fee %','Annual Amount','% of Total Revenue']],
+    [[formatNumber(appState.rateModel.assessmentFeePct,2)+'%', formatCurrency(r.totalAssessmentFees), formatNumber(assessPct,1)+'%']]
+  );
+
+  // Embed chart snapshots if available, two per page. Chart.js paints charts
+  // asynchronously (an animated draw scheduled via requestAnimationFrame) --
+  // capturing canvas.toDataURL() right after renderCharts() runs (inside
+  // calculateAll above) grabs the canvas before anything's been painted,
+  // producing a blank image. Waiting past the default ~1s animation avoids that.
+  await new Promise(resolve=>setTimeout(resolve, 1100));
+  try{
+    const chartTitles = {
+      expenseChart:'Operating Expense',
+      waterProductionChart:'Water Production',
+      revenueChart:'Revenue',
+      revExpChart:'Revenue vs. Expenses'
+    };
+    const visibleChartIds = ['expenseChart','waterProductionChart','revenueChart','revExpChart'].filter(id=>{
+      const c = document.getElementById(id);
+      return c && c.style.display !== 'none';
+    });
+    const chartSlotY = [24, 158];
+    visibleChartIds.forEach((id, idx)=>{
+      const slot = idx % 2;
+      if(slot===0) doc.addPage();
+      const canvas = document.getElementById(id);
+      const imgData = canvas.toDataURL('image/png');
+      const slotY = chartSlotY[slot];
+      pdfSectionTitle(doc, chartTitles[id], slotY-6);
+      doc.addImage(imgData, 'PNG', PDF_MARGIN, slotY, PDF_CONTENT_W, 100);
+    });
+  }catch(e){ /* chart image export best-effort */ }
+
+  pdfFinalizeFooters(doc);
+  doc.save('Civitas_Water_Rate_Analysis_'+new Date().toISOString().split('T')[0]+'.pdf');
+  showToastMsg('PDF report exported.', 'success');
+}
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+
+// Re-renders every step's content from the current state (used after load/reset).
+function renderAll(){
+  renderPage1();
+  renderMeterTable();
+  renderRateModelChoice();
+  renderRateDetails();
+  renderAssessmentFeePage();
+  renderExpenseTable();
+  renderMiscRevenueTable();
+  renderPage6();
+  renderStep();
+  if(Object.keys(appState.results||{}).length) renderResults();
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  // A page refresh always starts a brand-new session at Step 1 -- no resuming
+  // a prior in-progress session from localStorage.
+  localStorage.removeItem(STORAGE_KEY);
+  appState = defaultState();
+  renderAll();
+  renderStepOverview();
+  renderPriceLibrary();
+  renderWtpOmBenchmarks();
+  showHome();
+
+  ['resetModal','priceLibraryModal','wtpOmModal'].forEach(id=>{
+    document.getElementById(id).addEventListener('click', function(e){
+      if(e.target === this) closeModal(id);
+    });
+  });
+});
+</script>
+</body>
+</html>
