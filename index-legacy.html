@@ -73,47 +73,6 @@ body{
 .step-page.active{display:block;animation:fadein .25s ease;}
 @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-.wizard-body{display:flex;align-items:flex-start;}
-
-/* Sidebar layout (default): steps run top-to-bottom to the left of the page content. */
-.step-nav{display:flex;flex-direction:column;flex:0 0 220px;width:220px;padding:24px 14px;
-  background:#faf9fc;border-right:1px solid var(--border);}
-.step-nav-item{display:flex;flex-direction:column;align-items:stretch;}
-.step-nav-btn{display:flex;flex-direction:row;align-items:center;gap:12px;width:100%;text-align:left;
-  background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;font-family:inherit;}
-.step-nav-btn:disabled{cursor:not-allowed;}
-.step-nav-item:not(.locked):not(.skipped) .step-nav-btn:hover{background:#f1ecf8;}
-.step-nav-circle{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:12.5px;font-weight:700;color:var(--muted);background:#fff;border:2px solid var(--border);transition:all .15s ease;flex:none;}
-.step-nav-label{font-size:12.5px;font-weight:600;color:var(--muted);text-align:left;line-height:1.3;white-space:normal;}
-.step-nav-item.completed .step-nav-circle{background:var(--color-accent);border-color:var(--color-accent);color:#fff;}
-.step-nav-item.completed .step-nav-label{color:var(--color-primary-dark);}
-.step-nav-item.active .step-nav-circle{background:var(--color-primary);border-color:var(--color-primary);color:#fff;box-shadow:0 0 0 4px rgba(75,46,131,0.16);}
-.step-nav-item.active .step-nav-label{color:var(--color-primary-dark);font-weight:700;}
-.step-nav-item.locked .step-nav-btn{cursor:not-allowed;}
-.step-nav-item.locked .step-nav-circle{opacity:.6;}
-.step-nav-item.skipped .step-nav-btn{cursor:not-allowed;}
-.step-nav-item.skipped .step-nav-circle{opacity:.35;border-style:dashed;}
-.step-nav-item.skipped .step-nav-label{opacity:.5;}
-.step-nav-item:not(.locked) .step-nav-btn:hover .step-nav-circle{transform:scale(1.08);}
-.step-nav-line{width:2px;height:18px;background:var(--border);margin:0 0 0 22px;}
-.step-nav-line.completed{background:var(--color-accent);}
-
-/* Below 900px there's no room for a fixed sidebar -- collapse back to a
-   horizontal scrollable bar above the page content instead. */
-@media (max-width:900px){
-  .wizard-body{flex-direction:column;}
-  .step-nav{flex-direction:row;align-items:flex-start;width:auto;flex:none;padding:14px 16px 4px;
-    border-right:none;border-bottom:1px solid var(--border);overflow-x:auto;}
-  .step-nav-item{flex-direction:row;flex:1 1 0;min-width:52px;}
-  .step-nav-item:last-child{flex:0 0 auto;}
-  .step-nav-btn{flex-direction:column;gap:6px;padding:0;border-radius:0;}
-  .step-nav-item:not(.locked):not(.skipped) .step-nav-btn:hover{background:none;}
-  .step-nav-label{text-align:center;max-width:80px;font-size:10.5px;display:none;}
-  .step-nav-item.active .step-nav-label{display:block;}
-  .step-nav-line{flex:1 1 auto;width:auto;height:2px;margin:14px 6px 0;min-width:12px;}
-}
-
 .page-title{font-size:20px;font-weight:700;color:var(--color-primary-dark);margin-bottom:4px;display:flex;align-items:center;gap:10px;justify-content:space-between;}
 .page-title>span{display:flex;align-items:center;gap:10px;}
 .page-subtitle{font-size:13.5px;color:var(--muted);margin-bottom:24px;}
@@ -203,8 +162,6 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
 
 .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:30px;}
-.results-split-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-bottom:30px;}
-.results-split-grid:empty{display:none;}
 .metric-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;}
 .metric-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--color-accent);}
 .metric-card.negative::before{background:var(--danger);}
@@ -364,106 +321,31 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
     <!-- WIZARD VIEW -->
     <div id="wizardView" style="display:none;">
 
-    <div class="wizard-body">
-
-    <div class="step-nav" id="stepNav"></div>
-
     <div class="page-body">
 
       <!-- STEP 1: CUSTOMER & CONNECTIONS -->
       <div class="step-page" data-step="1">
-        <div class="page-title"><span><i class="fa-solid fa-address-card"></i> Customer &amp; Billing</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(1)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-title"><span><i class="fa-solid fa-address-card"></i> Customer &amp; Connections</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(1)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
         <div class="page-subtitle"></div>
         <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Use recent billing records and representative monthly averages when available.</div>
 
         <div class="section">
-          <div class="section-title">Customer Type</div>
-          <div class="rate-choice-grid" id="customerTypeToggle">
-            <div class="rate-choice-card" data-type="residential" onclick="setCustomerType('residential')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-icon"><i class="fa-solid fa-house"></i></div>
-              <div class="rate-choice-title">Residential</div>
-            </div>
-            <div class="rate-choice-card" data-type="commercial" onclick="setCustomerType('commercial')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-icon"><i class="fa-solid fa-building"></i></div>
-              <div class="rate-choice-title">Commercial</div>
-            </div>
-            <div class="rate-choice-card" data-type="both" onclick="setCustomerType('both')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-icon"><i class="fa-solid fa-city"></i></div>
-              <div class="rate-choice-title">Residential &amp; Commercial</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="section" id="residentialBillingPanel" style="display:none;">
-          <div class="section-title">Residential</div>
-          <div class="rate-choice-grid" id="residentialDataTypeToggle" style="max-width:520px;margin-bottom:18px;">
-            <div class="rate-choice-card" data-datatype="annualAvg" onclick="onCustomerDataTypeChange('residential','annualAvg')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Annual Monthly Average</div>
-            </div>
-            <div class="rate-choice-card" data-datatype="monthly" onclick="onCustomerDataTypeChange('residential','monthly')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Monthly Data</div>
-            </div>
-          </div>
           <div class="form-grid">
             <div class="form-group">
               <label>Total number of customers *</label>
-              <input type="text" inputmode="numeric" class="number-commas" data-integer id="residentialTotalCustomers" oninput="onCustomerFieldChange('residential','totalCustomers',this)">
-              <div class="field-error" id="err-residentialTotalCustomers"></div>
+              <input type="text" inputmode="numeric" class="number-commas" id="totalCustomers" oninput="onField1Change()">
+              <div class="field-error" id="err-totalCustomers"></div>
             </div>
             <div class="form-group">
               <label>Active customers *</label>
-              <input type="text" inputmode="numeric" class="number-commas" data-integer id="residentialActiveCustomers" oninput="onCustomerFieldChange('residential','activeCustomers',this)">
-              <div class="field-error" id="err-residentialActiveCustomers"></div>
-            </div>
-            <div class="form-group" id="residentialAnnualAvgFields">
-              <label>Monthly Average Water Sold in gallons *</label>
-              <input type="text" inputmode="numeric" class="number-commas" id="residentialMonthlyWaterSold" oninput="onCustomerFieldChange('residential','monthlyWaterSold',this)">
-              <div class="field-error" id="err-residentialMonthlyWaterSold"></div>
-            </div>
-          </div>
-          <div id="residentialMonthlyFields" style="display:none;margin-top:14px;">
-            <div class="section-title" style="border-bottom:none;margin-bottom:10px;">Water Sold by Month (gal)</div>
-            <div class="form-grid" id="residentialMonthGrid"></div>
-          </div>
-        </div>
-
-        <div class="section" id="commercialBillingPanel" style="display:none;">
-          <div class="section-title">Commercial</div>
-          <div class="rate-choice-grid" id="commercialDataTypeToggle" style="max-width:520px;margin-bottom:18px;">
-            <div class="rate-choice-card" data-datatype="annualAvg" onclick="onCustomerDataTypeChange('commercial','annualAvg')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Annual Monthly Average</div>
-            </div>
-            <div class="rate-choice-card" data-datatype="monthly" onclick="onCustomerDataTypeChange('commercial','monthly')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Monthly Data</div>
-            </div>
-          </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Total number of customers *</label>
-              <input type="text" inputmode="numeric" class="number-commas" data-integer id="commercialTotalCustomers" oninput="onCustomerFieldChange('commercial','totalCustomers',this)">
-              <div class="field-error" id="err-commercialTotalCustomers"></div>
+              <input type="text" inputmode="numeric" class="number-commas" id="activeCustomers" oninput="onField1Change()">
+              <div class="field-error" id="err-activeCustomers"></div>
             </div>
             <div class="form-group">
-              <label>Active customers *</label>
-              <input type="text" inputmode="numeric" class="number-commas" data-integer id="commercialActiveCustomers" oninput="onCustomerFieldChange('commercial','activeCustomers',this)">
-              <div class="field-error" id="err-commercialActiveCustomers"></div>
-            </div>
-            <div class="form-group" id="commercialAnnualAvgFields">
               <label>Monthly Average Water Sold in gallons *</label>
-              <input type="text" inputmode="numeric" class="number-commas" id="commercialMonthlyWaterSold" oninput="onCustomerFieldChange('commercial','monthlyWaterSold',this)">
-              <div class="field-error" id="err-commercialMonthlyWaterSold"></div>
+              <input type="text" inputmode="numeric" class="number-commas" id="monthlyWaterSold" oninput="onField1Change()">
+              <div class="field-error" id="err-monthlyWaterSold"></div>
             </div>
-          </div>
-          <div id="commercialMonthlyFields" style="display:none;margin-top:14px;">
-            <div class="section-title" style="border-bottom:none;margin-bottom:10px;">Water Sold by Month (gal)</div>
-            <div class="form-grid" id="commercialMonthGrid"></div>
           </div>
         </div>
       </div>
@@ -510,209 +392,139 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         </div>
       </div>
 
-      <!-- STEP 3: RATE STRUCTURE -->
+      <!-- STEP 3: COST MODEL, RATE STRUCTURE, ASSESSMENT FEES -->
       <div class="step-page" data-step="3">
-        <div class="page-title"><span><i class="fa-solid fa-sliders"></i> Rate Structure</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(3)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-title"><span><i class="fa-solid fa-sliders"></i> Rate Model</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(3)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
         <div class="page-subtitle"></div>
-        <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Choose Fixed Rate to apply the same volumetric rate to all water usage, or Tier-Based Rate to apply different rates based on customer usage levels. Commercial's rate can be set as a markup off Residential's when both customer types are selected.</div>
+        <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Choose Fixed Rate to apply the same volumetric rate to all water usage, or Tier-Based Rate to apply different rates based on customer usage levels.</div>
 
         <div class="section">
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Total Base Charge ($ / month)</label>
-              <input type="text" id="fixedBaseCharge" class="currency-input" readonly>
-              <span class="hint">Total of every meter row's Monthly Base Fee × count, from the Meter Distribution step. Shared across all customer types.</span>
-            </div>
-            <div class="form-group">
-              <label>Assessment Fee (% of Revenue)</label>
-              <input type="number" min="0" step="0.01" id="assessmentFeePct" oninput="onAssessmentFeeChange()">
-              <span class="hint">Any regulatory or other assessment fee charged to the customer separately, as a % of rate revenue. Enter 0% if not applicable or already included as an operating expense.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="section" id="residentialRateStructurePanel" style="display:none;">
-          <div class="section-title">Residential Rate Structure</div>
-          <div class="rate-choice-grid" id="residentialRateModelToggle" style="margin-bottom:18px;">
-            <div class="rate-choice-card" data-model="fixed" onclick="setTypeRateModel('residential','fixed')">
+          <div class="section-title">Choose a Rate Model</div>
+          <div class="rate-choice-grid" id="rateModelToggle">
+            <div class="rate-choice-card" data-model="fixed" onclick="setRateModel('fixed')">
               <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
               <div class="rate-choice-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
               <div class="rate-choice-title">Fixed Rate</div>
             </div>
-            <div class="rate-choice-card" data-model="tier" onclick="setTypeRateModel('residential','tier')">
+            <div class="rate-choice-card" data-model="tier" onclick="setRateModel('tier')">
               <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
               <div class="rate-choice-icon"><i class="fa-solid fa-layer-group"></i></div>
               <div class="rate-choice-title">Tier-Based Rate</div>
-            </div>
-          </div>
-
-          <div id="residentialFixedSection">
-            <p class="hint" style="margin:0;display:block;">The volumetric rate for Fixed Rate is calculated automatically so the Base Charge, this rate, misc. revenue, and the assessment fee together cover total annual expenses -- see it on the Summary &amp; Results step once all steps are complete.</p>
-          </div>
-
-          <div id="residentialTierSection" style="display:none;">
-            <div id="residentialTierAlert"></div>
-            <div class="table-scroll">
-              <table class="data-table" id="residentialTierTable">
-                <thead>
-                  <tr>
-                    <th>Tier Name</th>
-                    <th>Start (gal)</th>
-                    <th>End (gal)</th>
-                    <th>
-                      <span>Unit Cost Increase</span>
-                      <span class="col-toggle" title="Enter each tier's increase over the previous tier's rate as a flat $ amount or a % increase">
-                        <button type="button" id="residentialTierDiffMethodDollar" onclick="setTierDiffMethod('residential','dollar')">$</button>
-                        <button type="button" id="residentialTierDiffMethodPct" onclick="setTierDiffMethod('residential','pct')">%</button>
-                      </span>
-                    </th>
-                    <th>
-                      <span id="residentialTierCustomersHeaderLabel">No. of Customers</span>
-                      <span class="col-toggle" title="Enter directly, or as a % of Active Customers">
-                        <button type="button" id="residentialTierCustomersMethodNumber" onclick="setTierCustomersMethod('residential','number')">#</button>
-                        <button type="button" id="residentialTierCustomersMethodPct" onclick="setTierCustomersMethod('residential','pct')">%</button>
-                      </span>
-                    </th>
-                    <th>
-                      <span id="residentialTierWaterSoldHeaderLabel">Water Sold (gal/mo)</span>
-                      <span class="col-toggle" title="Enter directly, or as a % of Monthly Average Water Sold">
-                        <button type="button" id="residentialTierWaterSoldMethodGal" onclick="setTierWaterSoldMethod('residential','gal')">#</button>
-                        <button type="button" id="residentialTierWaterSoldMethodPct" onclick="setTierWaterSoldMethod('residential','pct')">%</button>
-                      </span>
-                    </th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="residentialTierTableBody"></tbody>
-                <tfoot id="residentialTierTableFoot"></tfoot>
-              </table>
-            </div>
-            <div style="margin-top:14px;">
-              <button class="btn btn-secondary btn-sm" onclick="addTierRow('residential')"><i class="fa-solid fa-plus"></i> Add Tier</button>
-            </div>
-            <div class="totals-row" style="margin-top:14px;">
-              <div class="total-item"><span class="label">Active Customers</span><span class="value" id="residentialTierRefActiveCustomers">0</span></div>
-              <div class="total-item"><span class="label">Monthly Avg. Water Sold, gal</span><span class="value" id="residentialTierRefMonthlyWaterSold">0</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="section" id="commercialRateStructurePanel" style="display:none;">
-          <div class="section-title">Commercial Rate Structure</div>
-          <div class="rate-choice-grid" id="commercialRateModelToggle" style="margin-bottom:18px;">
-            <div class="rate-choice-card" data-model="fixed" onclick="setTypeRateModel('commercial','fixed')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-              <div class="rate-choice-title">Fixed Rate</div>
-            </div>
-            <div class="rate-choice-card" data-model="tier" onclick="setTypeRateModel('commercial','tier')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-icon"><i class="fa-solid fa-layer-group"></i></div>
-              <div class="rate-choice-title">Tier-Based Rate</div>
-            </div>
-          </div>
-
-          <div id="commercialFixedSection">
-            <p class="hint" id="commercialFixedRateHint" style="margin:0 0 14px;display:block;">The volumetric rate for Fixed Rate is calculated automatically so the Base Charge, this rate, misc. revenue, and the assessment fee together cover total annual expenses -- see it on the Summary &amp; Results step once all steps are complete.</p>
-            <div class="form-grid" id="commercialFixedMarkupFields" style="display:none;">
-              <div class="form-group">
-                <label>Markup from Residential Rate</label>
-                <div class="field-toggle">
-                  <button type="button" id="commercialFixedMarkupMethodDollar" onclick="setMarkupMethod('commercial','fixedMarkup','dollar')">$</button>
-                  <button type="button" id="commercialFixedMarkupMethodPct" onclick="setMarkupMethod('commercial','fixedMarkup','pct')">%</button>
-                </div>
-                <input type="text" inputmode="decimal" id="commercialFixedMarkupValue" oninput="onMarkupValueChange('commercial','fixedMarkup',this)">
-                <div class="field-error" id="err-commercialFixedMarkupValue"></div>
-              </div>
-            </div>
-          </div>
-
-          <div id="commercialTierSection" style="display:none;">
-            <div id="commercialTierAlert"></div>
-            <div class="table-scroll">
-              <table class="data-table" id="commercialTierTable">
-                <thead>
-                  <tr>
-                    <th>Tier Name</th>
-                    <th>Start (gal)</th>
-                    <th>End (gal)</th>
-                    <th>
-                      <span>Unit Cost Increase</span>
-                      <span class="col-toggle" title="Enter each tier's increase over the previous tier's rate as a flat $ amount or a % increase">
-                        <button type="button" id="commercialTierDiffMethodDollar" onclick="setTierDiffMethod('commercial','dollar')">$</button>
-                        <button type="button" id="commercialTierDiffMethodPct" onclick="setTierDiffMethod('commercial','pct')">%</button>
-                      </span>
-                    </th>
-                    <th>
-                      <span id="commercialTierCustomersHeaderLabel">No. of Customers</span>
-                      <span class="col-toggle" title="Enter directly, or as a % of Active Customers">
-                        <button type="button" id="commercialTierCustomersMethodNumber" onclick="setTierCustomersMethod('commercial','number')">#</button>
-                        <button type="button" id="commercialTierCustomersMethodPct" onclick="setTierCustomersMethod('commercial','pct')">%</button>
-                      </span>
-                    </th>
-                    <th>
-                      <span id="commercialTierWaterSoldHeaderLabel">Water Sold (gal/mo)</span>
-                      <span class="col-toggle" title="Enter directly, or as a % of Monthly Average Water Sold">
-                        <button type="button" id="commercialTierWaterSoldMethodGal" onclick="setTierWaterSoldMethod('commercial','gal')">#</button>
-                        <button type="button" id="commercialTierWaterSoldMethodPct" onclick="setTierWaterSoldMethod('commercial','pct')">%</button>
-                      </span>
-                    </th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="commercialTierTableBody"></tbody>
-                <tfoot id="commercialTierTableFoot"></tfoot>
-              </table>
-            </div>
-            <div style="margin-top:14px;">
-              <button class="btn btn-secondary btn-sm" onclick="addTierRow('commercial')"><i class="fa-solid fa-plus"></i> Add Tier</button>
-            </div>
-            <div class="totals-row" style="margin-top:14px;">
-              <div class="total-item"><span class="label">Active Customers</span><span class="value" id="commercialTierRefActiveCustomers">0</span></div>
-              <div class="total-item"><span class="label">Monthly Avg. Water Sold, gal</span><span class="value" id="commercialTierRefMonthlyWaterSold">0</span></div>
-            </div>
-            <div class="form-grid" id="commercialTierMarkupFields" style="display:none;margin-top:14px;">
-              <div class="form-group">
-                <label>Markup from Residential Rate (applied to lowest tier)</label>
-                <div class="field-toggle">
-                  <button type="button" id="commercialTierMarkupMethodDollar" onclick="setMarkupMethod('commercial','tierMarkup','dollar')">$</button>
-                  <button type="button" id="commercialTierMarkupMethodPct" onclick="setMarkupMethod('commercial','tierMarkup','pct')">%</button>
-                </div>
-                <input type="text" inputmode="decimal" id="commercialTierMarkupValue" oninput="onMarkupValueChange('commercial','tierMarkup',this)">
-                <div class="field-error" id="err-commercialTierMarkupValue"></div>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- STEP 4: OPERATING EXPENSES -->
+      <!-- STEP 4: RATE DETAILS -->
       <div class="step-page" data-step="4">
-        <div class="page-title"><span><i class="fa-solid fa-file-invoice-dollar"></i> Operating Expenses</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(4)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-title"><span><i class="fa-solid fa-sliders"></i> Rate Details</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(4)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+        <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Define the customer usage tiers and indicate how customers and water sales are distributed among them.</div>
+
+        <div class="section" id="fixedRateSection">
+          <div class="section-title">Fixed-Rate Inputs</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Total Base Charge ($ / month)</label>
+              <input type="text" id="fixedBaseCharge" class="currency-input" readonly>
+              <span class="hint">Total of every meter row's Monthly Base Fee × count, from the Meter Distribution step.</span>
+            </div>
+            <div class="form-group">
+              <label>Volumetric Rate ($ / 1,000 gal)</label>
+              <input type="text" id="fixedVolumetricRate" class="currency-input" readonly>
+              <span class="hint">Calculated so the Base Charge, this rate, misc. revenue, and the assessment fee together cover total annual expenses.</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="section" id="tierRateSection" style="display:none;">
+          <div class="section-title">
+            <span>Consumption Tiers</span>
+          </div>
+          <div id="tierAlert"></div>
+          <div class="table-scroll">
+            <table class="data-table" id="tierTable">
+              <thead>
+                <tr>
+                  <th>Tier Name</th>
+                  <th>Start (gal)</th>
+                  <th>End (gal)</th>
+                  <th>
+                    <span>Unit Cost Increase</span>
+                    <span class="col-toggle" title="Enter each tier's increase over the previous tier's rate as a flat $ amount or a % increase">
+                      <button type="button" id="tierDiffMethodDollar" onclick="setTierDiffMethod('dollar')">$</button>
+                      <button type="button" id="tierDiffMethodPct" onclick="setTierDiffMethod('pct')">%</button>
+                    </span>
+                  </th>
+                  <th>
+                    <span id="tierCustomersHeaderLabel">No. of Customers</span>
+                    <span class="col-toggle" title="Enter directly, or as a % of Active Customers">
+                      <button type="button" id="tierCustomersMethodNumber" onclick="setTierCustomersMethod('number')">#</button>
+                      <button type="button" id="tierCustomersMethodPct" onclick="setTierCustomersMethod('pct')">%</button>
+                    </span>
+                  </th>
+                  <th>
+                    <span id="tierWaterSoldHeaderLabel">Water Sold (gal/mo)</span>
+                    <span class="col-toggle" title="Enter directly, or as a % of Monthly Average Water Sold">
+                      <button type="button" id="tierWaterSoldMethodGal" onclick="setTierWaterSoldMethod('gal')">#</button>
+                      <button type="button" id="tierWaterSoldMethodPct" onclick="setTierWaterSoldMethod('pct')">%</button>
+                    </span>
+                  </th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tierTableBody"></tbody>
+              <tfoot id="tierTableFoot"></tfoot>
+            </table>
+          </div>
+          <div style="margin-top:14px;">
+            <button class="btn btn-secondary btn-sm" onclick="addTierRow()"><i class="fa-solid fa-plus"></i> Add Tier</button>
+          </div>
+          <div class="totals-row" style="margin-top:14px;">
+            <div class="total-item"><span class="label">Active Customers</span><span class="value" id="tierRefActiveCustomers">0</span></div>
+            <div class="total-item"><span class="label">Monthly Avg. Water Sold, gal</span><span class="value" id="tierRefMonthlyWaterSold">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: ASSESSMENT FEE -->
+      <div class="step-page" data-step="5">
+        <div class="page-title"><span><i class="fa-solid fa-percent"></i> Assessment Fee</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(5)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+        <div class="page-subtitle"></div>
+        <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Enter any regulatory assessment fee that is charged to the customer separately.</div>
+
+        <div class="section">
+          <div class="section-title">Assessment Fee</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Assessment Fee (% of Revenue)</label>
+              <input type="number" min="0" step="0.01" id="assessmentFeePct" oninput="onAssessmentFeeChange()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6: OPERATING EXPENSES -->
+      <div class="step-page" data-step="6">
+        <div class="page-title"><span><i class="fa-solid fa-file-invoice-dollar"></i> Operating Expenses</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(6)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
         <div class="page-subtitle"></div>
         <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Enter all costs that should be recovered through customer rates. You may also include contingency, inflation, reserves, or future funding needs as applicable.</div>
 
         <div id="expenseAlert"></div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:18px;">
-          <div class="rate-choice-grid" id="expenseDataTypeToggle" style="max-width:420px;margin-bottom:0;">
-            <div class="rate-choice-card" data-datatype="annualAvg" onclick="setExpenseDataType('annualAvg')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Annual Average</div>
-            </div>
-            <div class="rate-choice-card" data-datatype="monthly" onclick="setExpenseDataType('monthly')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Monthly Data</div>
-            </div>
-          </div>
-          <div class="totals-row" style="margin-top:0;">
-            <div class="total-item"><span class="label">Total Annual Expenses</span><span class="value" id="expenseTopTotal">$0.00</span></div>
-          </div>
-        </div>
-
         <div class="table-scroll">
           <table class="data-table" id="expenseTable">
-            <thead id="expenseTableHead"></thead>
+            <thead>
+              <tr>
+                <th style="width:26%">Description</th>
+                <th style="width:20%">Category</th>
+                <th style="width:14%">Amount</th>
+                <th style="width:14%">Frequency</th>
+                <th style="width:18%">Annual Expense</th>
+                <th></th>
+              </tr>
+            </thead>
             <tbody id="expenseTableBody"></tbody>
           </table>
         </div>
@@ -750,33 +562,26 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         </div>
       </div>
 
-      <!-- STEP 5: MISCELLANEOUS REVENUE -->
-      <div class="step-page" data-step="5">
-        <div class="page-title"><span><i class="fa-solid fa-coins"></i> Non-Operating Revenues</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(5)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+      <!-- STEP 7: MISCELLANEOUS REVENUE -->
+      <div class="step-page" data-step="7">
+        <div class="page-title"><span><i class="fa-solid fa-coins"></i> Non-Operating Revenues</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(7)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
         <div class="page-subtitle"></div>
         <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Enter revenues received from sources other than water sales. These revenues reduce the amount that needs to be recovered through customer water rates.</div>
 
         <div id="miscRevenueAlert"></div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:18px;">
-          <div class="rate-choice-grid" id="miscRevenueDataTypeToggle" style="max-width:420px;margin-bottom:0;">
-            <div class="rate-choice-card" data-datatype="annualAvg" onclick="setMiscRevenueDataType('annualAvg')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Annual Average</div>
-            </div>
-            <div class="rate-choice-card" data-datatype="monthly" onclick="setMiscRevenueDataType('monthly')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Monthly Data</div>
-            </div>
-          </div>
-          <div class="totals-row" style="margin-top:0;">
-            <div class="total-item"><span class="label">Total Annual Revenue</span><span class="value" id="miscRevenueTopTotal">$0.00</span></div>
-          </div>
-        </div>
-
         <div class="table-scroll">
           <table class="data-table" id="miscRevenueTable">
-            <thead id="miscRevenueTableHead"></thead>
+            <thead>
+              <tr>
+                <th style="width:28%">Description</th>
+                <th style="width:20%">Category</th>
+                <th style="width:16%">Amount</th>
+                <th style="width:16%">Frequency</th>
+                <th style="width:16%">Annual Amount</th>
+                <th></th>
+              </tr>
+            </thead>
             <tbody id="miscRevenueTableBody"></tbody>
           </table>
         </div>
@@ -804,9 +609,9 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         </div>
       </div>
 
-      <!-- STEP 6: WATER LOSS -->
-      <div class="step-page" data-step="6">
-        <div class="page-title"><span><i class="fa-solid fa-droplet"></i> Water Loss</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(6)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+      <!-- STEP 8: WATER LOSS -->
+      <div class="step-page" data-step="8">
+        <div class="page-title"><span><i class="fa-solid fa-droplet"></i> Water Loss</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(8)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
         <div class="page-subtitle"></div>
         <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Choose Customer if water-loss costs should be recovered through rates, or Supply Corporation / Utility if the utility will absorb those costs.</div>
 
@@ -840,9 +645,9 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         </div>
       </div>
 
-      <!-- STEP 7: SUMMARY & RESULTS -->
-      <div class="step-page" data-step="7">
-        <div class="page-title"><span><i class="fa-solid fa-chart-line"></i> Summary &amp; Results</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(7)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
+      <!-- STEP 9: SUMMARY & RESULTS -->
+      <div class="step-page" data-step="9">
+        <div class="page-title"><span><i class="fa-solid fa-chart-line"></i> Summary &amp; Results</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(9)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
         <div class="page-subtitle"></div>
 
         <div style="margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;">
@@ -858,8 +663,6 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         </div>
 
         <div class="metric-grid" id="metricGrid"></div>
-
-        <div class="results-split-grid" id="typeResultsGrid"></div>
 
         <div class="chart-grid">
           <div class="chart-box">
@@ -889,8 +692,6 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
 
     </div>
 
-    </div>
-
     <div class="nav-footer">
       <div class="left-actions">
         <button class="btn btn-secondary" id="btnPrevious" onclick="previousStep()"><i class="fa-solid fa-arrow-left"></i> Previous</button>
@@ -907,7 +708,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
 <div class="modal-overlay" id="resetModal">
   <div class="modal-box">
     <h3>Reset all data?</h3>
-    <p>This clears every field you've entered across all 8 steps and cannot be undone.</p>
+    <p>This clears every field you've entered across all 9 steps and cannot be undone.</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('resetModal')">Cancel</button>
       <button class="btn btn-danger" onclick="resetTool()">Reset Everything</button>
@@ -945,7 +746,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
       <div class="ai-faq" id="aiFaq">
         <div class="ai-faq-item">
           <div class="ai-faq-q">What does this tool do? <i class="fa-solid fa-chevron-down"></i></div>
-          <div class="ai-faq-a">It walks a water utility through an 8-step rate study -- customer &amp; billing data (Residential and/or Commercial), meters, rate structure, expenses, non-operating revenue, and water loss -- then calculates the rate structure needed to cover costs.</div>
+          <div class="ai-faq-a">It walks a water utility through a 9-step rate study -- customers, meters, expenses, non-operating revenue, and water loss -- then calculates the rate structure needed to cover costs.</div>
         </div>
         <div class="ai-faq-item">
           <div class="ai-faq-q">Fixed Rate vs. Tier-Based Rate -- what's the difference? <i class="fa-solid fa-chevron-down"></i></div>
@@ -1016,50 +817,34 @@ const MISC_REVENUE_CATEGORIES = ['Grant','Interest on Cash Flow','Donations'];
 
 const FREQUENCIES = ['Monthly','Quarterly','Annual'];
 
-const MONTH_LABELS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
 const STORAGE_KEY = 'civitasWaterRateTool_v1';
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 9;
 const STEP_TITLES = [
-  'Customer & Billing',
+  'Customer & Connections',
   'Meter Distribution',
-  'Rate Structure',
+  'Rate Model',
+  'Rate Details',
+  'Assessment Fee',
   'Operating Expenses',
   'Non-Operating Revenues',
   'Water Loss',
   'Summary & Results'
 ];
-const STEP_ICONS = [
-  'fa-address-card',
-  'fa-gauge',
-  'fa-sliders',
-  'fa-file-invoice-dollar',
-  'fa-coins',
-  'fa-droplet',
-  'fa-chart-line'
-];
 
 // Per-step instructions text, shown in the Instructions button's modal on
 // each wizard page. Sourced from "Water Tool_Instructions Tab.docx".
 const STEP_INSTRUCTIONS = [
-`Select which customer types your utility serves, then enter each type's billing data. Use recent billing records and representative monthly figures when available.
-
-Customer Type
-Select Residential, Commercial, or Residential & Commercial depending on which customer types your utility bills for water. Selecting both shows a separate billing panel for each type below.
-
-Data Type (per customer type)
-Choose how you'd like to enter that type's water usage:
-• Annual Monthly Average -- enter a single representative average month.
-• Monthly Data -- enter 12 individual months of water sold; the tool averages them for you.
+`Enter the total number of customer accounts, the number of active customers currently receiving service, and the average total water billed each month. Use recent billing records and representative monthly averages when available.
 
 Total Customer Count
-Enter the total number of customer accounts of that type, including active and inactive accounts.
+Enter the total number of customer accounts associated with the utility, including active and inactive accounts.
 
 Active Customer Count
-Enter the number of accounts of that type that are currently active and are expected to receive a water bill. Customers without active service should not be included.
+Enter the number of customer accounts that are currently active and are expected to receive a water bill. Customers without active service should not be included.
 
-Total Water Sold in a Month (Annual Monthly Average) / Monthly Water Sold (Monthly Data)
-Enter the average total volume of water billed to that type's active customers during a typical month, in gallons -- either as a single average or as 12 individual months, depending on the Data Type selected.
+Total Water Sold in a Month
+Enter the average total volume of water billed to all active customers during a typical month, in gallons.
+Use recent billing records when available. If monthly usage varies significantly throughout the year, consider using an average representative of normal annual conditions.
 
 Click NEXT to continue.`,
 
@@ -1085,27 +870,47 @@ Before continuing, confirm that the total number of active meters matches the ac
 
 Click NEXT to continue.`,
 
-`Select a rate model for each customer type your utility bills for, then review or enter that model's details.
+`Select the rate structure you would like to evaluate.
 
 Fixed Rate
-Select this option to apply the same volumetric rate per gallon to all of that type's water usage, regardless of how much water an individual customer uses. Simple to administer, with a consistent unit cost for all water sold.
+Select this option to apply the same volumetric rate per gallon to all water usage, regardless of how much water an individual customer uses.
+This structure is simple to administer and provides a consistent unit cost for all water sold.
 
 Tier-Based Rate
-Select this option to establish different volumetric rates based on customer water usage. Customers are grouped into usage tiers, and the unit rate can increase between tiers.
+Select this option to establish different volumetric rates based on customer water usage.
+Customers are grouped into usage tiers, and the unit rate can increase between tiers. This approach can be used to reflect different usage patterns or encourage water conservation.
 
-Tier Details (when Tier-Based Rate is selected)
-Tier Name -- automatically generated as additional tiers are added; use Add Tier to create additional usage levels.
-Start (Gal) -- the minimum monthly water usage for the tier; the first tier always begins at zero.
-End (Gal) -- the maximum monthly water usage included within the tier; the final tier remains open-ended ('and above').
-Unit Cost Increase -- how much the water rate should increase from one tier to the next, as a dollar amount or a percentage.
-No. of Customers -- the number or percentage of that type's active customers whose average monthly usage falls within each tier; the total should equal that type's Active Customer Count (or 100%).
-Water Sold -- the amount or percentage of that type's total monthly water sales associated with each tier; the total should equal that type's monthly water sold (or 100%).
+Click NEXT to continue.`,
 
-Commercial Markup (only when both Residential and Commercial are selected)
-Commercial's rate is defined as a markup off Residential's rate rather than entered independently -- a dollar or percentage markup on Residential's Fixed volumetric rate, or on Residential's lowest tier rate if Residential uses a Tier-Based model. If your utility serves Commercial customers only, this markup doesn't apply -- Commercial's rate is entered/solved directly, the same way Residential's is.
+`This page applies when the Tier-Based Rate Model is selected.
+Use this page to define customer usage tiers and how water sales and customers are distributed among those tiers.
+
+Tier Name
+Tier names are automatically generated as additional tiers are added. Use Add Tier to create additional usage levels.
+
+Start (Gal)
+Represents the minimum monthly water usage for the tier. The starting value is automatically populated based on the ending value of the previous tier. The first tier begins at zero gallons.
+
+End (Gal)
+Enter the maximum monthly water usage included within the tier. The final tier will remain open-ended and will be shown as 'and above'.
+
+Unit Cost Increase
+Enter how much the water rate should increase from one tier to the next. The increase may be entered as either a dollar amount or a percentage, depending on the selected option.
+
+No. of Customers
+Enter the number or percentage of active customers whose average monthly usage falls within each tier. If entering customer counts, the total should equal the Active Customer Count. If entering percentages, the total should equal 100%.
+
+Water Sold
+Enter the amount or percentage of total monthly water sales associated with each tier. If entering gallons, the total should equal the Total Water Sold in a Month entered previously. If entering percentages, the total should equal 100%.
+
+Review the tier distributions before continuing to make sure customer counts and water sales are fully accounted for.
+
+Click NEXT to continue.`,
+
+`Use this page to separately account for regulatory or other assessment fees that are calculated as a percentage of utility revenue.
 
 Assessment Fee (% of Revenue)
-Enter any regulatory or other assessment fee that is charged to the customer separately, as a percentage of revenue.
+Enter the applicable assessment fee as a percentage of revenue.
 The tool will account for this fee separately when determining the revenue that must be recovered through customer rates.
 If the assessment fee is already included as an operating expense, enter 0% here to avoid counting the same cost twice.
 
@@ -1209,62 +1014,22 @@ const BILLING_UNIT_GAL = 1000;
    ========================================================================= */
 
 // Returns the app's default state -- nothing is pre-filled; every value must be explicitly entered by the user.
-function defaultTypeRateModel(){
-  return {
-    type:'',
-    fixed:{volumetricRate:0, includedConsumption:0, fixedMarkup:{method:'dollar', dollar:'', pct:''}},
-    tiers:[
-      {id:uid(), name:'1', start:'', end:null, rate:'', customers:'', waterSold:0, diffDollar:'', diffPct:''},
-      {id:uid(), name:'2', start:'', end:null, rate:'', customers:'', waterSold:0, diffDollar:'', diffPct:''}
-    ],
-    tierDiffMethod:'dollar',
-    tierCustomersMethod:'number',
-    tierWaterSoldMethod:'gal',
-    tierMarkup:{method:'dollar', dollar:'', pct:''}
-  };
-}
-
-function defaultTypeState(){
-  return {
-    dataType:'',
-    customerInfo:{totalCustomers:'', activeCustomers:'', monthlyWaterSold:''},
-    monthlyData:['','','','','','','','','','','',''],
-    rateModel: defaultTypeRateModel()
-  };
-}
-
 function defaultState(){
   return {
     currentStep: 1,
-    furthestStep: 1,
-
-    // '' | 'residential' | 'commercial' | 'both' -- drives which of the two
-    // panels below are shown/required on the Customer & Billing and Rate
-    // Structure steps.
-    customerType: '',
-    residential: defaultTypeState(),
-    commercial: defaultTypeState(),
-
-    // COMPAT MIRROR -- no longer directly user-edited. Rebuilt by
-    // syncCombinedCustomerInfo() whenever residential/commercial data
-    // changes (and defensively inside calculateAll()) so every existing
-    // reader (meter validation, water-loss calc, PDF export, AI widget)
-    // keeps working unmodified.
     customerInfo: {
       totalCustomers:'', activeCustomers:'', monthlyWaterSold:''
     },
     meters: [
       {id:uid(), size:'', count:'', factor:'', customSize:false, baseFee:''}
     ],
-    // Shrinks to what's genuinely shared: fixed.baseCharge (from meters) and
-    // assessmentFeePct. type/fixed.volumetricRate/tiers/tierDiffMethod are a
-    // WRITE-ONLY LEGACY MIRROR (see syncLegacyRateModelMirror) kept only so
-    // untouched chart/PDF/AI-widget code reading appState.rateModel.* still
-    // renders something correctly-shaped -- never edited directly by the UI.
     rateModel: {
-      fixed:{baseCharge:0, volumetricRate:0},
-      tiers:[],
       type:'',
+      fixed:{baseCharge:0, volumetricRate:0, includedConsumption:0},
+      tiers:[
+        {id:uid(), name:'1', start:'', end:null, rate:'', customers:'', waterSold:0, diffDollar:'', diffPct:''},
+        {id:uid(), name:'2', start:'', end:null, rate:'', customers:'', waterSold:0, diffDollar:'', diffPct:''}
+      ],
       tierDiffMethod:'dollar',
       tierCustomersMethod:'number',
       tierWaterSoldMethod:'gal',
@@ -1272,13 +1037,9 @@ function defaultState(){
     },
     operatingExpenses: {
       contingencyPct: '',
-      dataType: 'annualAvg', // 'annualAvg' | 'monthly' -- one shared entry mode for every row in the table
       rows: []
     },
-    miscellaneousRevenue: {
-      dataType: 'annualAvg',
-      rows: []
-    },
+    miscellaneousRevenue: [],
     waterLoss: {
       include:'',
       method:'pct',
@@ -1295,63 +1056,6 @@ let charts = {expense:null, waterProduction:null, revenue:null, revExp:null};
 // Generates a short random id used to key meter rows, tier rows, and other dynamic list items.
 function uid(){
   return 'id_' + Math.random().toString(36).slice(2,10) + Math.random().toString(36).slice(2,6);
-}
-
-/* =========================================================================
-   CUSTOMER-TYPE HELPERS -- combine/derive across the Residential and
-   Commercial panels, per which are included in appState.customerType.
-   ========================================================================= */
-
-function isResidentialIncluded(){ return appState.customerType==='residential' || appState.customerType==='both'; }
-function isCommercialIncluded(){ return appState.customerType==='commercial' || appState.customerType==='both'; }
-
-// Which type anchors the legacy single-customer-type mirror (appState.customerInfo/
-// appState.rateModel) that untouched chart/PDF/AI-widget code still reads.
-function getPrimaryType(){
-  if(isResidentialIncluded()) return 'residential';
-  if(isCommercialIncluded()) return 'commercial';
-  return null;
-}
-
-// Monthly Data mode enters 12 months of water sold and averages them into the
-// same "monthly average gallons" figure Annual Monthly Average mode captures
-// directly -- both modes feed the calc engine identically from this point on.
-function getEffectiveMonthlyWaterSold(typeState){
-  if(typeState.dataType === 'monthly'){
-    const sum = typeState.monthlyData.reduce((s,v)=>s+(Number(v)||0), 0);
-    return sum/12;
-  }
-  return Number(typeState.customerInfo.monthlyWaterSold)||0;
-}
-
-function getCombinedTotalCustomers(){
-  let total = 0;
-  if(isResidentialIncluded()) total += Number(appState.residential.customerInfo.totalCustomers)||0;
-  if(isCommercialIncluded()) total += Number(appState.commercial.customerInfo.totalCustomers)||0;
-  return total;
-}
-function getCombinedActiveCustomers(){
-  let total = 0;
-  if(isResidentialIncluded()) total += Number(appState.residential.customerInfo.activeCustomers)||0;
-  if(isCommercialIncluded()) total += Number(appState.commercial.customerInfo.activeCustomers)||0;
-  return total;
-}
-function getCombinedMonthlyWaterSold(){
-  let total = 0;
-  if(isResidentialIncluded()) total += getEffectiveMonthlyWaterSold(appState.residential);
-  if(isCommercialIncluded()) total += getEffectiveMonthlyWaterSold(appState.commercial);
-  return total;
-}
-
-// Rebuilds the legacy appState.customerInfo mirror from the real Residential/
-// Commercial state. Call after any residential/commercial field edit and
-// defensively at the top of calculateAll().
-function syncCombinedCustomerInfo(){
-  appState.customerInfo = {
-    totalCustomers: getCombinedTotalCustomers(),
-    activeCustomers: getCombinedActiveCustomers(),
-    monthlyWaterSold: getCombinedMonthlyWaterSold()
-  };
 }
 
 /* =========================================================================
@@ -1374,9 +1078,6 @@ function saveState(showToast){
 // migration path.
 function applyLoadedState(parsed){
   appState = Object.assign(defaultState(), parsed);
-  // Older saved sessions predate furthestStep tracking -- unlock at least up to
-  // wherever the session had gotten to, so resuming doesn't re-lock visited steps.
-  if(!appState.furthestStep || appState.furthestStep < appState.currentStep) appState.furthestStep = appState.currentStep;
   // Defensive merges for nested structures added after a save might predate them
   if(!appState.customerInfo) appState.customerInfo = defaultState().customerInfo;
   if(!appState.waterLoss || appState.waterLoss.annualGal === undefined){
@@ -1398,16 +1099,6 @@ function applyLoadedState(parsed){
     appState.waterLoss.method = appState.waterLoss.annualPct !== '' ? 'pct' : 'gal';
   }
   if(!appState.operatingExpenses) appState.operatingExpenses = defaultState().operatingExpenses;
-  if(!appState.operatingExpenses.dataType) appState.operatingExpenses.dataType = 'annualAvg';
-  appState.operatingExpenses.rows.forEach(row=>{ if(!row.monthlyData) row.monthlyData = Array(12).fill(''); });
-  // Older saved sessions had miscellaneousRevenue as a plain array (no Data
-  // Type) -- wrap it in the current {dataType, rows} shape.
-  if(Array.isArray(appState.miscellaneousRevenue)){
-    appState.miscellaneousRevenue = { dataType:'annualAvg', rows: appState.miscellaneousRevenue };
-  }
-  if(!appState.miscellaneousRevenue) appState.miscellaneousRevenue = defaultState().miscellaneousRevenue;
-  if(!appState.miscellaneousRevenue.dataType) appState.miscellaneousRevenue.dataType = 'annualAvg';
-  appState.miscellaneousRevenue.rows.forEach(row=>{ if(!row.monthlyData) row.monthlyData = Array(12).fill(''); });
   if(!appState.rateModel) appState.rateModel = defaultState().rateModel;
   if(!appState.rateModel.tierDiffMethod) appState.rateModel.tierDiffMethod = 'dollar';
   // Older saved sessions had one global $/% difference for every tier instead of a
@@ -1420,36 +1111,6 @@ function applyLoadedState(parsed){
   delete appState.rateModel.tierUnitCostDifferencePct;
   if(!appState.rateModel.tierCustomersMethod) appState.rateModel.tierCustomersMethod = 'number';
   if(!appState.rateModel.tierWaterSoldMethod) appState.rateModel.tierWaterSoldMethod = 'gal';
-
-  // Older saved sessions/share-links predate the Residential/Commercial split --
-  // synthesize the new shape from the legacy single-customer-type fields (now
-  // fully migrated above) so old sessions load straight into "Residential only"
-  // with everything already entered intact.
-  if(!appState.customerType){
-    appState.customerType = 'residential';
-    appState.residential = {
-      dataType: 'annualAvg',
-      customerInfo: {
-        totalCustomers: appState.customerInfo.totalCustomers,
-        activeCustomers: appState.customerInfo.activeCustomers,
-        monthlyWaterSold: appState.customerInfo.monthlyWaterSold
-      },
-      monthlyData: defaultTypeState().monthlyData,
-      rateModel: {
-        type: appState.rateModel.type || '',
-        fixed: { volumetricRate: appState.rateModel.fixed.volumetricRate||0, includedConsumption: 0, fixedMarkup: defaultTypeRateModel().fixed.fixedMarkup },
-        tiers: appState.rateModel.tiers && appState.rateModel.tiers.length ? appState.rateModel.tiers : defaultTypeRateModel().tiers,
-        tierDiffMethod: appState.rateModel.tierDiffMethod || 'dollar',
-        tierCustomersMethod: appState.rateModel.tierCustomersMethod || 'number',
-        tierWaterSoldMethod: appState.rateModel.tierWaterSoldMethod || 'gal',
-        tierMarkup: defaultTypeRateModel().tierMarkup
-      }
-    };
-    appState.commercial = defaultTypeState();
-  }
-  if(!appState.residential) appState.residential = defaultTypeState();
-  if(!appState.commercial) appState.commercial = defaultTypeState();
-  syncCombinedCustomerInfo();
 }
 
 // Loads app state from localStorage on startup, migrating older saved-state shapes to the current structure.
@@ -1470,9 +1131,7 @@ function loadState(){
 function buildShareLink(){
   const shareable = {
     currentStep: appState.currentStep,
-    customerType: appState.customerType,
-    residential: appState.residential,
-    commercial: appState.commercial,
+    customerInfo: appState.customerInfo,
     meters: appState.meters,
     rateModel: appState.rateModel,
     operatingExpenses: appState.operatingExpenses,
@@ -1549,26 +1208,29 @@ function resetCurrentStep(){
   if(!confirm('Reset all fields on "'+stepLabel+'"? This cannot be undone.')) return;
 
   if(step === 1){
-    appState.customerType = def.customerType;
-    appState.residential = def.residential;
-    appState.commercial = def.commercial;
-    syncCombinedCustomerInfo();
-    renderCustomerBillingStep();
+    appState.customerInfo = def.customerInfo;
+    renderPage1();
   } else if(step === 2){
     appState.meters = def.meters;
     renderMeterTable();
-  } else if(step === 3){
-    appState.residential.rateModel = defaultTypeRateModel();
-    appState.commercial.rateModel = defaultTypeRateModel();
-    appState.rateModel.assessmentFeePct = def.rateModel.assessmentFeePct;
-    renderRateStructureStep();
   } else if(step === 4){
+    appState.rateModel.fixed = def.rateModel.fixed;
+    appState.rateModel.tiers = def.rateModel.tiers;
+    appState.rateModel.tierDiffMethod = def.rateModel.tierDiffMethod;
+    appState.rateModel.tierCustomersMethod = def.rateModel.tierCustomersMethod;
+    appState.rateModel.tierWaterSoldMethod = def.rateModel.tierWaterSoldMethod;
+    renderRateDetails();
+    updateAssessmentFeeDisplay();
+  } else if(step === 5){
+    appState.rateModel.assessmentFeePct = def.rateModel.assessmentFeePct;
+    renderAssessmentFeePage();
+  } else if(step === 6){
     appState.operatingExpenses = def.operatingExpenses;
     renderExpenseTable();
-  } else if(step === 5){
+  } else if(step === 7){
     appState.miscellaneousRevenue = def.miscellaneousRevenue;
     renderMiscRevenueTable();
-  } else if(step === 6){
+  } else if(step === 8){
     appState.waterLoss = def.waterLoss;
     renderPage6();
   }
@@ -1623,24 +1285,6 @@ function toAnnual(amount, freq){
   return (Number(amount)||0) * periodsPerYear(freq);
 }
 
-// Annualizes one Operating Expenses / Non-Operating Revenue row, per that
-// table's shared Data Type: Monthly Data sums the row's 12 entered months;
-// Annual Average uses the existing Amount + Frequency fields.
-function toAnnualForRow(row, dataType){
-  if(dataType === 'monthly'){
-    return (row.monthlyData||[]).reduce((s,v)=>s+(Number(v)||0), 0);
-  }
-  return toAnnual(row.amount, row.frequency);
-}
-function rowAmountMissing(row, dataType){
-  if(dataType === 'monthly') return (row.monthlyData||[]).some(v=>v==='' || v===null || v===undefined);
-  return row.amount === '';
-}
-function rowAmountNegative(row, dataType){
-  if(dataType === 'monthly') return (row.monthlyData||[]).some(v=>Number(v) < 0);
-  return Number(row.amount) < 0;
-}
-
 // Shows a temporary toast notification in the corner of the screen.
 function showToastMsg(msg, type){
   const container = document.getElementById('toastContainer');
@@ -1691,15 +1335,6 @@ function liveNumberText(raw){
   return groupedInt + (decPart !== undefined ? '.'+decPart : '');
 }
 
-// Like liveNumberText, but for whole-number-only fields (counts of people,
-// meters, etc.) -- strips decimal points entirely instead of allowing one.
-function liveIntegerText(raw){
-  let digits = String(raw).replace(/[^0-9]/g,'');
-  digits = digits.replace(/^0+(?=\d)/,'');
-  if(digits === '') return '';
-  return Number(digits).toLocaleString('en-US');
-}
-
 // Currency-input formatting: $ and commas appear live as you type, normalized on blur.
 // Wires up live formatting and on-blur normalization for every currency input under root.
 function bindCurrencyInputs(root){
@@ -1726,13 +1361,11 @@ function bindNumberCommaInputs(root){
   (root||document).querySelectorAll('input.number-commas').forEach(inp=>{
     if(inp._commaBound) return;
     inp._commaBound = true;
-    const isInt = inp.hasAttribute('data-integer');
     inp.addEventListener('focus', function(){ this.select(); });
-    inp.addEventListener('input', function(){ reformatLive(this, isInt ? liveIntegerText : liveNumberText); });
+    inp.addEventListener('input', function(){ reformatLive(this, liveNumberText); });
     inp.addEventListener('blur', function(){
-      const raw = this.value.replace(/,/g,'');
-      const num = isInt ? Math.round(parseFloat(raw)) : parseFloat(raw);
-      this.value = isFinite(num) ? (isInt ? num.toLocaleString('en-US') : formatNumber(num)) : '';
+      const num = parseFloat(this.value.replace(/,/g,''));
+      this.value = isFinite(num) ? formatNumber(num) : '';
     });
   });
 }
@@ -1746,9 +1379,11 @@ function bindNumberCommaInputs(root){
 
 
 const STEP_OVERVIEW = [
-  {icon:'fa-address-card', color:'#A9D18E', desc:'This step captures customer type(s), and each type\'s total customers, active customers, and monthly water sold.'},
+  {icon:'fa-address-card', color:'#A9D18E', desc:'This step captures total customers, active customers, and monthly water sold.'},
   {icon:'fa-gauge', color:'#9DC3E6', desc:'This step captures meter counts by approved standard size.'},
-  {icon:'fa-sliders', color:'#FFD966', desc:'This step is where you choose Fixed Rate or Tier-Based Rate for each customer type, enter Commercial\'s markup off Residential when both are selected, and enter the assessment fee percentage applied to rate revenue.'},
+  {icon:'fa-sliders', color:'#FFD966', desc:'This step is where you choose Fixed Rate or Tier-Based Rate.'},
+  {icon:'fa-sliders', color:'#FFC38C', desc:'This step captures the inputs for your selected rate model.'},
+  {icon:'fa-percent', color:'#C9A6E0', desc:'This step captures the assessment fee percentage applied to rate revenue.'},
   {icon:'fa-file-invoice-dollar', color:'#B7B7B7', desc:'This step captures annual operating expenses and the contingency percentage.'},
   {icon:'fa-coins', color:'#8FE3E3', desc:'This step captures any revenue not related to water sales.'},
   {icon:'fa-droplet', color:'#74C7EC', desc:'This step captures information on water loss.'},
@@ -1770,7 +1405,7 @@ const HOME_INSTRUCTIONS = `Welcome to the Water Rate Tool. This tool guides you 
 
 Click START to begin.`;
 
-// Renders the Home > Instruction view's full-text accordion (Home + all 8 steps),
+// Renders the Home > Instruction view's full-text accordion (Home + all 9 steps),
 // expanded/collapsed on click. Uses HOME_INSTRUCTIONS/STEP_INSTRUCTIONS -- the
 // per-page short blurbs shown inline on each page are separate (hardcoded
 // alert boxes on each step-page).
@@ -1863,7 +1498,7 @@ function renderStep(){
   document.getElementById('btnPrevious').disabled = appState.currentStep === 1;
   const isLast = appState.currentStep === TOTAL_STEPS;
   document.getElementById('btnNext').style.display = isLast ? 'none' : 'inline-flex';
-  document.getElementById('btnResetStep').style.display = isLast ? 'none' : 'inline-flex';
+  document.getElementById('btnResetStep').style.display = (isLast || appState.currentStep === 3) ? 'none' : 'inline-flex';
   if(isLast){
     // Deferred one frame: the step-page just flipped from display:none to
     // display:block above. Chart.js measures the canvas at chart-creation
@@ -1872,58 +1507,32 @@ function renderStep(){
     // charts. Waiting a frame lets the browser finish laying out the page first.
     requestAnimationFrame(()=>calculateAll(false));
   }
-  renderStepNav();
   window.scrollTo({top:0, behavior:'smooth'});
-}
-
-// Builds the clickable step progress bar shown above the wizard. Steps up to
-// furthestStep are unlocked (already-validated ground the user can freely
-// revisit); anything beyond that is locked until Next validates its way there.
-function renderStepNav(){
-  const nav = document.getElementById('stepNav');
-  if(!nav) return;
-  let html = '';
-  STEP_TITLES.forEach((title, i)=>{
-    const n = i+1;
-    const state = n === appState.currentStep ? 'active' : (n <= appState.furthestStep ? 'completed' : 'locked');
-    const disabled = n > appState.furthestStep;
-    const icon = state==='completed' && n!==appState.currentStep ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid '+STEP_ICONS[i]+'"></i>';
-    html += '<div class="step-nav-item '+state+'">'+
-      '<button type="button" class="step-nav-btn" '+(disabled?'disabled':'')+' onclick="stepNavClick('+n+')" title="'+escapeHtml((n)+'. '+title)+'">'+
-      '<span class="step-nav-circle">'+icon+'</span>'+
-      '<span class="step-nav-label">'+escapeHtml(title)+'</span>'+
-      '</button></div>';
-    if(n < TOTAL_STEPS){
-      html += '<div class="step-nav-line '+(n < appState.furthestStep ? 'completed' : '')+'"></div>';
-    }
-  });
-  nav.innerHTML = html;
-}
-
-// Handles a click on a step-nav circle -- jumps straight there if that step
-// has already been unlocked (reached via Next at least once before).
-function stepNavClick(n){
-  if(n === appState.currentStep) return;
-  if(n > appState.furthestStep) return;
-  goToStep(n);
 }
 
 // Jumps directly to step n and renders it.
 function goToStep(n, skipValidation){
   appState.currentStep = n;
-  if(n > (appState.furthestStep||1)) appState.furthestStep = n;
   renderStep();
   saveState(false);
 }
 
+// Step 4 (Rate Details) has nothing left to configure for the Fixed-Rate
+// model -- Base Charge comes from the meters, Volumetric Rate is calculated,
+// and there's no Minimum Charge anymore -- so it's skipped in both directions.
 function nextStep(){
   const res = validateStep(appState.currentStep);
   if(!res.valid){ renderValidation(appState.currentStep, res); return; }
-  if(appState.currentStep < TOTAL_STEPS) goToStep(appState.currentStep+1);
+  let n = appState.currentStep+1;
+  if(n===4 && appState.rateModel.type==='fixed') n = 5;
+  if(appState.currentStep < TOTAL_STEPS) goToStep(n);
 }
 
+// Goes back one step -- skipping Rate Details for the Fixed-Rate model.
 function previousStep(){
-  if(appState.currentStep > 1) goToStep(appState.currentStep-1);
+  let n = appState.currentStep-1;
+  if(n===4 && appState.rateModel.type==='fixed') n = 3;
+  if(appState.currentStep > 1) goToStep(n);
 }
 
 // Displays field errors and a toast for a failed step validation.
@@ -1947,63 +1556,28 @@ function renderValidation(step, res){
 
 // Dispatches to the validator function for the given step number.
 function validateStep(step){
-  if(step === 1) return validateCustomerBilling();
+  if(step === 1) return validatePage1();
   if(step === 2) return validatePage2();
-  if(step === 3) return validateRateStructure();
-  if(step === 4) return validatePage4();
-  if(step === 5) return validatePage5();
-  if(step === 6) return validatePage6();
+  if(step === 3) return validateRateModelChoice();
+  if(step === 4) return validateRateDetails();
+  if(step === 5) return validateAssessmentFee();
+  if(step === 6) return validatePage4();
+  if(step === 7) return validatePage5();
+  if(step === 8) return validatePage6();
   return {valid:true};
 }
 
-// Validates one customer type's billing data (used by validateCustomerBilling
-// for whichever of Residential/Commercial are included).
-function validateTypeBilling(typeState, label, idPrefix){
+// Validates the Customer & Connections step (total/active customers, water sold).
+function validatePage1(){
   const fieldErrors = [], messages = [];
-  if(!typeState.dataType){
-    messages.push('Select a data type for '+label+'.');
-    return {fieldErrors, messages};
-  }
-  const ci = typeState.customerInfo;
+  const ci = appState.customerInfo;
   const total = Number(ci.totalCustomers);
-  if(!(total > 0)){ fieldErrors.push({field:idPrefix+'TotalCustomers', message:'Total number of customers must be greater than 0.'}); messages.push(label+': total number of customers must be greater than 0.'); }
+  if(!(total > 0)){ fieldErrors.push({field:'totalCustomers', message:'Total number of customers must be greater than 0.'}); messages.push('Total number of customers must be greater than 0.'); }
   const active = Number(ci.activeCustomers);
-  if(ci.activeCustomers === '' || active < 0 || active > total){ fieldErrors.push({field:idPrefix+'ActiveCustomers', message:'Active customers must be between 0 and the total number of customers.'}); messages.push(label+': active customers must be between 0 and the total number of customers.'); }
-  if(typeState.dataType === 'monthly'){
-    let anyBlank = false;
-    typeState.monthlyData.forEach((v,i)=>{
-      if(v === '' || v === null || v === undefined || Number(v) < 0){
-        anyBlank = true;
-        fieldErrors.push({field:idPrefix+'Month'+i, message:'Enter a water-sold value for every month.'});
-      }
-    });
-    if(anyBlank) messages.push(label+': enter a water-sold value (0 or greater) for every month.');
-    const sum = typeState.monthlyData.reduce((s,v)=>s+(Number(v)||0),0);
-    if(!anyBlank && !(sum > 0)) messages.push(label+': total water sold across all 12 months must be greater than 0.');
-  } else {
-    const sold = Number(ci.monthlyWaterSold);
-    if(!(sold > 0)){ fieldErrors.push({field:idPrefix+'MonthlyWaterSold', message:'Monthly average water sold must be greater than 0.'}); messages.push(label+': monthly average water sold must be greater than 0.'); }
-  }
-  return {fieldErrors, messages};
-}
-
-// Validates the Customer & Billing step: customer type selection, then each
-// included type's billing data.
-function validateCustomerBilling(){
-  const fieldErrors = [], messages = [];
-  if(!appState.customerType){
-    messages.push('Select a customer type to continue.');
-    return {valid:false, fieldErrors, messages};
-  }
-  if(isResidentialIncluded()){
-    const r = validateTypeBilling(appState.residential, 'Residential', 'residential');
-    fieldErrors.push(...r.fieldErrors); messages.push(...r.messages);
-  }
-  if(isCommercialIncluded()){
-    const r = validateTypeBilling(appState.commercial, 'Commercial', 'commercial');
-    fieldErrors.push(...r.fieldErrors); messages.push(...r.messages);
-  }
-  return {valid: fieldErrors.length===0 && messages.length===0, fieldErrors, messages};
+  if(ci.activeCustomers === '' || active < 0 || active > total){ fieldErrors.push({field:'activeCustomers', message:'Active customers must be between 0 and the total number of customers.'}); messages.push('Active customers must be between 0 and the total number of customers.'); }
+  const sold = Number(ci.monthlyWaterSold);
+  if(!(sold > 0)){ fieldErrors.push({field:'monthlyWaterSold', message:'Monthly average water sold must be greater than 0.'}); messages.push('Monthly average water sold must be greater than 0.'); }
+  return {valid: fieldErrors.length===0, fieldErrors, messages};
 }
 
 // Validates the Meter Distribution step (sizes, counts, factors, first row's base fee).
@@ -2019,106 +1593,103 @@ function validatePage2(){
   if(rows.length > 0 && validRows.length === 0) messages.push('At least one meter row needs a valid size and a count greater than 0.');
   const anyNegative = rows.some(m=>Number(m.count) < 0);
   if(anyNegative) messages.push('Meter counts cannot be negative.');
-  const activeCustomers = getCombinedActiveCustomers();
+  const activeCustomers = Number(appState.customerInfo.activeCustomers)||0;
   const totalMeterCount = rows.reduce((a,m)=>a+(Number(m.count)||0),0);
   if(activeCustomers > 0 && totalMeterCount !== activeCustomers){
-    messages.push('Total meter count ('+formatNumber(totalMeterCount)+') must equal combined Active Customers ('+formatNumber(activeCustomers)+') from the Customer & Billing step.');
+    messages.push('Total meter count ('+formatNumber(totalMeterCount)+') must equal Active Customers ('+formatNumber(activeCustomers)+') from the Customer & Connections step.');
   }
   return {valid: messages.length===0, messages};
 }
 
-// Validates one customer type's tier shape (contiguity, diffs, and the
-// customer/water-sold totals cross-check against that type's own data).
-function validateTierShape(rm, custTotal, waterTotal, label){
+// Validates that a rate model (Fixed or Tier) has been chosen.
+function validateRateModelChoice(){
   const messages = [];
-  const tiers = rm.tiers;
-  if(tiers.length === 0) messages.push(label+': add at least one tier to continue.');
-  for(let i=0;i<tiers.length;i++){
-    const t = tiers[i];
-    const isLast = i === tiers.length-1;
-    if(t.start === '') messages.push(label+' Tier '+(i+1)+' needs a starting usage value.');
-    if(t.customers === '') messages.push(label+' Tier '+(i+1)+' needs a number of customers.');
-    if(t.waterSold === '') messages.push(label+' Tier '+(i+1)+' needs a water sold value.');
-    const end = t.end === '' || t.end === null ? null : Number(t.end);
-    if(!isLast && end === null) messages.push(label+' Tier '+(i+1)+' needs an ending usage value.');
-    if(end !== null && end <= Number(t.start)) messages.push(label+' Tier '+(i+1)+"'s ending usage must be greater than its starting usage.");
-    if(i > 0){
-      const prev = tiers[i-1];
-      const prevEnd = prev.end === '' || prev.end === null ? Infinity : Number(prev.end);
-      if(Number(t.start) < Number(prev.start)) messages.push(label+' Tier '+(i+1)+"'s starting usage cannot be less than the previous tier's starting usage.");
-      if(prevEnd !== Infinity && Number(t.start) !== prevEnd + 1){
-        messages.push(label+' Tier '+(i+1)+' must start immediately after Tier '+i+' ends (at '+(prevEnd+1)+').');
-      }
-      if(rm.tierDiffMethod === 'pct'){
-        if(t.diffPct === '') messages.push(label+' Tier '+(i+1)+' needs a unit cost increase (%).');
-        else if(Number(t.diffPct) <= -100) messages.push(label+' Tier '+(i+1)+"'s % increase must be greater than -100%.");
-      } else {
-        if(t.diffDollar === '') messages.push(label+' Tier '+(i+1)+' needs a unit cost increase ($).');
-      }
-    }
-  }
-  const custSum = tiers.reduce((a,t)=>a+(Number(t.customers)||0),0);
-  if(custTotal > 0 && custSum !== custTotal){
-    messages.push(label+': total tier customers ('+formatNumber(custSum)+') must equal Active Customers ('+formatNumber(custTotal)+') from the Customer & Billing step.');
-  }
-  const waterSum = tiers.reduce((a,t)=>a+(Number(t.waterSold)||0),0);
-  if(waterTotal > 0 && waterSum !== waterTotal){
-    messages.push(label+': total tier water sold ('+formatNumber(waterSum)+') must equal that type\'s monthly water sold from the Customer & Billing step.');
-  }
-  return messages;
-}
-
-// Validates the Rate Structure step: each included type's rate-model choice
-// and (if Tier) its tier shape, plus Commercial's markup value when both
-// customer types are present.
-function validateRateStructure(){
-  const messages = [];
-  if(isResidentialIncluded()){
-    const rm = appState.residential.rateModel;
-    if(!rm.type) messages.push('Select a Residential rate model (Fixed Rate or Tier-Based) to continue.');
-    else if(rm.type === 'tier') messages.push(...validateTierShape(rm, getTierCustomersTotal(appState.residential), getTierWaterSoldTotal(appState.residential), 'Residential'));
-  }
-  if(isCommercialIncluded()){
-    const rm = appState.commercial.rateModel;
-    if(!rm.type) messages.push('Select a Commercial rate model (Fixed Rate or Tier-Based) to continue.');
-    else if(rm.type === 'tier') messages.push(...validateTierShape(rm, getTierCustomersTotal(appState.commercial), getTierWaterSoldTotal(appState.commercial), 'Commercial'));
-    if(rm.type && isResidentialIncluded()){
-      const mk = rm.type==='fixed' ? rm.fixed.fixedMarkup : rm.tierMarkup;
-      const val = mk.method==='pct' ? mk.pct : mk.dollar;
-      if(val === '' || val === null || val === undefined || isNaN(Number(val))){
-        messages.push('Enter a Commercial markup value (the '+(mk.method==='pct'?'%':'$')+' markup off Residential\'s rate).');
-      }
-    }
-  }
-  const feePct = appState.rateModel.assessmentFeePct;
-  if(feePct === '') messages.push('Enter an assessment fee percentage.');
-  else if(Number(feePct) < 0) messages.push('Assessment fee percentage cannot be negative.');
+  if(!appState.rateModel.type) messages.push('Select a rate model (Fixed Rate or Tier-Based) to continue.');
   return {valid: messages.length===0, messages};
 }
-// Validates the Operating Expenses step (step 4).
+
+// Validates the Rate Details step: tier definitions, or the Fixed-Rate fields.
+function validateRateDetails(){
+  const messages = [];
+  const rm = appState.rateModel;
+  if(rm.type === 'tier'){
+    const tiers = rm.tiers;
+    if(tiers.length === 0) messages.push('Add at least one tier to continue.');
+    for(let i=0;i<tiers.length;i++){
+      const t = tiers[i];
+      const isLast = i === tiers.length-1;
+      if(t.start === '') messages.push('Tier '+(i+1)+' needs a starting usage value.');
+      if(t.customers === '') messages.push('Tier '+(i+1)+' needs a number of customers.');
+      if(t.waterSold === '') messages.push('Tier '+(i+1)+' needs a water sold value.');
+      const end = t.end === '' || t.end === null ? null : Number(t.end);
+      if(!isLast && end === null) messages.push('Tier '+(i+1)+' needs an ending usage value.');
+      if(end !== null && end <= Number(t.start)) messages.push('Tier '+(i+1)+"'s ending usage must be greater than its starting usage.");
+      if(i > 0){
+        const prev = tiers[i-1];
+        const prevEnd = prev.end === '' || prev.end === null ? Infinity : Number(prev.end);
+        if(Number(t.start) < Number(prev.start)) messages.push('Tier '+(i+1)+"'s starting usage cannot be less than the previous tier's starting usage.");
+        if(prevEnd !== Infinity && Number(t.start) !== prevEnd + 1){
+          messages.push('Tier '+(i+1)+' must start immediately after Tier '+i+' ends (at '+(prevEnd+1)+').');
+        }
+        if(rm.tierDiffMethod === 'pct'){
+          if(t.diffPct === '') messages.push('Tier '+(i+1)+' needs a unit cost increase (%).');
+          else if(Number(t.diffPct) <= -100) messages.push('Tier '+(i+1)+"'s % increase must be greater than -100%.");
+        } else {
+          if(t.diffDollar === '') messages.push('Tier '+(i+1)+' needs a unit cost increase ($).');
+        }
+      }
+    }
+    const custTotal = getTierCustomersTotal();
+    const custSum = tiers.reduce((a,t)=>a+(Number(t.customers)||0),0);
+    if(custTotal > 0 && custSum !== custTotal){
+      messages.push('Total tier customers ('+formatNumber(custSum)+') must equal Active Customers ('+formatNumber(custTotal)+') from the Customer & Connections step.');
+    }
+    const waterTotal = getTierWaterSoldTotal();
+    const waterSum = tiers.reduce((a,t)=>a+(Number(t.waterSold)||0),0);
+    if(waterTotal > 0 && waterSum !== waterTotal){
+      messages.push('Total tier water sold ('+formatNumber(waterSum)+') must equal Monthly Average Water Sold ('+formatNumber(waterTotal)+') from the Customer & Connections step.');
+    }
+  }
+  // Fixed-Rate model: Base Charge and Volumetric Rate are both calculated, not entered -- nothing to validate.
+  return {valid: messages.length===0, messages};
+}
+// the validateAssessmentFee function is the validation for page 5, which is the assessment fee page. 
+// Validates the Assessment Fee step.
+function validateAssessmentFee(){
+  const messages = [];
+  const rm = appState.rateModel;
+  if(rm.assessmentFeePct === '') messages.push('Enter an assessment fee percentage.');
+  if(Number(rm.assessmentFeePct) < 0) messages.push('Assessment fee percentage cannot be negative.');
+  if(rm.assessmentFeePct !== '' && Number(rm.assessmentFeePct) === 0) messages.push('Assessment fee percentage cannot be zero.');
+  return {valid: messages.length===0, messages};
+}
+//this validatepage4 function is the validation for page 6, which is the operating expenses page. 
+// Validates the Operating Expenses step.
 function validatePage4(){
   const messages = [];
-  const oe = appState.operatingExpenses;
-  const rows = oe.rows;
+  const rows = appState.operatingExpenses.rows;
   if(rows.some(r=>!r.description || !r.description.trim())) messages.push('Enter a description for every expense row.');
   if(rows.some(r=>!r.category || !String(r.category).trim())) messages.push('Select a category for every expense row.');
-  if(rows.some(r=>rowAmountMissing(r, oe.dataType))) messages.push(oe.dataType==='monthly' ? 'Enter a value for every month on every expense row.' : 'Enter an amount for every expense row.');
-  if(rows.some(r=>rowAmountNegative(r, oe.dataType))) messages.push('Expense amounts cannot be negative.');
-  if(oe.contingencyPct === '') messages.push('Enter a contingency percentage.');
+  if(rows.some(r=>r.amount === '')) messages.push('Enter an amount for every expense row.');
+  const anyNeg = rows.some(r=>Number(r.amount) < 0);
+  if(anyNeg) messages.push('Expense amounts cannot be negative.');
+  if(appState.operatingExpenses.contingencyPct === '') messages.push('Enter a contingency percentage.');
   return {valid: messages.length===0, messages};
 }
-// Validates the Miscellaneous Revenue step (step 5).
+// this validatepage5 function is the validation for page 7, which is the miscellaneous revenue page. 
+// Validates the Miscellaneous Revenue step.
 function validatePage5(){
   const messages = [];
-  const mr = appState.miscellaneousRevenue;
-  const rows = mr.rows;
+  const rows = appState.miscellaneousRevenue;
   if(rows.some(r=>!r.description || !r.description.trim())) messages.push('Enter a description for every revenue row.');
   if(rows.some(r=>!r.category || !String(r.category).trim())) messages.push('Select a category for every revenue row.');
-  if(rows.some(r=>rowAmountMissing(r, mr.dataType))) messages.push(mr.dataType==='monthly' ? 'Enter a value for every month on every revenue row.' : 'Enter an amount for every revenue row.');
-  if(rows.some(r=>rowAmountNegative(r, mr.dataType))) messages.push('Revenue amounts cannot be negative.');
+  if(rows.some(r=>r.amount === '')) messages.push('Enter an amount for every revenue row.');
+  const anyNeg = rows.some(r=>Number(r.amount) < 0);
+  if(anyNeg) messages.push('Revenue amounts cannot be negative.');
   return {valid: messages.length===0, messages};
 }
-// Validates the Water Loss step (step 6): who bears the loss and the loss amount are both always required, regardless of who bears it.
+// this code is the validation for page 6, which is the water loss page.
+// Validates the Water Loss step: who bears the loss and the loss amount are both always required, regardless of who bears it.
 function validatePage6(){
   const messages = [];
   const wl = appState.waterLoss;
@@ -2136,96 +1707,38 @@ function validatePage6(){
 }
 
 /* =========================================================================
-   STEP 1: CUSTOMER & BILLING
+   PAGE 1: CUSTOMER & CONNECTIONS
    ========================================================================= */
 
-// Highlights the selected Customer Type card and shows/hides each included
-// type's billing panel, populating whichever are shown.
-function renderCustomerBillingStep(){
-  document.querySelectorAll('#customerTypeToggle .rate-choice-card').forEach(el=>{
-    el.classList.toggle('selected', el.dataset.type === appState.customerType);
-  });
-  document.getElementById('residentialBillingPanel').style.display = isResidentialIncluded() ? 'block' : 'none';
-  document.getElementById('commercialBillingPanel').style.display = isCommercialIncluded() ? 'block' : 'none';
-  if(isResidentialIncluded()) renderCustomerTypePanel('residential');
-  if(isCommercialIncluded()) renderCustomerTypePanel('commercial');
-}
-
-// Sets the Customer Type ('residential'|'commercial'|'both') and re-renders
-// everything that depends on which types are included.
-function setCustomerType(type){
-  appState.customerType = type;
-  renderCustomerBillingStep();
-  syncCombinedCustomerInfo();
-  updateMeterTotals();
-  // Rate Structure's panels (and Commercial's markup fields) depend on which
-  // customer type(s) are included -- refresh them now, even though that step
-  // isn't visible yet, the same way the meter totals above are kept fresh
-  // ahead of time rather than only recomputed when that step is entered.
-  renderRateStructureStep();
-  renderStepNav();
-}
-
-// Populates one customer type's billing panel: Data Type card selection, its
-// Annual-Avg vs Monthly-Data sub-blocks, and current field values.
-function renderCustomerTypePanel(typeKey){
-  const typeState = appState[typeKey];
-  document.querySelectorAll('#'+typeKey+'DataTypeToggle .rate-choice-card').forEach(el=>{
-    el.classList.toggle('selected', el.dataset.datatype === typeState.dataType);
-  });
-  const ci = typeState.customerInfo;
-  document.getElementById(typeKey+'TotalCustomers').value = ci.totalCustomers===''?'':formatNumber(ci.totalCustomers||0);
-  document.getElementById(typeKey+'ActiveCustomers').value = ci.activeCustomers===''?'':formatNumber(ci.activeCustomers||0);
-  document.getElementById(typeKey+'MonthlyWaterSold').value = ci.monthlyWaterSold===''?'':formatNumber(ci.monthlyWaterSold||0);
-
-  const isMonthly = typeState.dataType === 'monthly';
-  document.getElementById(typeKey+'AnnualAvgFields').style.display = isMonthly ? 'none' : 'flex';
-  document.getElementById(typeKey+'MonthlyFields').style.display = isMonthly ? 'block' : 'none';
-
-  const grid = document.getElementById(typeKey+'MonthGrid');
-  grid.innerHTML = MONTH_LABELS.map((label,i)=>
-    '<div class="form-group">'+
-      '<label>'+label+'</label>'+
-      '<input type="text" inputmode="numeric" class="number-commas" id="'+typeKey+'Month'+i+'" value="'+(typeState.monthlyData[i]===''?'':formatNumber(typeState.monthlyData[i]||0))+'" oninput="onMonthlyDataChange(\''+typeKey+'\','+i+',this)">'+
-      '<div class="field-error" id="err-'+typeKey+'Month'+i+'"></div>'+
-    '</div>'
-  ).join('');
+// Populates the Customer & Connections step's inputs from state.
+function renderPage1(){
+  const ci = appState.customerInfo;
+  document.getElementById('totalCustomers').value = ci.totalCustomers===''?'':formatNumber(ci.totalCustomers||0);
+  document.getElementById('activeCustomers').value = ci.activeCustomers===''?'':formatNumber(ci.activeCustomers||0);
+  document.getElementById('monthlyWaterSold').value = ci.monthlyWaterSold===''?'':formatNumber(ci.monthlyWaterSold||0);
   bindNumberCommaInputs(document);
 }
 
-// Sets a customer type's Data Type (Annual Monthly Average vs Monthly Data) and re-renders its panel.
-function onCustomerDataTypeChange(typeKey, dataType){
-  appState[typeKey].dataType = dataType;
-  renderCustomerTypePanel(typeKey);
-  syncCombinedCustomerInfo();
+// Handles edits to the Customer & Connections inputs, clamping negatives and updating meter totals.
+function onField1Change(){
+  const ci = appState.customerInfo;
+  const tcRaw = document.getElementById('totalCustomers').value.replace(/,/g,'');
+  let tc = Number(tcRaw);
+  if(tc < 0) tc = 0;
+  ci.totalCustomers = tcRaw === '' ? '' : tc;
+  const acRaw = document.getElementById('activeCustomers').value.replace(/,/g,'');
+  let ac = Number(acRaw);
+  if(ac < 0) ac = 0;
+  ci.activeCustomers = acRaw === '' ? '' : ac;
+  const mwsRaw = document.getElementById('monthlyWaterSold').value.replace(/,/g,'');
+  let mws = Number(mwsRaw);
+  if(mws < 0) mws = 0;
+  ci.monthlyWaterSold = mwsRaw === '' ? '' : mws;
   updateMeterTotals();
-}
-
-// Handles edits to a customer type's Total/Active Customers or Monthly Water
-// Sold fields, clamping negatives, then keeps the combined mirror and
-// dependents (meters, that type's tier table) in sync.
-function onCustomerFieldChange(typeKey, field, el){
-  const raw = el.value.replace(/,/g,'');
-  let val = Number(raw);
-  if(val < 0) val = 0;
-  // Total/Active Customers are counts of people -- always whole numbers,
-  // regardless of what slipped through before the live formatter caught it.
-  if(field === 'totalCustomers' || field === 'activeCustomers') val = Math.round(val);
-  appState[typeKey].customerInfo[field] = raw === '' ? '' : val;
-  syncCombinedCustomerInfo();
-  updateMeterTotals();
-  if(appState[typeKey].rateModel.type === 'tier') renderTierTable(typeKey);
-}
-
-// Handles edits to one month's water-sold figure in Monthly Data mode.
-function onMonthlyDataChange(typeKey, monthIndex, el){
-  const raw = el.value.replace(/,/g,'');
-  let val = Number(raw);
-  if(val < 0) val = 0;
-  appState[typeKey].monthlyData[monthIndex] = raw === '' ? '' : val;
-  syncCombinedCustomerInfo();
-  updateMeterTotals();
-  if(appState[typeKey].rateModel.type === 'tier') renderTierTable(typeKey);
+  // Active Customers / Monthly Water Sold are the basis the tier table's %
+  // columns divide into -- re-render so those percentages and their
+  // enabled/disabled state stay in sync.
+  if(appState.rateModel.type === 'tier') renderTierTable();
 }
 
 // Escapes HTML special characters so untrusted text can be safely inserted into innerHTML.
@@ -2414,7 +1927,7 @@ function updateMeterTotals(){
   const totalCount = appState.meters.reduce((a,m)=>a+(Number(m.count)||0),0);
   document.getElementById('meterTotalCount').textContent = formatNumber(totalCount);
   document.getElementById('meterSummaryCount').textContent = formatNumber(totalCount);
-  const activeCustomers = getCombinedActiveCustomers();
+  const activeCustomers = Number(appState.customerInfo.activeCustomers)||0;
   document.getElementById('meterSummaryConnections').textContent = formatNumber(activeCustomers);
   const baseFeeRevenue = getMonthlyBaseFeeRevenue();
   document.getElementById('meterTotalBaseFeeRevenue').textContent = formatCurrency(baseFeeRevenue);
@@ -2441,105 +1954,63 @@ function updateMeterTotals(){
 }
 
 /* =========================================================================
-   STEP 3: RATE STRUCTURE
+   PAGE 3: RATE MODEL SELECTION
    ========================================================================= */
 
-// Top-level renderer for the Rate Structure step: shows/hides each included
-// type's panel and refreshes the shared base-charge readout.
-function renderRateStructureStep(){
-  setCurrencyValue(document.getElementById('fixedBaseCharge'), appState.rateModel.fixed.baseCharge);
-  document.getElementById('assessmentFeePct').value = appState.rateModel.assessmentFeePct;
-  document.getElementById('residentialRateStructurePanel').style.display = isResidentialIncluded() ? 'block' : 'none';
-  document.getElementById('commercialRateStructurePanel').style.display = isCommercialIncluded() ? 'block' : 'none';
-  if(isResidentialIncluded()) renderTypeRateDetails('residential');
-  if(isCommercialIncluded()) renderTypeRateDetails('commercial');
-  updateAssessmentFeeDisplay();
-}
-
-// Highlights the selected rate-model card (Fixed vs Tier) for one customer type.
-function renderTypeRateModelChoice(typeKey){
-  const rm = appState[typeKey].rateModel;
-  document.querySelectorAll('#'+typeKey+'RateModelToggle .rate-choice-card').forEach(el=>{
+// Highlights the selected rate-model card (Fixed vs Tier).
+function renderRateModelChoice(){
+  const rm = appState.rateModel;
+  document.querySelectorAll('#rateModelToggle .rate-choice-card').forEach(el=>{
     el.classList.toggle('selected', el.dataset.model === rm.type);
   });
 }
 
-// Sets one customer type's chosen rate model and re-renders its section.
-function setTypeRateModel(typeKey, type){
-  appState[typeKey].rateModel.type = type;
-  renderTypeRateModelChoice(typeKey);
-  renderTypeRateDetails(typeKey);
+// Sets the chosen rate model and re-renders the choice cards and rate details.
+function setRateModel(type){
+  appState.rateModel.type = type;
+  renderRateModelChoice();
+  renderRateDetails();
+}
+
+/* =========================================================================
+   PAGE 4: RATE DETAILS
+   ========================================================================= */
+
+// Shows the Fixed-Rate or Tier section depending on the chosen model, and refreshes the derived Base Charge.
+function renderRateDetails(){
+  const rm = appState.rateModel;
+  rm.fixed.baseCharge = getMonthlyBaseFeeRevenue();
+  document.getElementById('fixedRateSection').style.display = rm.type==='fixed' ? 'block' : 'none';
+  document.getElementById('tierRateSection').style.display = rm.type==='tier' ? 'block' : 'none';
+
+  setCurrencyValue(document.getElementById('fixedBaseCharge'), rm.fixed.baseCharge);
+  setCurrencyValue(document.getElementById('fixedVolumetricRate'), rm.fixed.volumetricRate);
+
+  const isPctDiff = rm.tierDiffMethod === 'pct';
+  document.getElementById('tierDiffMethodDollar').classList.toggle('active', !isPctDiff);
+  document.getElementById('tierDiffMethodPct').classList.toggle('active', isPctDiff);
+
+  renderTierTable();
+  bindCurrencyInputs(document.getElementById('fixedRateSection'));
+  bindCurrencyInputs(document.getElementById('tierRateSection'));
+}
+
+/* =========================================================================
+   PAGE 5: ASSESSMENT FEE
+   ========================================================================= */
+
+// Populates the Assessment Fee step's input from state.
+function renderAssessmentFeePage(){
+  document.getElementById('assessmentFeePct').value = appState.rateModel.assessmentFeePct;
   updateAssessmentFeeDisplay();
-  renderStepNav();
 }
 
-// Shows the Fixed-Rate or Tier section for one customer type, refreshes its
-// computed rate display, and (for Commercial, only when both customer types
-// are present) shows/populates the markup-off-Residential fields.
-function renderTypeRateDetails(typeKey){
-  const rm = appState[typeKey].rateModel;
-  document.getElementById(typeKey+'FixedSection').style.display = rm.type==='fixed' ? 'block' : 'none';
-  document.getElementById(typeKey+'TierSection').style.display = rm.type==='tier' ? 'block' : 'none';
-
-  if(typeKey === 'commercial'){
-    const showMarkup = isResidentialIncluded() && isCommercialIncluded();
-    document.getElementById('commercialFixedMarkupFields').style.display = (showMarkup && rm.type==='fixed') ? 'grid' : 'none';
-    document.getElementById('commercialTierMarkupFields').style.display = (showMarkup && rm.type==='tier') ? 'grid' : 'none';
-    document.getElementById('commercialFixedRateHint').textContent = showMarkup
-      ? "Solved as Residential's volumetric rate plus the markup below -- see it on the Summary & Results step once all steps are complete."
-      : 'The volumetric rate for Fixed Rate is calculated automatically so the Base Charge, this rate, misc. revenue, and the assessment fee together cover total annual expenses -- see it on the Summary & Results step once all steps are complete.';
-    renderMarkupFields('fixedMarkup');
-    renderMarkupFields('tierMarkup');
-  }
-
-  if(rm.type === 'tier'){
-    const isPctDiff = rm.tierDiffMethod === 'pct';
-    document.getElementById(typeKey+'TierDiffMethodDollar').classList.toggle('active', !isPctDiff);
-    document.getElementById(typeKey+'TierDiffMethodPct').classList.toggle('active', isPctDiff);
-    renderTierTable(typeKey);
-  }
-  bindCurrencyInputs(document.getElementById(typeKey+'FixedSection'));
-  bindCurrencyInputs(document.getElementById(typeKey+'TierSection'));
-}
-
-// Returns Commercial's markup object for 'fixedMarkup' or 'tierMarkup'.
-function getMarkupObj(markupKey){
-  const rm = appState.commercial.rateModel;
-  return markupKey === 'fixedMarkup' ? rm.fixed.fixedMarkup : rm.tierMarkup;
-}
-
-// Switches a Commercial markup field between $ and % entry.
-function setMarkupMethod(typeKey, markupKey, method){
-  getMarkupObj(markupKey).method = method;
-  renderMarkupFields(markupKey);
-}
-
-// Handles edits to a Commercial markup value field.
-function onMarkupValueChange(typeKey, markupKey, el){
-  const mk = getMarkupObj(markupKey);
-  const raw = String(el.value).replace(/,/g,'');
-  const val = raw === '' ? '' : Number(raw);
-  if(mk.method === 'pct') mk.pct = val; else mk.dollar = val;
-}
-
-// Refreshes a Commercial markup field's $/% toggle state and displayed value.
-function renderMarkupFields(markupKey){
-  const mk = getMarkupObj(markupKey);
-  const isPct = mk.method === 'pct';
-  const idBase = 'commercial'+markupKey.charAt(0).toUpperCase()+markupKey.slice(1);
-  document.getElementById(idBase+'MethodDollar').classList.toggle('active', !isPct);
-  document.getElementById(idBase+'MethodPct').classList.toggle('active', isPct);
-  const input = document.getElementById(idBase+'Value');
-  const val = isPct ? mk.pct : mk.dollar;
-  input.value = val === '' || val === null || val === undefined ? '' : val;
-}
-
-// Tier 1's rate is solved in calculateAll() (via solveJointRates); every later
-// tier is priced automatically at the previous tier's rate plus that tier's
-// own unit cost increase -- either a flat $ amount added on, or a % increase
-// applied, per rm.tierDiffMethod.
-function recomputeTierRates(rm){
-  const tiers = rm.tiers;
+// Tier 1's rate is solved in calculateAll(); every later tier is priced
+// automatically at the previous tier's rate plus that tier's own unit cost
+// increase -- either a flat $ amount added on, or a % increase applied, per tierDiffMethod.
+function recomputeTierRates(){
+  const tiers = appState.rateModel.tiers;
+  const rm = appState.rateModel;
   if(rm.tierDiffMethod === 'pct'){
     for(let i=1;i<tiers.length;i++){
       const growth = 1 + (Number(tiers[i].diffPct)||0)/100;
@@ -2554,38 +2025,36 @@ function recomputeTierRates(rm){
 }
 
 // The Customers/Water Sold columns can be driven by either a raw count/gallon
-// figure or a % of that customer type's own totals from the Customer &
-// Billing step -- these are the totals that % entry divides into (and that %
-// display is a share of).
-function getTierCustomersTotal(typeState){ return Number(typeState.customerInfo.activeCustomers)||0; }
-function getTierWaterSoldTotal(typeState){ return getEffectiveMonthlyWaterSold(typeState); }
+// figure or a % of the totals from the Customer & Connections step -- these
+// are the totals that % entry divides into (and that % display is a share of).
+function getTierCustomersTotal(){ return Number(appState.customerInfo.activeCustomers)||0; }
+function getTierWaterSoldTotal(){ return Number(appState.customerInfo.monthlyWaterSold)||0; }
 function round1(n){ return Math.round(n*10)/10; }
 
-// Rebuilds one customer type's tier table rows from state.
-function renderTierTable(typeKey){
-  const typeState = appState[typeKey];
-  const rm = typeState.rateModel;
-  recomputeTierRates(rm);
+// Rebuilds the tier table's rows from state.
+function renderTierTable(){
+  recomputeTierRates();
+  const rm = appState.rateModel;
   const isCustPct = rm.tierCustomersMethod === 'pct';
   const isWaterPct = rm.tierWaterSoldMethod === 'pct';
-  document.getElementById(typeKey+'TierCustomersMethodNumber').classList.toggle('active', !isCustPct);
-  document.getElementById(typeKey+'TierCustomersMethodPct').classList.toggle('active', isCustPct);
-  document.getElementById(typeKey+'TierWaterSoldMethodGal').classList.toggle('active', !isWaterPct);
-  document.getElementById(typeKey+'TierWaterSoldMethodPct').classList.toggle('active', isWaterPct);
-  document.getElementById(typeKey+'TierCustomersHeaderLabel').textContent = isCustPct ? 'No. of Customers (%)' : 'No. of Customers';
-  document.getElementById(typeKey+'TierWaterSoldHeaderLabel').textContent = isWaterPct ? 'Water Sold (%)' : 'Water Sold (gal/mo)';
-  document.getElementById(typeKey+'TierRefActiveCustomers').textContent = formatNumber(getTierCustomersTotal(typeState));
-  document.getElementById(typeKey+'TierRefMonthlyWaterSold').textContent = formatNumber(getTierWaterSoldTotal(typeState));
+  document.getElementById('tierCustomersMethodNumber').classList.toggle('active', !isCustPct);
+  document.getElementById('tierCustomersMethodPct').classList.toggle('active', isCustPct);
+  document.getElementById('tierWaterSoldMethodGal').classList.toggle('active', !isWaterPct);
+  document.getElementById('tierWaterSoldMethodPct').classList.toggle('active', isWaterPct);
+  document.getElementById('tierCustomersHeaderLabel').textContent = isCustPct ? 'No. of Customers (%)' : 'No. of Customers';
+  document.getElementById('tierWaterSoldHeaderLabel').textContent = isWaterPct ? 'Water Sold (%)' : 'Water Sold (gal/mo)';
+  document.getElementById('tierRefActiveCustomers').textContent = formatNumber(getTierCustomersTotal());
+  document.getElementById('tierRefMonthlyWaterSold').textContent = formatNumber(getTierWaterSoldTotal());
 
   const isPctDiff = rm.tierDiffMethod === 'pct';
-  document.getElementById(typeKey+'TierDiffMethodDollar').classList.toggle('active', !isPctDiff);
-  document.getElementById(typeKey+'TierDiffMethodPct').classList.toggle('active', isPctDiff);
+  document.getElementById('tierDiffMethodDollar').classList.toggle('active', !isPctDiff);
+  document.getElementById('tierDiffMethodPct').classList.toggle('active', isPctDiff);
 
-  const tbody = document.getElementById(typeKey+'TierTableBody');
+  const tbody = document.getElementById('tierTableBody');
   tbody.innerHTML = '';
   const tiers = rm.tiers;
-  const custTotal = getTierCustomersTotal(typeState);
-  const waterTotal = getTierWaterSoldTotal(typeState);
+  const custTotal = getTierCustomersTotal();
+  const waterTotal = getTierWaterSoldTotal();
   tiers.forEach((t,idx)=>{
     t.name = String(idx+1);
     if(idx===0) t.start = 0;
@@ -2597,58 +2066,57 @@ function renderTierTable(typeKey){
     const custPct = (t.customers==='' || custTotal<=0) ? '' : round1(Number(t.customers)/custTotal*100);
     const waterPct = (t.waterSold==='' || waterTotal<=0) ? '' : round1(Number(t.waterSold)/waterTotal*100);
     const custCell = isCustPct
-      ? '<td><input type="number" min="0" step="0.1" data-field="customersPct" value="'+custPct+'"'+(custTotal<=0?' disabled title="Enter Active Customers on the Customer & Billing step first"':'')+' oninput="onTierRowChange(\''+typeKey+'\',this)"></td>'
-      : '<td><input type="number" min="0" data-field="customers" value="'+t.customers+'" oninput="onTierRowChange(\''+typeKey+'\',this)"></td>';
+      ? '<td><input type="number" min="0" step="0.1" data-field="customersPct" value="'+custPct+'"'+(custTotal<=0?' disabled title="Enter Active Customers on the Customer & Connections step first"':'')+' oninput="onTierRowChange(this)"></td>'
+      : '<td><input type="number" min="0" data-field="customers" value="'+t.customers+'" oninput="onTierRowChange(this)"></td>';
     const waterCell = isWaterPct
-      ? '<td><input type="number" min="0" step="0.1" data-field="waterSoldPct" value="'+waterPct+'"'+(waterTotal<=0?' disabled title="Enter that type\'s water sold on the Customer & Billing step first"':'')+' oninput="onTierRowChange(\''+typeKey+'\',this)"></td>'
-      : '<td><input type="text" class="number-commas" data-field="waterSold" value="'+(t.waterSold===''?'':formatNumber(t.waterSold))+'" oninput="onTierRowChange(\''+typeKey+'\',this)"></td>';
+      ? '<td><input type="number" min="0" step="0.1" data-field="waterSoldPct" value="'+waterPct+'"'+(waterTotal<=0?' disabled title="Enter Monthly Average Water Sold on the Customer & Connections step first"':'')+' oninput="onTierRowChange(this)"></td>'
+      : '<td><input type="text" class="number-commas" data-field="waterSold" value="'+(t.waterSold===''?'':formatNumber(t.waterSold))+'" oninput="onTierRowChange(this)"></td>';
     const diffCell = idx===0
       ? '<td><input type="text" value="--" readonly title="Tier 1\'s rate is solved automatically -- there\'s no previous tier to increase from."></td>'
       : (isPctDiff
-          ? '<td><input type="number" step="0.01" data-field="diffPct" value="'+(t.diffPct===''?'':t.diffPct)+'" oninput="onTierRowChange(\''+typeKey+'\',this)"></td>'
-          : '<td><input type="text" class="currency-input" data-field="diffDollar" value="'+(t.diffDollar===''?'':formatCurrency(t.diffDollar))+'" oninput="onTierRowChange(\''+typeKey+'\',this)"></td>');
+          ? '<td><input type="number" step="0.01" data-field="diffPct" value="'+(t.diffPct===''?'':t.diffPct)+'" oninput="onTierRowChange(this)"></td>'
+          : '<td><input type="text" class="currency-input" data-field="diffDollar" value="'+(t.diffDollar===''?'':formatCurrency(t.diffDollar))+'" oninput="onTierRowChange(this)"></td>');
     const tr = document.createElement('tr');
     tr.dataset.id = t.id;
     tr.innerHTML =
       '<td><input type="text" value="'+escapeHtml(t.name)+'" readonly></td>'+
       (idx===0
         ? '<td><input type="text" value="0" readonly></td>'
-        : '<td><input type="text" class="number-commas" data-field="start" value="'+(t.start===''?'':formatNumber(t.start))+'" oninput="onTierRowChange(\''+typeKey+'\',this)"></td>')+
+        : '<td><input type="text" class="number-commas" data-field="start" value="'+(t.start===''?'':formatNumber(t.start))+'" oninput="onTierRowChange(this)"></td>')+
       (isLast
         ? '<td><input type="text" value="and above" readonly title="The last tier always runs to and above, with no upper bound."></td>'
-        : '<td><input type="text" class="number-commas" data-field="end" value="'+(t.end===null?'':formatNumber(t.end))+'" oninput="onTierRowChange(\''+typeKey+'\',this)"></td>')+
+        : '<td><input type="text" class="number-commas" data-field="end" value="'+(t.end===null?'':formatNumber(t.end))+'" oninput="onTierRowChange(this)"></td>')+
       diffCell + custCell + waterCell +
-      '<td><button class="btn-icon" onclick="removeTierRow(\''+typeKey+'\',\''+t.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
+      '<td><button class="btn-icon" onclick="removeTierRow(\''+t.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
     tbody.appendChild(tr);
   });
   bindCurrencyInputs(tbody);
   bindNumberCommaInputs(tbody);
-  refreshTierTotalsRow(typeKey);
-  runTierValidation(typeKey);
+  refreshTierTotalsRow();
+  runTierValidation();
   updateAssessmentFeeDisplay();
 }
 
 // Switches between entering each tier's customer count as a raw number or a % of Active Customers.
-function setTierCustomersMethod(typeKey, method){
-  appState[typeKey].rateModel.tierCustomersMethod = method;
-  renderTierTable(typeKey);
+function setTierCustomersMethod(method){
+  appState.rateModel.tierCustomersMethod = method;
+  renderTierTable();
 }
 
-// Switches between entering each tier's water sold as raw gallons or a % of that type's monthly water sold.
-function setTierWaterSoldMethod(typeKey, method){
-  appState[typeKey].rateModel.tierWaterSoldMethod = method;
-  renderTierTable(typeKey);
+// Switches between entering each tier's water sold as raw gallons or a % of Monthly Average Water Sold.
+function setTierWaterSoldMethod(method){
+  appState.rateModel.tierWaterSoldMethod = method;
+  renderTierTable();
 }
 
-// Rebuilds one customer type's totals (tfoot) row: sums of whichever Customers/Water Sold columns are currently shown.
-function refreshTierTotalsRow(typeKey){
-  const tfoot = document.getElementById(typeKey+'TierTableFoot');
+// Rebuilds the totals (tfoot) row: sums of whichever Customers/Water Sold columns are currently shown.
+function refreshTierTotalsRow(){
+  const tfoot = document.getElementById('tierTableFoot');
   if(!tfoot) return;
-  const typeState = appState[typeKey];
-  const rm = typeState.rateModel;
+  const rm = appState.rateModel;
   const tiers = rm.tiers;
-  const custTotal = getTierCustomersTotal(typeState);
-  const waterTotal = getTierWaterSoldTotal(typeState);
+  const custTotal = getTierCustomersTotal();
+  const waterTotal = getTierWaterSoldTotal();
   const custSum = tiers.reduce((a,t)=>a+(Number(t.customers)||0),0);
   const waterSum = tiers.reduce((a,t)=>a+(Number(t.waterSold)||0),0);
   const custPctSum = custTotal>0 ? round1(custSum/custTotal*100) : '-';
@@ -2672,13 +2140,11 @@ function setTierSiblingField(tr, field, value){
 
 // Handles edits to a tier row's name/start/end/customers/waterSold fields
 // (and their % counterparts, which derive the underlying count/gallons from
-// that customer type's own totals on the Customer & Billing step). Rate isn't
-// editable here -- it's solved in calculateAll() (see solveJointRates()).
-function onTierRowChange(typeKey, el){
+// the Customer & Connections step's totals). Rate isn't editable here -- it's
+// solved in calculateAll() (see the tier branch there).
+function onTierRowChange(el){
   const tr = el.closest('tr');
-  const typeState = appState[typeKey];
-  const rm = typeState.rateModel;
-  const t = rm.tiers.find(x=>x.id===tr.dataset.id);
+  const t = appState.rateModel.tiers.find(x=>x.id===tr.dataset.id);
   if(!t) return;
   const field = el.dataset.field;
   if(field === 'end'){
@@ -2686,8 +2152,8 @@ function onTierRowChange(typeKey, el){
     // Keep the next tier's Start immediately after this tier's End, so the
     // user doesn't have to update it by hand every time this one changes.
     if(t.end !== null){
-      const idx = rm.tiers.findIndex(x=>x.id===t.id);
-      const nextTier = rm.tiers[idx+1];
+      const idx = appState.rateModel.tiers.findIndex(x=>x.id===t.id);
+      const nextTier = appState.rateModel.tiers[idx+1];
       if(nextTier){
         nextTier.start = t.end + 1;
         const nextRow = tr.nextElementSibling;
@@ -2699,10 +2165,10 @@ function onTierRowChange(typeKey, el){
     let v = el.value === '' ? '' : Number(el.value);
     if(v !== '' && v < 0) v = 0;
     t.customers = v;
-    const total = getTierCustomersTotal(typeState);
+    const total = getTierCustomersTotal();
     setTierSiblingField(tr, 'customersPct', (v==='' || total<=0) ? '' : round1(v/total*100));
   } else if(field === 'customersPct'){
-    const total = getTierCustomersTotal(typeState);
+    const total = getTierCustomersTotal();
     const pct = el.value === '' ? '' : Number(el.value);
     if(total > 0 && pct !== ''){
       t.customers = Math.round(pct/100*total);
@@ -2712,10 +2178,10 @@ function onTierRowChange(typeKey, el){
     const num = parseFloat(String(el.value).replace(/,/g,''));
     const v = isFinite(num) ? Math.max(0,num) : '';
     t.waterSold = v;
-    const total = getTierWaterSoldTotal(typeState);
+    const total = getTierWaterSoldTotal();
     setTierSiblingField(tr, 'waterSoldPct', (v==='' || total<=0) ? '' : round1(v/total*100));
   } else if(field === 'waterSoldPct'){
-    const total = getTierWaterSoldTotal(typeState);
+    const total = getTierWaterSoldTotal();
     const pct = el.value === '' ? '' : Number(el.value);
     if(total > 0 && pct !== ''){
       t.waterSold = Math.round(pct/100*total);
@@ -2732,26 +2198,26 @@ function onTierRowChange(typeKey, el){
     t[field] = v;
     if(v !== '') el.value = formatNumber(v);
   }
-  recomputeTierRates(rm);
-  refreshTierTotalsRow(typeKey);
-  runTierValidation(typeKey);
+  recomputeTierRates();
+  refreshTierTotalsRow();
+  runTierValidation();
   updateAssessmentFeeDisplay();
 }
 
 // Switches between entering each tier's unit cost increase as a flat $ amount or a % increase.
-function setTierDiffMethod(typeKey, method){
-  appState[typeKey].rateModel.tierDiffMethod = method;
-  renderTypeRateDetails(typeKey);
+function setTierDiffMethod(method){
+  appState.rateModel.tierDiffMethod = method;
+  renderRateDetails();
 }
 
-// Adds a new tier to one customer type. If the last row is still open-ended
-// ("and above", end not yet set), the new tier is inserted just above it so
-// that open-ended row stays pinned last -- otherwise (every tier so far has
-// an explicit end) there's no open-ended row to preserve, so it's appended as
-// usual. The new tier's unit cost increase starts blank -- it's never
-// inferred from another tier, only from what the user enters for this one.
-function addTierRow(typeKey){
-  const tiers = appState[typeKey].rateModel.tiers;
+// Adds a new tier. If the last row is still open-ended ("and above", end not
+// yet set), the new tier is inserted just above it so that open-ended row
+// stays pinned last -- otherwise (every tier so far has an explicit end)
+// there's no open-ended row to preserve, so it's appended as usual.
+// The new tier's unit cost increase starts blank -- it's never inferred from
+// another tier, only from what the user enters for this one.
+function addTierRow(){
+  const tiers = appState.rateModel.tiers;
   const lastIdx = tiers.length-1;
   const lastIsOpenEnded = lastIdx >= 0 && tiers[lastIdx].end === null;
   const insertIdx = lastIsOpenEnded ? lastIdx : tiers.length;
@@ -2759,38 +2225,32 @@ function addTierRow(typeKey){
   const newStart = prev && prev.end !== null ? Number(prev.end)+1 : (prev ? Number(prev.start)+1000 : 0);
   tiers.splice(insertIdx, 0, {id:uid(), name:String(tiers.length+1), start:newStart, end:null, rate:0, customers:'', waterSold:0,
     diffDollar:'', diffPct:''});
-  renderTierTable(typeKey);
+  renderTierTable();
 }
 
-// Removes a tier by id from one customer type.
-function removeTierRow(typeKey, id){
-  appState[typeKey].rateModel.tiers = appState[typeKey].rateModel.tiers.filter(t=>t.id!==id);
-  renderTierTable(typeKey);
+// Removes a tier by id.
+function removeTierRow(id){
+  appState.rateModel.tiers = appState.rateModel.tiers.filter(t=>t.id!==id);
+  renderTierTable();
 }
 
-// A rate model's rate(s) are a calculated output (not something the user
-// directly enters), so a negative result is only ever a heads-up, never
-// something that should block navigation -- see negativeRateWarning().
-function typeHasNegativeRate(typeState){
-  const rm = typeState.rateModel;
-  if(rm.type === 'fixed') return Number(rm.fixed.volumetricRate) < 0;
-  if(rm.type === 'tier') return rm.tiers.some(t=>Number(t.rate) < 0);
-  return false;
+// Tier rates are a calculated output (not something the user directly enters), so a
+// negative result is only ever a heads-up, never something that should block navigation --
+// see negativeTierRateWarning().
+function tiersHaveNegativeRate(){
+  return appState.rateModel.type==='tier' && appState.rateModel.tiers.some(t=>Number(t.rate) < 0);
 }
-function negativeRateWarning(typeState, label){
-  return 'One or more calculated '+label+' unit costs (Cost per 1,000 Gal) came out negative. This usually means the unit cost difference between tiers (or, for Commercial, the markup applied) is too large for the revenue currently needed from rates -- double-check the data entered on the Customer & Billing, Operating Expenses, and Rate Structure steps. This is just a heads-up and will not stop you from continuing.';
+function negativeTierRateWarning(){
+  return 'One or more calculated unit costs (Cost per 1,000 Gal) came out negative. This usually means the unit cost difference between tiers is too large for the revenue currently needed from rates -- double-check the data entered on the Customer & Connections, Operating Expenses, and Consumption Tiers steps. This is just a heads-up and will not stop you from continuing.';
 }
 
-// Re-validates one customer type's tier shape and updates its warning banner.
-function runTierValidation(typeKey){
-  const typeState = appState[typeKey];
-  const rm = typeState.rateModel;
-  const label = typeKey==='residential' ? 'Residential' : 'Commercial';
-  const messages = rm.type==='tier' ? validateTierShape(rm, getTierCustomersTotal(typeState), getTierWaterSoldTotal(typeState), label) : [];
-  const displayMsgs = [...messages];
-  if(typeHasNegativeRate(typeState)) displayMsgs.push(negativeRateWarning(typeState, label));
-  const alertBox = document.getElementById(typeKey+'TierAlert');
-  if(rm.type==='tier' && displayMsgs.length){
+// Re-validates the Rate Details step and updates its warning banner.
+function runTierValidation(){
+  const res = validateRateDetails();
+  const alertBox = document.getElementById('tierAlert');
+  const displayMsgs = [...res.messages];
+  if(tiersHaveNegativeRate()) displayMsgs.push(negativeTierRateWarning());
+  if(appState.rateModel.type==='tier' && displayMsgs.length){
     alertBox.innerHTML = alertHtml('warning','triangle-exclamation', displayMsgs);
   } else {
     alertBox.innerHTML = '';
@@ -2813,27 +2273,17 @@ function computeAssessmentFeeAnnual(){
 }
 
 // Rate revenue estimate used as the base for the assessment fee percentage --
-// computed before the assessment fee is added to total revenue. Sums across
-// whichever customer type(s) are included.
+// computed before the assessment fee is added to total revenue.
 function estimateRateRevenueForAssessment(){
-  const wl = getWaterLossSummary();
-  let total = 0;
-  if(isResidentialIncluded()) total += typeRateRevenueAnnual(appState.residential, wl);
-  if(isCommercialIncluded()) total += typeRateRevenueAnnual(appState.commercial, wl);
-  return total;
-}
-
-// One customer type's own volumetric/tier revenue (no base charge -- that's
-// shared and added once at the combined level, see calculateAll()).
-function typeRateRevenueAnnual(typeState, waterLossSummary){
-  const rm = typeState.rateModel;
+  const rm = appState.rateModel;
+  const ci = appState.customerInfo;
+  const activeCustomers = Number(ci.activeCustomers)||0;
+  const monthlyWaterSold = Number(ci.monthlyWaterSold)||0;
   if(rm.type === 'fixed'){
-    return computeVolumetricRevenue(rm.fixed.volumetricRate, Number(typeState.customerInfo.activeCustomers)||0, getEffectiveMonthlyWaterSold(typeState), rm.fixed.includedConsumption).volumetricAnnual;
+    return computeFixedRateRevenue(rm.fixed, activeCustomers, monthlyWaterSold).totalAnnual;
   }
-  if(rm.type === 'tier'){
-    return computeTierRevenue(rm.tiers, waterLossSummary).totalAnnual;
-  }
-  return 0;
+  const wl = getWaterLossSummary();
+  return computeTierRevenue(rm.tiers, wl).totalAnnual;
 }
 
 // Updates the assessment-fee annual-amount display, if that element exists on the page.
@@ -2847,58 +2297,22 @@ function updateAssessmentFeeDisplay(){
    ========================================================================= */
 
 // Rebuilds the operating-expenses table's rows from state.
-// Builds the Operating Expenses / Non-Operating Revenue table header for the
-// given Data Type -- Monthly Data spreads the amount across 12 month
-// columns instead of one Amount + Frequency pair.
-function moneyTableHeadHtml(dataType, annualLabel){
-  if(dataType === 'monthly'){
-    return '<tr><th style="width:18%">Description</th><th style="width:14%">Category</th>'+
-      MONTH_LABELS.map(m=>'<th>'+m.slice(0,3)+'</th>').join('')+
-      '<th style="width:9%">'+annualLabel+'</th><th></th></tr>';
-  }
-  return '<tr><th style="width:26%">Description</th><th style="width:20%">Category</th><th style="width:14%">Amount</th><th style="width:14%">Frequency</th><th style="width:18%">'+annualLabel+'</th><th></th></tr>';
-}
-
-// Builds the amount-entry cells for one row -- either the 12 month inputs
-// (Monthly Data) or the Amount+Frequency pair (Annual Average).
-function moneyRowCellsHtml(row, dataType, handlerName){
-  if(dataType === 'monthly'){
-    return MONTH_LABELS.map((label,i)=>
-      '<td><input type="text" class="number-commas" data-field="monthlyData" data-month-index="'+i+'" value="'+(row.monthlyData[i]===''?'':formatNumber(row.monthlyData[i]||0))+'" oninput="'+handlerName+'(this)" title="'+label+'"></td>'
-    ).join('');
-  }
-  return '<td><input type="text" class="currency-input" data-field="amount" value="'+formatCurrency(row.amount)+'" oninput="'+handlerName+'(this)"></td>'+
-    '<td><select data-field="frequency" onchange="'+handlerName+'(this)">'+FREQUENCIES.map(f=>'<option value="'+f+'"'+(f===row.frequency?' selected':'')+'>'+f+'</option>').join('')+'</select></td>';
-}
-
-// Sets the Operating Expenses table's Data Type and re-renders it.
-function setExpenseDataType(type){
-  appState.operatingExpenses.dataType = type;
-  renderExpenseTable();
-}
-
 function renderExpenseTable(){
-  const dataType = appState.operatingExpenses.dataType;
-  document.querySelectorAll('#expenseDataTypeToggle .rate-choice-card').forEach(el=>{
-    el.classList.toggle('selected', el.dataset.datatype === dataType);
-  });
-  document.getElementById('expenseTableHead').innerHTML = moneyTableHeadHtml(dataType, 'Annual Expense');
   const tbody = document.getElementById('expenseTableBody');
   tbody.innerHTML = '';
   appState.operatingExpenses.rows.forEach(row=>{
-    if(!row.monthlyData) row.monthlyData = Array(12).fill('');
     const tr = document.createElement('tr');
     tr.dataset.id = row.id;
     tr.innerHTML =
       '<td><input type="text" data-field="description" value="'+escapeHtml(row.description)+'" oninput="onExpenseRowChange(this)"></td>'+
       '<td>'+categorySelectHtml(EXPENSE_CATEGORIES, row, 'onExpenseRowChange')+'</td>'+
-      moneyRowCellsHtml(row, dataType, 'onExpenseRowChange')+
-      '<td class="row-annual">'+formatCurrency(toAnnualForRow(row, dataType))+'</td>'+
+      '<td><input type="text" class="currency-input" data-field="amount" value="'+formatCurrency(row.amount)+'" oninput="onExpenseRowChange(this)"></td>'+
+      '<td><select data-field="frequency" onchange="onExpenseRowChange(this)">'+FREQUENCIES.map(f=>'<option value="'+f+'"'+(f===row.frequency?' selected':'')+'>'+f+'</option>').join('')+'</select></td>'+
+      '<td class="row-annual">'+formatCurrency(toAnnual(row.amount,row.frequency))+'</td>'+
       '<td><button class="btn-icon" onclick="removeExpenseRow(\''+row.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
     tbody.appendChild(tr);
   });
   bindCurrencyInputs(tbody);
-  bindNumberCommaInputs(tbody);
   document.getElementById('expenseContingencyPct').value = appState.operatingExpenses.contingencyPct;
   onExpenseTotalsChange();
 }
@@ -2920,7 +2334,7 @@ function categorySelectHtml(categories, row, handlerName, allowCustom){
   return html;
 }
 
-// Handles edits to an expense row's description/category/amount/frequency/monthlyData.
+// Handles edits to an expense row's description/category/amount/frequency.
 function onExpenseRowChange(el){
   const tr = el.closest('tr');
   const row = appState.operatingExpenses.rows.find(r=>r.id===tr.dataset.id);
@@ -2928,12 +2342,6 @@ function onExpenseRowChange(el){
   const field = el.dataset.field;
   if(field === 'amount'){
     row.amount = parseCurrencyInputOrBlank(el.value);
-  } else if(field === 'monthlyData'){
-    const idx = Number(el.dataset.monthIndex);
-    const raw = el.value.replace(/,/g,'');
-    let v = raw === '' ? '' : Number(raw);
-    if(v !== '' && v < 0) v = 0;
-    row.monthlyData[idx] = v;
   } else if(field === 'category'){
     if(el.value === '__custom__'){ row.customCategory = true; row.category=''; renderExpenseTable(); return; }
     // Switching away from Custom... needs a re-render too, so the leftover custom-text input is removed.
@@ -2947,13 +2355,13 @@ function onExpenseRowChange(el){
     row[field] = el.value;
   }
   const annualCell = tr.querySelector('.row-annual');
-  if(annualCell) annualCell.textContent = formatCurrency(toAnnualForRow(row, appState.operatingExpenses.dataType));
+  if(annualCell) annualCell.textContent = formatCurrency(toAnnual(row.amount, row.frequency));
   onExpenseTotalsChange();
 }
 
 // Adds a new blank expense row.
 function addExpenseRow(){
-  appState.operatingExpenses.rows.push({id:uid(), description:'', category:'Facilities Operation', amount:0, frequency:'Annual', monthlyData:Array(12).fill('')});
+  appState.operatingExpenses.rows.push({id:uid(), description:'', category:'Facilities Operation', amount:0, frequency:'Annual'});
   renderExpenseTable();
 }
 
@@ -2977,11 +2385,10 @@ function onExpenseTotalsChange(){
 
 // Recomputes and displays the per-category expense breakdown and grand totals.
 function updateExpenseCategoryBreakdown(){
-  const dataType = appState.operatingExpenses.dataType;
   const byCategory = {};
   appState.operatingExpenses.rows.forEach(row=>{
     const cat = row.category || 'Other';
-    byCategory[cat] = (byCategory[cat]||0) + toAnnualForRow(row, dataType);
+    byCategory[cat] = (byCategory[cat]||0) + toAnnual(row.amount, row.frequency);
   });
   const subtotal = Object.values(byCategory).reduce((a,v)=>a+v,0);
   const contingencyPct = Number(appState.operatingExpenses.contingencyPct)||0;
@@ -3005,8 +2412,6 @@ function updateExpenseCategoryBreakdown(){
   if(contingencyEl) contingencyEl.textContent = formatCurrency(contingencyAmount);
   const totalEl = document.getElementById('expenseGrandTotal');
   if(totalEl) totalEl.textContent = formatCurrency(subtotal+contingencyAmount);
-  const topTotalEl = document.getElementById('expenseTopTotal');
-  if(topTotalEl) topTotalEl.textContent = formatCurrency(subtotal+contingencyAmount);
 }
 
 /* =========================================================================
@@ -3014,51 +2419,32 @@ function updateExpenseCategoryBreakdown(){
    ========================================================================= */
 
 // Rebuilds the miscellaneous-revenue table's rows from state.
-// Sets the Non-Operating Revenue table's Data Type and re-renders it.
-function setMiscRevenueDataType(type){
-  appState.miscellaneousRevenue.dataType = type;
-  renderMiscRevenueTable();
-}
-
 function renderMiscRevenueTable(){
-  const dataType = appState.miscellaneousRevenue.dataType;
-  document.querySelectorAll('#miscRevenueDataTypeToggle .rate-choice-card').forEach(el=>{
-    el.classList.toggle('selected', el.dataset.datatype === dataType);
-  });
-  document.getElementById('miscRevenueTableHead').innerHTML = moneyTableHeadHtml(dataType, 'Annual Amount');
   const tbody = document.getElementById('miscRevenueTableBody');
   tbody.innerHTML = '';
-  appState.miscellaneousRevenue.rows.forEach(row=>{
-    if(!row.monthlyData) row.monthlyData = Array(12).fill('');
+  appState.miscellaneousRevenue.forEach(row=>{
     const tr = document.createElement('tr');
     tr.dataset.id = row.id;
     tr.innerHTML =
       '<td><input type="text" data-field="description" value="'+escapeHtml(row.description)+'" oninput="onMiscRevenueRowChange(this)"></td>'+
       '<td>'+categorySelectHtml(MISC_REVENUE_CATEGORIES, row, 'onMiscRevenueRowChange')+'</td>'+
-      moneyRowCellsHtml(row, dataType, 'onMiscRevenueRowChange')+
-      '<td class="row-annual">'+formatCurrency(toAnnualForRow(row, dataType))+'</td>'+
+      '<td><input type="text" class="currency-input" data-field="amount" value="'+formatCurrency(row.amount)+'" oninput="onMiscRevenueRowChange(this)"></td>'+
+      '<td><select data-field="frequency" onchange="onMiscRevenueRowChange(this)">'+FREQUENCIES.map(f=>'<option value="'+f+'"'+(f===row.frequency?' selected':'')+'>'+f+'</option>').join('')+'</select></td>'+
+      '<td class="row-annual">'+formatCurrency(toAnnual(row.amount,row.frequency))+'</td>'+
       '<td><button class="btn-icon" onclick="removeMiscRevenueRow(\''+row.id+'\')" title="Remove"><i class="fa-solid fa-xmark"></i></button></td>';
     tbody.appendChild(tr);
   });
   bindCurrencyInputs(tbody);
-  bindNumberCommaInputs(tbody);
   updateMiscRevenueTotals();
 }
 
-// Handles edits to a misc-revenue row's description/category/amount/frequency/monthlyData.
+// Handles edits to a misc-revenue row's description/category/amount/frequency.
 function onMiscRevenueRowChange(el){
   const tr = el.closest('tr');
-  const row = appState.miscellaneousRevenue.rows.find(r=>r.id===tr.dataset.id);
+  const row = appState.miscellaneousRevenue.find(r=>r.id===tr.dataset.id);
   if(!row) return;
   const field = el.dataset.field;
   if(field === 'amount') row.amount = parseCurrencyInputOrBlank(el.value);
-  else if(field === 'monthlyData'){
-    const idx = Number(el.dataset.monthIndex);
-    const raw = el.value.replace(/,/g,'');
-    let v = raw === '' ? '' : Number(raw);
-    if(v !== '' && v < 0) v = 0;
-    row.monthlyData[idx] = v;
-  }
   else if(field === 'category'){
     if(el.value === '__custom__'){ row.customCategory = true; row.category=''; renderMiscRevenueTable(); return; }
     // Switching away from Custom... needs a re-render too, so the leftover custom-text input is removed.
@@ -3069,30 +2455,27 @@ function onMiscRevenueRowChange(el){
   } else if(field === 'customCategory') row.category = el.value;
   else row[field] = el.value;
   const annualCell = tr.querySelector('.row-annual');
-  if(annualCell) annualCell.textContent = formatCurrency(toAnnualForRow(row, appState.miscellaneousRevenue.dataType));
+  if(annualCell) annualCell.textContent = formatCurrency(toAnnual(row.amount,row.frequency));
   updateMiscRevenueTotals();
 }
 
 // Adds a new blank misc-revenue row.
 function addMiscRevenueRow(){
-  appState.miscellaneousRevenue.rows.push({id:uid(), description:'', category:'Grant', amount:0, frequency:'Annual', monthlyData:Array(12).fill('')});
+  appState.miscellaneousRevenue.push({id:uid(), description:'', category:'Grant', amount:0, frequency:'Annual'});
   renderMiscRevenueTable();
 }
 
 // Removes a misc-revenue row by id.
 function removeMiscRevenueRow(id){
-  appState.miscellaneousRevenue.rows = appState.miscellaneousRevenue.rows.filter(r=>r.id!==id);
+  appState.miscellaneousRevenue = appState.miscellaneousRevenue.filter(r=>r.id!==id);
   renderMiscRevenueTable();
 }
 
 // Recomputes and displays misc-revenue totals.
 function updateMiscRevenueTotals(){
-  const dataType = appState.miscellaneousRevenue.dataType;
-  const annual = appState.miscellaneousRevenue.rows.reduce((a,r)=>a+toAnnualForRow(r, dataType),0);
+  const annual = appState.miscellaneousRevenue.reduce((a,r)=>a+toAnnual(r.amount,r.frequency),0);
   document.getElementById('miscMonthlyEquivalent').textContent = formatCurrency(annual/12);
   document.getElementById('miscAnnualTotal').textContent = formatCurrency(annual);
-  const topTotalEl = document.getElementById('miscRevenueTopTotal');
-  if(topTotalEl) topTotalEl.textContent = formatCurrency(annual);
   const alertBox = document.getElementById('miscRevenueAlert');
   if(alertBox){
     const res = validatePage5();
@@ -3103,11 +2486,10 @@ function updateMiscRevenueTotals(){
 
 // Recomputes and displays the per-category non-operating-revenue breakdown, same layout as the expense summary.
 function updateMiscRevenueCategoryBreakdown(){
-  const dataType = appState.miscellaneousRevenue.dataType;
   const byCategory = {};
-  appState.miscellaneousRevenue.rows.forEach(row=>{
+  appState.miscellaneousRevenue.forEach(row=>{
     const cat = row.category || 'Other';
-    byCategory[cat] = (byCategory[cat]||0) + toAnnualForRow(row, dataType);
+    byCategory[cat] = (byCategory[cat]||0) + toAnnual(row.amount, row.frequency);
   });
   const subtotal = Object.values(byCategory).reduce((a,v)=>a+v,0);
 
@@ -3188,7 +2570,7 @@ function onWaterLossFieldChange(){
 // 1,000 Gallons either way; only the required-rate denominator depends on the toggle.
 function getWaterLossSummary(){
   const wl = appState.waterLoss;
-  const annualSold = getCombinedMonthlyWaterSold()*12;
+  const annualSold = (Number(appState.customerInfo.monthlyWaterSold)||0)*12;
   let totalGal, avgPct;
   if(wl.method === 'gal'){
     totalGal = Number(wl.annualGal)||0;
@@ -3256,160 +2638,8 @@ function computeTierRevenue(tiers, waterLossSummary){
   return {rows, totalAnnual};
 }
 
-// Pure volumetric math for one customer type -- deliberately excludes base
-// charge, which is shared across all customer types and added exactly once
-// at the combined level in calculateAll(), never per type.
-function computeVolumetricRevenue(volumetricRate, activeCustomers, monthlyWaterSold, includedConsumption){
-  const rate = Number(volumetricRate)||0;
-  const avgMonthlyConsumptionPerConn = activeCustomers>0 ? monthlyWaterSold/activeCustomers : 0;
-  const billableMonthlyPerConn = Math.max(0, avgMonthlyConsumptionPerConn - (Number(includedConsumption)||0));
-  const volumetricMonthlyPerConn = (billableMonthlyPerConn/BILLING_UNIT_GAL)*rate;
-  return { volumetricAnnual: volumetricMonthlyPerConn*activeCustomers*12, volumetricMonthlyPerConn };
-}
-
-/* =========================================================================
-   JOINT RATE SOLVE -- Residential's rate (its Fixed volumetric rate, or its
-   Tier 1 rate) is the one free variable solved against the shared revenue
-   requirement; Commercial's rate is either that same free variable directly
-   (Commercial-only -- no markup) or a known $/% markup off it (both types
-   present). Either way, each type's revenue is affine in Residential's
-   anchor rate, so -- exactly like the existing single-tier-1 solve below --
-   the whole system inverts directly, no numeric solver needed.
-   ========================================================================= */
-
-// Returns {coeffWeighted, constant} such that a type's own annual rate
-// revenue = coeffWeighted * itsOwnAnchorRate + constant. Generalizes the
-// Fixed volumetric-rate solve and the Tier 1 cascade solve into one shape.
-function computeTypeCoeffs(typeState, grossFactor){
-  const rm = typeState.rateModel;
-  if(rm.type === 'fixed'){
-    const annualVolumeBasis = getEffectiveMonthlyWaterSold(typeState) * 12 * grossFactor;
-    return { coeffWeighted: annualVolumeBasis / BILLING_UNIT_GAL, constant: 0 };
-  }
-  if(rm.tierDiffMethod === 'pct'){
-    let sumWeightedCoeff = 0, cumGrowth = 1;
-    rm.tiers.forEach((t,i)=>{
-      if(i>0) cumGrowth *= 1 + (Number(t.diffPct)||0)/100;
-      const coeff = (Number(t.waterSold)||0)*12*grossFactor/BILLING_UNIT_GAL;
-      sumWeightedCoeff += coeff*cumGrowth;
-    });
-    return { coeffWeighted: sumWeightedCoeff, constant: 0 };
-  }
-  let sumCoeff = 0, sumWeightedDiff = 0, cumDiff = 0;
-  rm.tiers.forEach((t,i)=>{
-    if(i>0) cumDiff += Number(t.diffDollar)||0;
-    const coeff = (Number(t.waterSold)||0)*12*grossFactor/BILLING_UNIT_GAL;
-    sumCoeff += coeff;
-    sumWeightedDiff += coeff*cumDiff;
-  });
-  return { coeffWeighted: sumCoeff, constant: sumWeightedDiff };
-}
-
-// Writes a solved rate into the right field for that type's model (Fixed
-// volumetric rate, or Tier 1's rate -- later tiers cascade separately).
-function setAnchorRate(rm, value){
-  if(rm.type==='fixed') rm.fixed.volumetricRate = value;
-  else if(rm.type==='tier' && rm.tiers.length) rm.tiers[0].rate = value;
-}
-
-// Solves Residential's anchor rate (and, when both customer types are
-// present, Commercial's markup-derived anchor rate) against the shared
-// annual revenue requirement, then cascades each type's later tiers (if any).
-function solveJointRates(annualRevenueNeededFromRates, grossFactor){
-  let totalA = 0, totalB = 0;
-  const resIncluded = isResidentialIncluded(), comIncluded = isCommercialIncluded();
-  const both = resIncluded && comIncluded;
-
-  if(resIncluded){
-    const c = computeTypeCoeffs(appState.residential, grossFactor);
-    totalA += c.coeffWeighted; totalB += c.constant;
-  }
-  if(comIncluded){
-    const c = computeTypeCoeffs(appState.commercial, grossFactor);
-    if(both){
-      const rm = appState.commercial.rateModel;
-      const mk = rm.type==='fixed' ? rm.fixed.fixedMarkup : rm.tierMarkup;
-      const m = mk.method==='pct' ? 1+(Number(mk.pct)||0)/100 : 1;
-      const b = mk.method==='dollar' ? (Number(mk.dollar)||0) : 0;
-      totalA += c.coeffWeighted*m; totalB += c.coeffWeighted*b + c.constant;
-    } else {
-      // Commercial-only: no markup to apply -- x IS Commercial's own anchor rate.
-      totalA += c.coeffWeighted; totalB += c.constant;
-    }
-  }
-
-  const x = totalA>0 ? (annualRevenueNeededFromRates - totalB)/totalA : 0;
-
-  if(resIncluded){
-    setAnchorRate(appState.residential.rateModel, x);
-    if(appState.residential.rateModel.type==='tier') recomputeTierRates(appState.residential.rateModel);
-  }
-  if(comIncluded){
-    let T = x;
-    if(both){
-      const rm = appState.commercial.rateModel;
-      const mk = rm.type==='fixed' ? rm.fixed.fixedMarkup : rm.tierMarkup;
-      T = mk.method==='pct' ? x*(1+(Number(mk.pct)||0)/100) : x + (Number(mk.dollar)||0);
-    }
-    setAnchorRate(appState.commercial.rateModel, T);
-    if(appState.commercial.rateModel.type==='tier') recomputeTierRates(appState.commercial.rateModel);
-  }
-}
-
-// Builds one customer type's results block: its own revenue, and its average
-// customer bill (that type's share of the shared base charge, plus its own volumetric/tier charge).
-function buildTypeResults(typeState, waterLossSummary, sharedBaseChargePerConnMonthly){
-  const rm = typeState.rateModel;
-  const activeCustomers = Number(typeState.customerInfo.activeCustomers)||0;
-  const monthlyWaterSold = getEffectiveMonthlyWaterSold(typeState);
-  let volumetricAnnual, tierRows = null;
-  if(rm.type === 'fixed'){
-    volumetricAnnual = computeVolumetricRevenue(rm.fixed.volumetricRate, activeCustomers, monthlyWaterSold, rm.fixed.includedConsumption).volumetricAnnual;
-  } else {
-    const tr = computeTierRevenue(rm.tiers, waterLossSummary);
-    volumetricAnnual = tr.totalAnnual;
-    tierRows = tr.rows;
-  }
-  const volumetricMonthlyPerConn = activeCustomers>0 ? volumetricAnnual/12/activeCustomers : 0;
-  return {
-    rateModelType: rm.type, activeCustomers, monthlyWaterSold, volumetricAnnual, tierRows,
-    averageCustomerBill: sharedBaseChargePerConnMonthly + volumetricMonthlyPerConn
-  };
-}
-
-// Keeps the legacy single-customer-type appState.rateModel mirror (type,
-// fixed.volumetricRate, tiers, tierDiffMethod) in sync with whichever
-// customer type is "primary", so untouched chart/PDF/AI-widget code that
-// still reads appState.rateModel.* directly keeps rendering something
-// correctly-shaped. Temporary scaffolding -- remove once those are made
-// dual-type-aware.
-function syncLegacyRateModelMirror(){
-  const primaryKey = getPrimaryType();
-  const primary = primaryKey ? appState[primaryKey] : null;
-  const rm = appState.rateModel;
-  rm.type = primary ? primary.rateModel.type : '';
-  rm.fixed.volumetricRate = primary && primary.rateModel.type==='fixed' ? primary.rateModel.fixed.volumetricRate : 0;
-  rm.tiers = primary && primary.rateModel.type==='tier' ? primary.rateModel.tiers : [];
-  rm.tierDiffMethod = primary ? primary.rateModel.tierDiffMethod : 'dollar';
-  rm.tierCustomersMethod = primary ? primary.rateModel.tierCustomersMethod : 'number';
-  rm.tierWaterSoldMethod = primary ? primary.rateModel.tierWaterSoldMethod : 'gal';
-}
-
-// Legacy-mirror compatibility wrappers for the PDF export and AI-assistant
-// widget, which read the single-customer-type appState.rateModel mirror
-// rather than per-type state (dual-type support for those is a fast-follow).
-function tiersHaveNegativeRate(){
-  return appState.rateModel.type==='tier' && appState.rateModel.tiers.some(t=>Number(t.rate) < 0);
-}
-function negativeTierRateWarning(){
-  return 'One or more calculated unit costs (Cost per 1,000 Gal) came out negative. This usually means the unit cost difference between tiers is too large for the revenue currently needed from rates -- double-check the data entered on the Customer & Billing, Operating Expenses, and Rate Structure steps. This is just a heads-up and will not stop you from continuing.';
-}
-
-// The main calculation engine -- derives the revenue requirement, solves each
-// included customer type's rate(s) jointly, and builds appState.results for
-// the Summary page.
+// The main calculation engine -- derives the revenue requirement, solves the Fixed-Rate volumetric rate, and builds appState.results for the Summary page.
 function calculateAll(showToast){
-  syncCombinedCustomerInfo();
   const ci = appState.customerInfo;
   const totalCustomers = Number(ci.totalCustomers)||0;
   const activeCustomers = Number(ci.activeCustomers)||0;
@@ -3429,43 +2659,64 @@ function calculateAll(showToast){
   const totalMeterEquivalents = appState.meters.reduce((a,m)=>a+(Number(m.count)||0)*(Number(m.factor)||0),0);
 
   const expenseRows = appState.operatingExpenses.rows;
-  const expenseDataType = appState.operatingExpenses.dataType;
-  const expenseSubtotal = expenseRows.reduce((a,r)=>a+toAnnualForRow(r, expenseDataType),0);
+  const expenseSubtotal = expenseRows.reduce((a,r)=>a+toAnnual(r.amount,r.frequency),0);
   const contingencyPct = Number(appState.operatingExpenses.contingencyPct)||0;
   const totalAnnualExpenses = expenseSubtotal*(1+contingencyPct/100);
 
-  const annualMiscRevenue = appState.miscellaneousRevenue.rows.reduce((a,r)=>a+toAnnualForRow(r, appState.miscellaneousRevenue.dataType),0);
+  const annualMiscRevenue = appState.miscellaneousRevenue.reduce((a,r)=>a+toAnnual(r.amount,r.frequency),0);
 
   const rm = appState.rateModel;
   const includeWaterLossInRates = waterLossSummary.include;
 
   // Assessment fee is estimated off whatever rate revenue was computed last
-  // cycle (see estimateRateRevenueForAssessment), summed across whichever
-  // customer type(s) are included.
+  // cycle (see estimateRateRevenueForAssessment).
   const totalAssessmentFees = computeAssessmentFeeAnnual();
 
   // Base Charge is the total monthly base-fee revenue from all meters (see
-  // getMonthlyBaseFeeRevenue) -- shared across all customer types, never
-  // duplicated per type. Matches DeBerry Rate Tool.xlsm's Calculations Sheet
-  // B4 ("Annual Revenue needed from water sales" = Total Expenses - Misc
-  // Revenue - Base Fee Revenue): assessment fees are NOT netted out here --
-  // Excel instead layers them on as a (1+assessmentFee%) markup on top of
+  // getMonthlyBaseFeeRevenue). Matches DeBerry Rate Tool.xlsm's Calculations
+  // Sheet B4 ("Annual Revenue needed from water sales" = Total Expenses -
+  // Misc Revenue - Base Fee Revenue): assessment fees are NOT netted out here
+  // -- Excel instead layers them on as a (1+assessmentFee%) markup on top of
   // cost recovery, so they show up as overcollection in the net surplus/deficit
   // rather than reducing what the rate itself needs to cover.
   const baseChargeAnnual = rm.fixed.baseCharge*12;
   const annualRevenueNeededFromRates = Math.max(0, totalAnnualExpenses - annualMiscRevenue - baseChargeAnnual);
 
-  // Solve Residential's (and, when both types are present, Commercial's
-  // markup-derived) rate(s) jointly against the shared revenue requirement --
-  // see solveJointRates() for the algebra. Reduces to today's single-model
-  // formula automatically when only one customer type is included.
-  const grossFactor = includeWaterLossInRates ? 1/(1-(avgLossPct/100)) : 1;
-  solveJointRates(annualRevenueNeededFromRates, grossFactor);
+  if(rm.type === 'fixed'){
+    const volumetricBasis = includeWaterLossInRates ? annualWaterProduced : annualWaterSold;
+    rm.fixed.volumetricRate = volumetricBasis>0 ? annualRevenueNeededFromRates/volumetricBasis*1000 : 0;
+  } else if(rm.type === 'tier' && rm.tiers.length){
+    // Tier 1's rate is solved the same way the Fixed-Rate volumetric rate is
+    // above -- every later tier prices off the previous tier's rate using that
+    // tier's OWN unit cost increase (+$diff or x(1+pct/100)), so each tier's
+    // rate is Tier 1's rate times/plus a fixed cumulative factor. Total tier
+    // revenue is still linear in Tier 1's rate either way and can be solved
+    // directly (no Solver needed).
+    const grossFactor = includeWaterLossInRates ? 1/(1-(avgLossPct/100)) : 1;
+    if(rm.tierDiffMethod === 'pct'){
+      let sumWeightedCoeff = 0, cumGrowth = 1;
+      rm.tiers.forEach((t,i)=>{
+        if(i>0) cumGrowth *= 1 + (Number(t.diffPct)||0)/100;
+        const coeff = (Number(t.waterSold)||0)*12*grossFactor/BILLING_UNIT_GAL;
+        sumWeightedCoeff += coeff*cumGrowth;
+      });
+      rm.tiers[0].rate = sumWeightedCoeff>0 ? annualRevenueNeededFromRates/sumWeightedCoeff : 0;
+    } else {
+      let sumCoeff = 0, sumWeightedDiff = 0, cumDiff = 0;
+      rm.tiers.forEach((t,i)=>{
+        if(i>0) cumDiff += Number(t.diffDollar)||0;
+        const coeff = (Number(t.waterSold)||0)*12*grossFactor/BILLING_UNIT_GAL;
+        sumCoeff += coeff;
+        sumWeightedDiff += coeff*cumDiff;
+      });
+      rm.tiers[0].rate = sumCoeff>0 ? (annualRevenueNeededFromRates - sumWeightedDiff)/sumCoeff : 0;
+    }
+    recomputeTierRates();
+  }
 
-  const sharedBaseChargePerConnMonthly = activeCustomers>0 ? rm.fixed.baseCharge/activeCustomers : 0;
-  const residentialResults = isResidentialIncluded() ? buildTypeResults(appState.residential, waterLossSummary, sharedBaseChargePerConnMonthly) : null;
-  const commercialResults = isCommercialIncluded() ? buildTypeResults(appState.commercial, waterLossSummary, sharedBaseChargePerConnMonthly) : null;
-  const actualRateRevenue = (residentialResults?residentialResults.volumetricAnnual:0) + (commercialResults?commercialResults.volumetricAnnual:0);
+  const fixedResult = computeFixedRateRevenue(rm.fixed, activeCustomers, monthlyWaterSold);
+  const tierResult = computeTierRevenue(rm.tiers, waterLossSummary);
+  const actualRateRevenue = rm.type==='fixed' ? fixedResult.totalAnnual : tierResult.totalAnnual;
 
   // NOTE: this does not net out any meter-based/flat service-fee revenue the
   // utility might already collect outside its water-sale rates -- if so, the
@@ -3478,31 +2729,16 @@ function calculateAll(showToast){
 
   const costPer1000Gal = annualWaterProduced>0 ? totalAnnualExpenses/annualWaterProduced*1000 : 0;
 
-  // Base charge is added exactly once here (never per type -- see
-  // buildTypeResults/computeVolumetricRevenue, which both deliberately
-  // exclude it) rather than folded into either type's own revenue figure.
-  const totalRevenue = actualRateRevenue + annualMiscRevenue + totalAssessmentFees + baseChargeAnnual;
+  // Base Charge revenue is already folded into fixedResult.totalAnnual for the
+  // Fixed-Rate model -- computeTierRevenue doesn't include it, so add it here.
+  const totalRevenue = actualRateRevenue + annualMiscRevenue + totalAssessmentFees + (rm.type==='tier' ? baseChargeAnnual : 0);
   const netSurplusDeficit = totalRevenue - totalAnnualExpenses;
 
   const expenseByCategory = {};
   expenseRows.forEach(r=>{
     const cat = r.category || 'Other';
-    expenseByCategory[cat] = (expenseByCategory[cat]||0) + toAnnualForRow(r, expenseDataType);
+    expenseByCategory[cat] = (expenseByCategory[cat]||0) + toAnnual(r.amount,r.frequency);
   });
-
-  // Legacy single-customer-type mirror, populated from whichever type is
-  // "primary" (Residential if included, else Commercial) -- see
-  // syncLegacyRateModelMirror(). Keeps chart/PDF/AI-widget code that still
-  // reads appState.rateModel.*/r.fixedResult/r.tierResult/r.rateModelType
-  // working, showing that one type's numbers, until those get dual-type
-  // support in a fast-follow.
-  syncLegacyRateModelMirror();
-  const primaryKey = getPrimaryType();
-  const primaryTypeState = primaryKey ? appState[primaryKey] : null;
-  const legacyActiveCustomers = primaryTypeState ? Number(primaryTypeState.customerInfo.activeCustomers)||0 : 0;
-  const legacyMonthlyWaterSold = primaryTypeState ? getEffectiveMonthlyWaterSold(primaryTypeState) : 0;
-  const fixedResult = computeFixedRateRevenue(rm.fixed, legacyActiveCustomers, legacyMonthlyWaterSold);
-  const tierResult = computeTierRevenue(rm.tiers, waterLossSummary);
 
   appState.results = {
     totalCustomers, activeCustomers, totalMeters, totalMeterEquivalents,
@@ -3512,8 +2748,6 @@ function calculateAll(showToast){
     totalAssessmentFees,
     baseChargeAnnual, netExpensesForRateAnnual: annualRevenueNeededFromRates,
     revenueRequirement, requiredAverageRate, costPer1000Gal,
-    customerType: appState.customerType,
-    residential: residentialResults, commercial: commercialResults,
     rateModelType: rm.type,
     fixedResult, tierResult, actualRateRevenue,
     totalRevenue, netSurplusDeficit,
@@ -3542,7 +2776,7 @@ function renderResults(){
   if(!r || Object.keys(r).length===0) return;
 
   const alertBox = document.getElementById('resultsAlert');
-  const p1 = validateCustomerBilling(), p2 = validatePage2(), p4 = validatePage4();
+  const p1 = validatePage1(), p2 = validatePage2(), p4 = validatePage4();
   const blockingMsgs = [...(p1.messages||[]), ...(p2.messages||[]), ...(p4.messages||[])];
   alertBox.innerHTML = alertHtml('warning','triangle-exclamation', blockingMsgs);
 
@@ -3553,9 +2787,7 @@ function renderResults(){
     metricCard('Non-Operating Annual Revenue', formatCurrency(r.annualMiscRevenue)) +
     metricCard('Total Water Production (Annual)', formatNumber(r.annualWaterProduced)+' gal') +
     metricCard('Total Water Sales (Annual)', formatNumber(r.annualWaterSold)+' gal') +
-    metricCard('Active Customers', formatNumber(r.activeCustomers)) +
-    (r.residential ? metricCard('Residential Revenue Contribution', formatCurrency(r.residential.volumetricAnnual)) : '') +
-    (r.commercial ? metricCard('Commercial Revenue Contribution', formatCurrency(r.commercial.volumetricAnnual)) : '');
+    metricCard('Active Customers', formatNumber(r.activeCustomers));
 
   document.getElementById('rateModelBadge').className = 'badge ' + (r.rateModelType==='fixed'?'badge-fixed':'badge-tier');
   document.getElementById('rateModelBadge').textContent = r.rateModelType==='fixed' ? 'Fixed Rate' : 'Tier-Based Rate';
@@ -3588,58 +2820,7 @@ function renderResults(){
       '</div>';
   }
 
-  renderTypeResults(r);
   renderCharts(r);
-}
-
-// Builds the rate table (or negative-rate warning) for one customer type's
-// results panel -- the same table shape the legacy single-block section
-// above shows, just scoped to one type's own results.
-function buildRateResultsHtml(typeState, typeResult){
-  if(typeHasNegativeRate(typeState)){
-    return alertHtml('danger','triangle-exclamation', [negativeRateWarning(typeState, typeState===appState.residential?'Residential':'Commercial')]);
-  }
-  if(typeResult.rateModelType === 'fixed'){
-    return '<div class="totals-row">'+
-      '<div class="total-item"><span class="label">Volumetric Rate ($/1,000 gal)</span><span class="value">'+formatCurrency(typeState.rateModel.fixed.volumetricRate)+'</span></div>'+
-      '</div>';
-  }
-  const tierTableRows = (typeResult.tierRows||[]).map(row=>
-    '<tr><td>'+formatNumber(row.tier.start)+'</td><td>'+(row.tier.end===null?'and above':formatNumber(row.tier.end))+'</td><td>'+formatCurrency(row.tier.rate)+'</td><td>'+formatCurrency(row.revenue)+'</td></tr>'
-  ).join('');
-  return '<div class="table-scroll">'+
-    '<table class="data-table">'+
-    '<thead><tr><th>Tier Start (Gal)</th><th>Tier End (Gal)</th><th>Cost per 1,000 Gal</th><th>Revenue in Each Tier</th></tr></thead>'+
-    '<tbody>'+tierTableRows+'</tbody>'+
-    '<tfoot><tr><td colspan="3">Total</td><td>'+formatCurrency(typeResult.volumetricAnnual)+'</td></tr></tfoot>'+
-    '</table>'+
-    '</div>';
-}
-
-// Builds one customer type's results panel: label, Fixed/Tier badge, its rate
-// table (or negative-rate warning), and a totals row.
-function renderOneTypePanel(label, typeState, typeResult){
-  const badgeClass = typeResult.rateModelType==='fixed' ? 'badge-fixed' : 'badge-tier';
-  const badgeText = typeResult.rateModelType==='fixed' ? 'Fixed Rate' : 'Tier-Based Rate';
-  return '<div class="section">'+
-    '<div class="section-title">'+escapeHtml(label)+' Rate Results <span class="badge '+badgeClass+'">'+badgeText+'</span></div>'+
-    buildRateResultsHtml(typeState, typeResult)+
-    '<div class="totals-row">'+
-      '<div class="total-item"><span class="label">Annual Revenue from Rates</span><span class="value">'+formatCurrency(typeResult.volumetricAnnual)+'</span></div>'+
-      '<div class="total-item"><span class="label">Average Customer Bill / mo</span><span class="value">'+formatCurrency(typeResult.averageCustomerBill)+'</span></div>'+
-      '<div class="total-item"><span class="label">Active Customers</span><span class="value">'+formatNumber(typeResult.activeCustomers)+'</span></div>'+
-    '</div></div>';
-}
-
-// Renders the Residential/Commercial side-by-side results grid, one panel
-// per included customer type.
-function renderTypeResults(r){
-  const grid = document.getElementById('typeResultsGrid');
-  if(!grid) return;
-  let html = '';
-  if(r.residential) html += renderOneTypePanel('Residential', appState.residential, r.residential);
-  if(r.commercial) html += renderOneTypePanel('Commercial', appState.commercial, r.commercial);
-  grid.innerHTML = html;
 }
 
 /* =========================================================================
@@ -3798,7 +2979,7 @@ function renderExpenseChart(r){
     .map(row=>({
       label: row.description && row.description.trim() ? row.description : '(untitled)',
       category: row.category || 'Other',
-      value: toAnnualForRow(row, appState.operatingExpenses.dataType)
+      value: toAnnual(row.amount, row.frequency)
     }))
     .filter(row=>row.value>0);
   if(rows.length===0){ showChartEmpty('expenseChart','No expense data to display yet.'); return; }
@@ -4144,12 +3325,9 @@ function pdfDataEnteredSection(doc, y){
   y = pdfEnsureSpace(doc, y, 24);
   y = pdfSubheading(doc, 'Operating Expenses', y);
   const expenseRows = appState.operatingExpenses.rows;
-  const expenseDataTypeForPdf = appState.operatingExpenses.dataType;
   if(expenseRows.length){
     y = pdfTable(doc, y, [['Description','Category','Amount','Frequency']],
-      expenseRows.map(r=> expenseDataTypeForPdf==='monthly'
-        ? [r.description||'', r.category||'', formatCurrency(toAnnualForRow(r, 'monthly')), 'Monthly Data (annual total)']
-        : [r.description||'', r.category||'', formatCurrency(r.amount||0), r.frequency||''])
+      expenseRows.map(r=>[r.description||'', r.category||'', formatCurrency(r.amount||0), r.frequency||''])
     ) + 4;
   } else {
     y = pdfParagraph(doc, 'No expense rows entered.', y, {fontSize:9, color:PDF_MUTED}) + 4;
@@ -4160,13 +3338,10 @@ function pdfDataEnteredSection(doc, y){
 
   y = pdfEnsureSpace(doc, y, 24);
   y = pdfSubheading(doc, 'Non-Operating Revenues', y);
-  const miscRows = appState.miscellaneousRevenue.rows;
-  const miscDataTypeForPdf = appState.miscellaneousRevenue.dataType;
+  const miscRows = appState.miscellaneousRevenue;
   y = miscRows.length
     ? pdfTable(doc, y, [['Description','Category','Amount','Frequency']],
-        miscRows.map(r=> miscDataTypeForPdf==='monthly'
-          ? [r.description||'', r.category||'', formatCurrency(toAnnualForRow(r, 'monthly')), 'Monthly Data (annual total)']
-          : [r.description||'', r.category||'', formatCurrency(r.amount||0), r.frequency||''])) + 8
+        miscRows.map(r=>[r.description||'', r.category||'', formatCurrency(r.amount||0), r.frequency||''])) + 8
     : pdfParagraph(doc, 'No non-operating revenue rows entered.', y, {fontSize:9, color:PDF_MUTED}) + 6;
 
   y = pdfEnsureSpace(doc, y, 24);
@@ -4459,7 +3634,7 @@ async function exportPDF(){
       .map(row=>({
         label: row.description && row.description.trim() ? row.description : '(untitled)',
         category: row.category || 'Other',
-        value: toAnnualForRow(row, appState.operatingExpenses.dataType)
+        value: toAnnual(row.amount, row.frequency)
       }))
       .filter(row=>row.value>0);
     const revenueBarEntries = [
@@ -4527,9 +3702,11 @@ async function exportPDF(){
 
 // Re-renders every step's content from the current state (used after load/reset).
 function renderAll(){
-  renderCustomerBillingStep();
+  renderPage1();
   renderMeterTable();
-  renderRateStructureStep();
+  renderRateModelChoice();
+  renderRateDetails();
+  renderAssessmentFeePage();
   renderExpenseTable();
   renderMiscRevenueTable();
   renderPage6();
@@ -4625,24 +3802,20 @@ function addMsg(role, text){
 // so the assistant can talk about THIS rate study rather than answering blind.
 function buildSystemPrompt(){
   let s = "You are the built-in assistant for the Civitas Engineering Water Rate Tool, " +
-    "a 7-step wizard water utilities use to calculate a water rate structure " +
-    "(Customer & Billing, Meter Distribution, Rate Structure, " +
+    "a 9-step wizard water utilities use to calculate a water rate structure " +
+    "(Customer & Connections, Meter Distribution, Rate Model, Rate Details, Assessment Fee, " +
     "Operating Expenses, Non-Operating Revenues, Water Loss, Summary & Results). " +
-    "Customer & Billing and Rate Structure can each be filled out for Residential customers, " +
-    "Commercial customers, or both -- when both are present, Commercial's rate can be set as a " +
-    "dollar or percentage markup off Residential's rate instead of entered independently. " +
-    "Each customer type supports two rate models: a Fixed Rate (one base charge per meter size " +
-    "plus one flat volumetric rate per 1,000 gallons for everyone) or a Tier-Based Rate (the " +
-    "volumetric rate increases across consumption tiers). Rates are always solved automatically " +
+    "It supports two rate models: a Fixed Rate (one base charge per meter size plus one flat " +
+    "volumetric rate per 1,000 gallons for everyone) or a Tier-Based Rate (the volumetric rate " +
+    "increases across consumption tiers). The volumetric rate is always solved automatically " +
     "from the revenue requirement (annual operating expenses plus contingency, minus non-operating " +
-    "revenue and base charge revenue) divided by billable water volume -- users never type them in directly. " +
+    "revenue and base charge revenue) divided by billable water volume -- users never type it in directly. " +
     "Answer briefly and in plain language, as if talking to a utility manager, not an engineer. " +
     "If asked something outside this tool's scope, say so briefly.\n\n";
 
   try{
     const step = appState.currentStep;
     s += "Current step: " + step + " of " + TOTAL_STEPS + " (" + STEP_TITLES[step-1] + ").\n";
-    s += "Customer type: " + (appState.customerType || "not yet chosen") + ".\n";
     s += "Rate model selected: " + (appState.rateModel.type ? appState.rateModel.type : "not yet chosen") + ".\n";
     if(appState.results && Object.keys(appState.results).length){
       const r = appState.results;
