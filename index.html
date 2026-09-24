@@ -68,7 +68,7 @@ body{
 
 
 
-.page-body{padding:32px;min-height:420px;}
+.page-body{padding:32px;min-height:420px;flex:1 1 auto;min-width:0;}
 .step-page{display:none;}
 .step-page.active{display:block;animation:fadein .25s ease;}
 @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
@@ -77,7 +77,7 @@ body{
 
 /* Sidebar layout (default): steps run top-to-bottom to the left of the page content. */
 .step-nav{display:flex;flex-direction:column;flex:0 0 220px;width:220px;padding:24px 14px;
-  background:#faf9fc;border-right:1px solid var(--border);}
+  background:#faf9fc;border-right:1px solid var(--border);position:sticky;top:0;max-height:100vh;overflow-y:auto;}
 .step-nav-item{display:flex;flex-direction:column;align-items:stretch;}
 .step-nav-btn{display:flex;flex-direction:row;align-items:center;gap:12px;width:100%;text-align:left;
   background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;font-family:inherit;}
@@ -98,13 +98,30 @@ body{
 .step-nav-item:not(.locked) .step-nav-btn:hover .step-nav-circle{transform:scale(1.08);}
 .step-nav-line{width:2px;height:18px;background:var(--border);margin:0 0 0 22px;}
 .step-nav-line.completed{background:var(--color-accent);}
+/* Sub-section links listed under the active step. The left border lines up
+   with the connector line between step circles. */
+.step-nav-sub{display:flex;flex-direction:column;margin:4px 0 2px 22px;padding:2px 0 2px 14px;border-left:2px solid var(--color-primary);}
+.step-nav-sub-btn{background:none;border:none;font-family:inherit;text-align:left;cursor:pointer;
+  font-size:12px;font-weight:500;color:var(--muted);padding:5px 8px;border-radius:6px;line-height:1.3;}
+.step-nav-sub-btn:hover{background:#f1ecf8;color:var(--color-primary-dark);}
+.step-nav-sub-btn.current{color:var(--color-primary);font-weight:700;background:#f1ecf8;}
+.step-nav-sub-btn:disabled{opacity:.45;cursor:not-allowed;background:none;color:var(--muted);}
+[data-subnav]{scroll-margin-top:16px;}
+/* A step can be split into sub-pages (e.g. Customer & Billing: type, then data
+   entry); only the current one is shown and Next/Previous walk through them. */
+.data-format-note{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);
+  background:#faf9fc;border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:18px;}
+.data-format-note b{color:var(--color-primary-dark);}
+.data-format-note a{color:var(--color-primary);font-weight:600;cursor:pointer;text-decoration:underline;}
+.sub-page{display:none;}
+.sub-page.active{display:block;animation:fadein .25s ease;}
 
 /* Below 900px there's no room for a fixed sidebar -- collapse back to a
    horizontal scrollable bar above the page content instead. */
 @media (max-width:900px){
   .wizard-body{flex-direction:column;}
   .step-nav{flex-direction:row;align-items:flex-start;width:auto;flex:none;padding:14px 16px 4px;
-    border-right:none;border-bottom:1px solid var(--border);overflow-x:auto;}
+    border-right:none;border-bottom:1px solid var(--border);overflow-x:auto;position:static;max-height:none;}
   .step-nav-item{flex-direction:row;flex:1 1 0;min-width:52px;}
   .step-nav-item:last-child{flex:0 0 auto;}
   .step-nav-btn{flex-direction:column;gap:6px;padding:0;border-radius:0;}
@@ -112,6 +129,7 @@ body{
   .step-nav-label{text-align:center;max-width:80px;font-size:10.5px;display:none;}
   .step-nav-item.active .step-nav-label{display:block;}
   .step-nav-line{flex:1 1 auto;width:auto;height:2px;margin:14px 6px 0;min-width:12px;}
+  .step-nav-sub{display:none;}
 }
 
 .page-title{font-size:20px;font-weight:700;color:var(--color-primary-dark);margin-bottom:4px;display:flex;align-items:center;gap:10px;justify-content:space-between;}
@@ -126,7 +144,7 @@ body{
 .form-group.full{grid-column:1/-1;}
 .form-group label{font-size:12.5px;font-weight:700;color:var(--text);}
 .form-group .hint{font-size:11.5px;color:var(--muted);font-weight:400;}
-input[type=text],input[type=number],input[type=date],select,textarea{
+input[type=text],input[type=password],input[type=number],input[type=date],select,textarea{
   border:1.5px solid var(--color-accent);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--text);
   background:#fff;font-family:inherit;
 }
@@ -167,7 +185,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
 
 /* Compact segmented switch for a standalone field (e.g. $ vs % entry mode) -- same idea as
    .col-toggle but sized to sit under a label instead of inline in a table header. */
-.field-toggle{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:6px;}
+.field-toggle{display:inline-flex;align-self:flex-start;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:6px;}
 .field-toggle button{border:none;background:#fff;color:var(--muted);font-size:12px;font-weight:700;padding:5px 12px;cursor:pointer;}
 .field-toggle button:first-child{border-right:1px solid var(--border);}
 .field-toggle button.active{background:var(--color-accent);color:#fff;}
@@ -308,9 +326,70 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
 .instr-acc-a{max-height:0;overflow:hidden;transition:max-height .25s ease;font-size:13px;line-height:1.6;color:var(--text);
   white-space:pre-line;background:#f9f8fc;}
 .instr-acc-a.open{max-height:1200px;padding:2px 16px 16px;}
+
+/* Sign-in gate shown over the whole app until valid credentials are entered. */
+.login-gate{position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-gate.hidden{display:none;}
+.login-card{width:100%;max-width:380px;background:#fff;border-radius:14px;box-shadow:0 10px 40px rgba(75,46,131,0.14);overflow:hidden;}
+.login-card .login-head{background:var(--color-primary);color:#fff;padding:22px 26px;}
+.login-card .login-head h1{font-size:20px;font-weight:700;}
+.login-card .login-head p{font-size:12.5px;opacity:.85;margin-top:2px;}
+.login-card form{padding:24px 26px 26px;display:flex;flex-direction:column;gap:16px;}
+.login-card .btn{justify-content:center;width:100%;}
 </style>
 </head>
 <body>
+<div class="login-gate" id="loginGate">
+  <div class="login-card">
+    <div class="login-head">
+      <h1>Water Rate Tool</h1>
+      <p>Civitas Engineering Group</p>
+    </div>
+    <form id="loginForm" autocomplete="on">
+      <div class="form-group">
+        <label for="loginUsername">Username</label>
+        <input type="text" id="loginUsername" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required>
+        <div class="field-error" id="loginError"></div>
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+    </form>
+  </div>
+</div>
+<script>
+// Temporary hard-coded sign-in. This runs entirely in the browser, so it only
+// keeps casual visitors out -- anyone can read these values in the page
+// source. Replace with server-side authentication before real use.
+(function(){
+  const LOGIN_USERNAME = 'admin';
+  const LOGIN_PASSWORD = 'Civitas2026!';
+  const SESSION_KEY = 'civitasWaterRateTool_auth';
+  const gate = document.getElementById('loginGate');
+  let signedIn = false;
+  try{ signedIn = sessionStorage.getItem(SESSION_KEY) === '1'; }catch(e){}
+  if(signedIn){ gate.classList.add('hidden'); return; }
+  document.getElementById('loginUsername').focus();
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const user = document.getElementById('loginUsername').value.trim();
+    const pass = document.getElementById('loginPassword').value;
+    const err = document.getElementById('loginError');
+    if(user === LOGIN_USERNAME && pass === LOGIN_PASSWORD){
+      try{ sessionStorage.setItem(SESSION_KEY, '1'); }catch(e){}
+      gate.classList.add('hidden');
+      err.classList.remove('show');
+    } else {
+      err.textContent = 'Incorrect username or password.';
+      err.classList.add('show');
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginPassword').focus();
+    }
+  });
+})();
+</script>
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="app-shell">
@@ -376,6 +455,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         <div class="page-subtitle"></div>
         <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Use recent billing records and representative monthly averages when available.</div>
 
+        <div class="sub-page" data-subnav="Customer Type">
         <div class="section">
           <div class="section-title">Customer Type</div>
           <div class="rate-choice-grid" id="customerTypeToggle">
@@ -396,19 +476,29 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
             </div>
           </div>
         </div>
+        </div>
 
-        <div class="section" id="residentialBillingPanel" style="display:none;">
-          <div class="section-title">Residential</div>
-          <div class="rate-choice-grid" id="residentialDataTypeToggle" style="max-width:520px;margin-bottom:18px;">
-            <div class="rate-choice-card" data-datatype="annualAvg" onclick="onCustomerDataTypeChange('residential','annualAvg')">
+        <div class="sub-page" data-subnav="Data Format">
+        <div class="section">
+          <div class="section-title">Data Format</div>
+          <div class="rate-choice-grid" id="dataTypeToggle" style="max-width:520px;margin-bottom:8px;">
+            <div class="rate-choice-card" data-datatype="annualAvg" onclick="setDataType('annualAvg')">
               <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
               <div class="rate-choice-title">Annual Monthly Average</div>
             </div>
-            <div class="rate-choice-card" data-datatype="monthly" onclick="onCustomerDataTypeChange('residential','monthly')">
+            <div class="rate-choice-card" data-datatype="monthly" onclick="setDataType('monthly')">
               <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
               <div class="rate-choice-title">Monthly Data</div>
             </div>
           </div>
+          <span class="hint">Applies to every data-entry page in the tool: customer billing, operating expenses and non-operating revenues.</span>
+        </div>
+        </div>
+
+        <div class="sub-page" data-subnav="Data Entry">
+        <div class="data-format-note" data-format-context="customer"></div>
+        <div class="section" id="residentialBillingPanel" style="display:none;">
+          <div class="section-title">Residential</div>
           <div class="form-grid">
             <div class="form-group">
               <label>Total number of customers *</label>
@@ -434,16 +524,6 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
 
         <div class="section" id="commercialBillingPanel" style="display:none;">
           <div class="section-title">Commercial</div>
-          <div class="rate-choice-grid" id="commercialDataTypeToggle" style="max-width:520px;margin-bottom:18px;">
-            <div class="rate-choice-card" data-datatype="annualAvg" onclick="onCustomerDataTypeChange('commercial','annualAvg')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Annual Monthly Average</div>
-            </div>
-            <div class="rate-choice-card" data-datatype="monthly" onclick="onCustomerDataTypeChange('commercial','monthly')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Monthly Data</div>
-            </div>
-          </div>
           <div class="form-grid">
             <div class="form-group">
               <label>Total number of customers *</label>
@@ -466,6 +546,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
             <div class="form-grid" id="commercialMonthGrid"></div>
           </div>
         </div>
+        </div>
       </div>
 
       <!-- STEP 2: METER DISTRIBUTION -->
@@ -476,7 +557,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
 
         <div id="meterAlert"></div>
 
-        <div class="table-scroll">
+        <div class="table-scroll" data-subnav="Meter Sizes">
           <table class="data-table" id="meterTable">
             <thead>
               <tr>
@@ -503,7 +584,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
           <button class="btn btn-secondary btn-sm" onclick="addMeterRow()"><i class="fa-solid fa-plus"></i> Add Meter Row</button>
         </div>
 
-        <div class="totals-row">
+        <div class="totals-row" data-subnav="Meter Totals">
           <div class="total-item"><span class="label">Total Monthly Base Fee Revenue</span><span class="value" id="meterSummaryBaseFeeRevenue">$0.00</span></div>
           <div class="total-item"><span class="label">Total Active Meters</span><span class="value" id="meterSummaryCount">0</span></div>
           <div class="total-item"><span class="label">Active Customers</span><span class="value" id="meterSummaryConnections">0</span></div>
@@ -516,7 +597,34 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         <div class="page-subtitle"></div>
         <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Choose Fixed Rate to apply the same volumetric rate to all water usage, or Tier-Based Rate to apply different rates based on customer usage levels. Commercial's rate can be set as a markup off Residential's when both customer types are selected.</div>
 
-        <div class="section">
+        <div class="section" data-subnav="Commercial Markup" id="commercialMarkupSection" style="display:none;">
+          <div class="section-title">Commercial Markup from Residential Rate</div>
+          <p class="hint" id="commercialMarkupPendingHint" style="margin:0;display:block;">Choose Commercial's rate model (Fixed Rate or Tier-Based Rate) below, then enter its markup here.</p>
+        <div class="form-grid" id="commercialFixedMarkupFields" style="display:none;">
+          <div class="form-group">
+            <label>Markup from Residential Rate</label>
+            <div class="field-toggle">
+              <button type="button" id="commercialFixedMarkupMethodDollar" onclick="setMarkupMethod('commercial','fixedMarkup','dollar')">$</button>
+              <button type="button" id="commercialFixedMarkupMethodPct" onclick="setMarkupMethod('commercial','fixedMarkup','pct')">%</button>
+            </div>
+            <input type="text" inputmode="decimal" id="commercialFixedMarkupValue" oninput="onMarkupValueChange('commercial','fixedMarkup',this)">
+            <div class="field-error" id="err-commercialFixedMarkupValue"></div>
+          </div>
+        </div>
+        <div class="form-grid" id="commercialTierMarkupFields" style="display:none;">
+          <div class="form-group">
+            <label>Markup from Residential Rate (applied to lowest tier)</label>
+            <div class="field-toggle">
+              <button type="button" id="commercialTierMarkupMethodDollar" onclick="setMarkupMethod('commercial','tierMarkup','dollar')">$</button>
+              <button type="button" id="commercialTierMarkupMethodPct" onclick="setMarkupMethod('commercial','tierMarkup','pct')">%</button>
+            </div>
+            <input type="text" inputmode="decimal" id="commercialTierMarkupValue" oninput="onMarkupValueChange('commercial','tierMarkup',this)">
+            <div class="field-error" id="err-commercialTierMarkupValue"></div>
+          </div>
+        </div>
+        </div>
+
+        <div class="section" data-subnav="Base Charge &amp; Fees">
           <div class="form-grid">
             <div class="form-group">
               <label>Total Base Charge ($ / month)</label>
@@ -531,7 +639,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
           </div>
         </div>
 
-        <div class="section" id="residentialRateStructurePanel" style="display:none;">
+        <div class="section" data-subnav="Residential Rates" id="residentialRateStructurePanel" style="display:none;">
           <div class="section-title">Residential Rate Structure</div>
           <div class="rate-choice-grid" id="residentialRateModelToggle" style="margin-bottom:18px;">
             <div class="rate-choice-card" data-model="fixed" onclick="setTypeRateModel('residential','fixed')">
@@ -597,7 +705,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
           </div>
         </div>
 
-        <div class="section" id="commercialRateStructurePanel" style="display:none;">
+        <div class="section" data-subnav="Commercial Rates" id="commercialRateStructurePanel" style="display:none;">
           <div class="section-title">Commercial Rate Structure</div>
           <div class="rate-choice-grid" id="commercialRateModelToggle" style="margin-bottom:18px;">
             <div class="rate-choice-card" data-model="fixed" onclick="setTypeRateModel('commercial','fixed')">
@@ -614,17 +722,6 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
 
           <div id="commercialFixedSection">
             <p class="hint" id="commercialFixedRateHint" style="margin:0 0 14px;display:block;">The volumetric rate for Fixed Rate is calculated automatically so the Base Charge, this rate, misc. revenue, and the assessment fee together cover total annual expenses -- see it on the Summary &amp; Results step once all steps are complete.</p>
-            <div class="form-grid" id="commercialFixedMarkupFields" style="display:none;">
-              <div class="form-group">
-                <label>Markup from Residential Rate</label>
-                <div class="field-toggle">
-                  <button type="button" id="commercialFixedMarkupMethodDollar" onclick="setMarkupMethod('commercial','fixedMarkup','dollar')">$</button>
-                  <button type="button" id="commercialFixedMarkupMethodPct" onclick="setMarkupMethod('commercial','fixedMarkup','pct')">%</button>
-                </div>
-                <input type="text" inputmode="decimal" id="commercialFixedMarkupValue" oninput="onMarkupValueChange('commercial','fixedMarkup',this)">
-                <div class="field-error" id="err-commercialFixedMarkupValue"></div>
-              </div>
-            </div>
           </div>
 
           <div id="commercialTierSection" style="display:none;">
@@ -671,17 +768,6 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
               <div class="total-item"><span class="label">Active Customers</span><span class="value" id="commercialTierRefActiveCustomers">0</span></div>
               <div class="total-item"><span class="label">Monthly Avg. Water Sold, gal</span><span class="value" id="commercialTierRefMonthlyWaterSold">0</span></div>
             </div>
-            <div class="form-grid" id="commercialTierMarkupFields" style="display:none;margin-top:14px;">
-              <div class="form-group">
-                <label>Markup from Residential Rate (applied to lowest tier)</label>
-                <div class="field-toggle">
-                  <button type="button" id="commercialTierMarkupMethodDollar" onclick="setMarkupMethod('commercial','tierMarkup','dollar')">$</button>
-                  <button type="button" id="commercialTierMarkupMethodPct" onclick="setMarkupMethod('commercial','tierMarkup','pct')">%</button>
-                </div>
-                <input type="text" inputmode="decimal" id="commercialTierMarkupValue" oninput="onMarkupValueChange('commercial','tierMarkup',this)">
-                <div class="field-error" id="err-commercialTierMarkupValue"></div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -695,22 +781,13 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         <div id="expenseAlert"></div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:18px;">
-          <div class="rate-choice-grid" id="expenseDataTypeToggle" style="max-width:420px;margin-bottom:0;">
-            <div class="rate-choice-card" data-datatype="annualAvg" onclick="setExpenseDataType('annualAvg')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Annual Average</div>
-            </div>
-            <div class="rate-choice-card" data-datatype="monthly" onclick="setExpenseDataType('monthly')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Monthly Data</div>
-            </div>
-          </div>
+          <div class="data-format-note" data-format-context="money" style="margin-bottom:0;"></div>
           <div class="totals-row" style="margin-top:0;">
             <div class="total-item"><span class="label">Total Annual Expenses</span><span class="value" id="expenseTopTotal">$0.00</span></div>
           </div>
         </div>
 
-        <div class="table-scroll">
+        <div class="table-scroll" data-subnav="Expense Items">
           <table class="data-table" id="expenseTable">
             <thead id="expenseTableHead"></thead>
             <tbody id="expenseTableBody"></tbody>
@@ -720,7 +797,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
           <button class="btn btn-secondary btn-sm" onclick="addExpenseRow()"><i class="fa-solid fa-plus"></i> Add Expense Row</button>
         </div>
 
-        <div class="section" style="margin-top:24px;">
+        <div class="section" data-subnav="Contingency" style="margin-top:24px;">
           <div class="form-grid">
             <div class="form-group">
               <label>Contingency / Inflation (%)</label>
@@ -729,7 +806,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
           </div>
         </div>
 
-        <div class="section-title" style="margin-top:24px;">Annual Expenses Summary</div>
+        <div class="section-title" data-subnav="Expenses Summary" style="margin-top:24px;">Annual Expenses Summary</div>
         <div class="table-scroll">
           <table class="data-table" id="expenseCategoryTable">
             <thead>
@@ -748,6 +825,11 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
           <div class="total-item"><span class="label">Contingency Amount</span><span class="value" id="expenseContingencyAmount">$0.00</span></div>
           <div class="total-item"><span class="label">Total Annual Expenses</span><span class="value" id="expenseGrandTotal">$0.00</span></div>
         </div>
+        <div class="totals-row">
+          <div class="total-item"><span class="label">Water Loss Cost – Customer Share</span><span class="value" data-wl-share="customer">—</span></div>
+          <div class="total-item"><span class="label">Water Loss Cost – Absorbed by Supply Corporation</span><span class="value" data-wl-share="utility">—</span></div>
+        </div>
+        <p class="hint" style="margin-top:8px;display:block;font-size:11.5px;color:var(--muted);">For reference only -- already part of Total Annual Expenses. Set on the Water Loss step.</p>
       </div>
 
       <!-- STEP 5: MISCELLANEOUS REVENUE -->
@@ -759,22 +841,13 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         <div id="miscRevenueAlert"></div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:18px;">
-          <div class="rate-choice-grid" id="miscRevenueDataTypeToggle" style="max-width:420px;margin-bottom:0;">
-            <div class="rate-choice-card" data-datatype="annualAvg" onclick="setMiscRevenueDataType('annualAvg')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Annual Average</div>
-            </div>
-            <div class="rate-choice-card" data-datatype="monthly" onclick="setMiscRevenueDataType('monthly')">
-              <div class="rate-choice-check"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="rate-choice-title">Monthly Data</div>
-            </div>
-          </div>
+          <div class="data-format-note" data-format-context="money" style="margin-bottom:0;"></div>
           <div class="totals-row" style="margin-top:0;">
             <div class="total-item"><span class="label">Total Annual Revenue</span><span class="value" id="miscRevenueTopTotal">$0.00</span></div>
           </div>
         </div>
 
-        <div class="table-scroll">
+        <div class="table-scroll" data-subnav="Revenue Items">
           <table class="data-table" id="miscRevenueTable">
             <thead id="miscRevenueTableHead"></thead>
             <tbody id="miscRevenueTableBody"></tbody>
@@ -784,7 +857,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
           <button class="btn btn-secondary btn-sm" onclick="addMiscRevenueRow()"><i class="fa-solid fa-plus"></i> Add Revenue Row</button>
         </div>
 
-        <div class="section-title" style="margin-top:24px;">Annual Revenue Summary</div>
+        <div class="section-title" data-subnav="Revenue Summary" style="margin-top:24px;">Annual Revenue Summary</div>
         <div class="table-scroll">
           <table class="data-table" id="miscRevenueCategoryTable">
             <thead>
@@ -808,35 +881,51 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
       <div class="step-page" data-step="6">
         <div class="page-title"><span><i class="fa-solid fa-droplet"></i> Water Loss</span><button class="btn btn-secondary btn-sm" onclick="openStepInstructions(6)"><i class="fa-solid fa-circle-info"></i> Instructions</button></div>
         <div class="page-subtitle"></div>
-        <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Choose Customer if water-loss costs should be recovered through rates, or Supply Corporation / Utility if the utility will absorb those costs.</div>
+        <div class="alert alert-info" style="margin-bottom:16px;"><i class="fa-solid fa-circle-info"></i> Enter the annual water loss and split its cost between customers (added to rates) and the Supply Corporation / Utility (absorbed).</div>
 
-        <div class="section">
-          <div class="section-title">Who will bear the water loss?</div>
-          <div class="yesno-group">
-            <div class="yesno-option" id="waterLossYes" onclick="setWaterLossInclude('yes')">Supply Corporation / Utility</div>
-            <div class="yesno-option" id="waterLossNo" onclick="setWaterLossInclude('no')">Customer</div>
-          </div>
-          <p class="hint" style="margin-top:10px;display:block;"></p>
-        </div>
-
-        <div id="waterLossSection" style="display:block;">
-          <div id="waterLossAlert"></div>
-          <div class="section-title">Enter Loss As</div>
+        <div class="section" id="waterLossSection">
+          <div class="section-title" data-subnav="Loss Amount">Enter Loss As *</div>
           <div class="yesno-group">
             <div class="yesno-option" id="waterLossMethodPct" onclick="setWaterLossMethod('pct')">Percentage</div>
             <div class="yesno-option" id="waterLossMethodGal" onclick="setWaterLossMethod('gal')">Gallons</div>
           </div>
           <div class="form-grid" style="margin-top:14px;">
             <div class="form-group" id="waterLossPctGroup">
-              <label>Annual Water Loss (%)</label>
-              <input type="number" min="0" step="0.01" id="waterLossAnnualPctInput" oninput="onWaterLossFieldChange()">
+              <label>Annual Water Loss (% of water sold) *</label>
+              <input type="number" min="0" step="0.01" id="waterLossAnnualPctInput" oninput="onWaterLossFieldChange()" onblur="validateWaterLossField('waterLossAnnualPctInput')">
+              <div class="field-error" id="err-waterLossAnnualPctInput"></div>
             </div>
             <div class="form-group" id="waterLossGalGroup">
-              <label>Annual Water Loss (gallons)</label>
-              <input type="text" inputmode="numeric" class="number-commas" id="waterLossAnnualGalInput" oninput="onWaterLossFieldChange()">
+              <label>Annual Water Loss (gal/yr) *</label>
+              <input type="text" inputmode="numeric" class="number-commas" id="waterLossAnnualGalInput" oninput="onWaterLossFieldChange()" onblur="validateWaterLossField('waterLossAnnualGalInput')">
+              <div class="field-error" id="err-waterLossAnnualGalInput"></div>
             </div>
           </div>
-          <div class="hint" style="margin-top:8px;display:block;"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title" data-subnav="Who Bears the Loss">Who will bear the water loss? *</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Supply Corporation / Utility (%) *</label>
+              <input type="number" min="0" max="100" step="0.01" id="waterLossUtilityPctInput" oninput="onWaterLossShareChange('utility')" onblur="validateWaterLossField('waterLossUtilityPctInput')">
+              <div class="field-error" id="err-waterLossUtilityPctInput"></div>
+            </div>
+            <div class="form-group">
+              <label>Customer (%) *</label>
+              <input type="number" min="0" max="100" step="0.01" id="waterLossCustomerPctInput" oninput="onWaterLossShareChange('customer')" onblur="validateWaterLossField('waterLossCustomerPctInput')">
+              <div class="field-error" id="err-waterLossCustomerPctInput"></div>
+            </div>
+          </div>
+          <span class="hint" style="display:block;margin-top:8px;font-size:11.5px;color:var(--muted);">Customer share is added to the costs recovered through rates. Utility share is absorbed by the Supply Corporation.</span>
+        </div>
+
+        <div class="section-title" data-subnav="Water Loss Cost">Water Loss Cost Summary</div>
+        <div class="totals-row" style="margin-top:0;">
+          <div class="total-item"><span class="label">Cost to Produce per Gal</span><span class="value" id="wlCostPerGal">—</span></div>
+          <div class="total-item"><span class="label">Cost of Lost Water</span><span class="value" id="wlLossCost">—</span></div>
+          <div class="total-item"><span class="label">Customer Share (added to rates)</span><span class="value" id="wlCustomerLoss">—</span></div>
+          <div class="total-item"><span class="label">Utility Share (absorbed)</span><span class="value" id="wlUtilityLoss">—</span></div>
         </div>
       </div>
 
@@ -852,16 +941,16 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
 
         <div id="resultsAlert"></div>
 
-        <div class="section" id="rateResultsSection">
+        <div class="section" data-subnav="Rate Results" id="rateResultsSection">
           <div class="section-title">Rate Results <span class="badge" id="rateModelBadge"></span></div>
           <div id="rateResultsContent"></div>
         </div>
 
-        <div class="metric-grid" id="metricGrid"></div>
+        <div class="metric-grid" data-subnav="Key Metrics" id="metricGrid"></div>
 
-        <div class="results-split-grid" id="typeResultsGrid"></div>
+        <div class="results-split-grid" data-subnav="By Customer Type" id="typeResultsGrid"></div>
 
-        <div class="chart-grid">
+        <div class="chart-grid" data-subnav="Charts">
           <div class="chart-box">
             <h4>Operating Expense</h4>
             <div class="chart-canvas-wrap"><canvas id="expenseChart"></canvas></div>
@@ -961,7 +1050,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         </div>
         <div class="ai-faq-item">
           <div class="ai-faq-q">How does Water Loss affect the rate? <i class="fa-solid fa-chevron-down"></i></div>
-          <div class="ai-faq-a">If you choose to recover water loss through rates, the volumetric rate is based on water produced (sold water grossed up by the loss %) instead of just water sold, so customers collectively cover the lost water too.</div>
+          <div class="ai-faq-a">The cost of lost water is its share of production times the cost to produce each gallon. Water produced is water sold plus water loss. On the Water Loss step you split that cost between customers and the Supply Corporation: the customer share is added to what customers pay through rates (billed on water sold); the utility share is absorbed.</div>
         </div>
         <div class="ai-faq-item">
           <div class="ai-faq-q">What's the Assessment Fee? <i class="fa-solid fa-chevron-down"></i></div>
@@ -1167,16 +1256,13 @@ Click NEXT to continue.`,
 Water losses may result from leaks, meter inaccuracies, flushing, unauthorized consumption, or other differences between water supplied and water billed.
 
 Enter Loss
-Enter the utility's average water loss as either a percentage of water supplied or a volume in gallons. Use recent water production/purchase and customer billing records when available.
+Enter the utility's average annual water loss as either a percentage of water sold or a volume in gallons. Use recent water production/purchase and customer billing records when available.
+
+Water Produced
+Calculated automatically as water sold (from the Customer & Billing step) plus water loss.
 
 Who Will Bear the Water Loss?
-Select how the financial impact of water loss should be treated in the rate calculation.
-
-Customer
-Select this option if the cost associated with water losses should be recovered through customer rates. The tool will determine rates so that revenues from billed water are sufficient to recover the costs associated with both billed water and water losses.
-
-Supply Corporation / Utility
-Select this option if the utility will absorb the financial impact of water losses rather than recovering those costs from customers. The rate calculation will reflect this selection when determining the required customer rate.
+Split the cost of lost water between the Supply Corporation / Utility and the Customer, in %. Entering one fills in the other so the two always total 100% (default: Customer 100%). Customer share is added to the costs recovered through rates. Utility share is absorbed by the Supply Corporation.
 
 Click NEXT or FINISH to complete the analysis.`,
 
@@ -1242,6 +1328,9 @@ function defaultState(){
     // panels below are shown/required on the Customer & Billing and Rate
     // Structure steps.
     customerType: '',
+    // '' | 'annualAvg' | 'monthly' -- chosen once on the Customer Type page and
+    // copied into every table's own dataType by applyDataTypeEverywhere().
+    dataType: '',
     residential: defaultTypeState(),
     commercial: defaultTypeState(),
 
@@ -1280,10 +1369,11 @@ function defaultState(){
       rows: []
     },
     waterLoss: {
-      include:'',
       method:'pct',
       annualGal:'',
-      annualPct:''
+      annualPct:'', // % of water sold
+      absorbedPct:0, // Supply Corporation / Utility share of lost-water cost (%)
+      customerPct:100 // Customer share (%); the two always total 100
     },
     results: {}
   };
@@ -1397,6 +1487,15 @@ function applyLoadedState(parsed){
   if(!appState.waterLoss.method){
     appState.waterLoss.method = appState.waterLoss.annualPct !== '' ? 'pct' : 'gal';
   }
+  // Older sessions picked who bears the loss (Utility / Customer / Shared)
+  // instead of entering the Supply Corporation's % directly -- map it over.
+  delete appState.waterLoss.annualProduced;
+  const legacyInclude = appState.waterLoss.include;
+  if(appState.waterLoss.absorbedPct === undefined || appState.waterLoss.absorbedPct === '') appState.waterLoss.absorbedPct = 0;
+  if(legacyInclude === 'yes') appState.waterLoss.absorbedPct = 100;
+  else if(legacyInclude === 'no') appState.waterLoss.absorbedPct = 0;
+  delete appState.waterLoss.include;
+  if(appState.waterLoss.customerPct === undefined) appState.waterLoss.customerPct = 100 - Number(appState.waterLoss.absorbedPct);
   if(!appState.operatingExpenses) appState.operatingExpenses = defaultState().operatingExpenses;
   if(!appState.operatingExpenses.dataType) appState.operatingExpenses.dataType = 'annualAvg';
   appState.operatingExpenses.rows.forEach(row=>{ if(!row.monthlyData) row.monthlyData = Array(12).fill(''); });
@@ -1408,6 +1507,10 @@ function applyLoadedState(parsed){
   if(!appState.miscellaneousRevenue) appState.miscellaneousRevenue = defaultState().miscellaneousRevenue;
   if(!appState.miscellaneousRevenue.dataType) appState.miscellaneousRevenue.dataType = 'annualAvg';
   appState.miscellaneousRevenue.rows.forEach(row=>{ if(!row.monthlyData) row.monthlyData = Array(12).fill(''); });
+  // Older saved sessions picked a data format per table -- adopt the customer
+  // billing one as the tool-wide choice.
+  if(!appState.dataType) appState.dataType = appState.residential.dataType || appState.commercial.dataType || '';
+  applyDataTypeEverywhere();
   if(!appState.rateModel) appState.rateModel = defaultState().rateModel;
   if(!appState.rateModel.tierDiffMethod) appState.rateModel.tierDiffMethod = 'dollar';
   // Older saved sessions had one global $/% difference for every tier instead of a
@@ -1550,10 +1653,12 @@ function resetCurrentStep(){
 
   if(step === 1){
     appState.customerType = def.customerType;
+    appState.dataType = def.dataType;
     appState.residential = def.residential;
     appState.commercial = def.commercial;
     syncCombinedCustomerInfo();
     renderCustomerBillingStep();
+    goToSubPage(0);
   } else if(step === 2){
     appState.meters = def.meters;
     renderMeterTable();
@@ -1564,9 +1669,11 @@ function resetCurrentStep(){
     renderRateStructureStep();
   } else if(step === 4){
     appState.operatingExpenses = def.operatingExpenses;
+    applyDataTypeEverywhere();
     renderExpenseTable();
   } else if(step === 5){
     appState.miscellaneousRevenue = def.miscellaneousRevenue;
+    applyDataTypeEverywhere();
     renderMiscRevenueTable();
   } else if(step === 6){
     appState.waterLoss = def.waterLoss;
@@ -1860,7 +1967,11 @@ function renderStep(){
   document.querySelectorAll('.step-page').forEach(p=>{
     p.classList.toggle('active', Number(p.dataset.step) === appState.currentStep);
   });
-  document.getElementById('btnPrevious').disabled = appState.currentStep === 1;
+  const subs = stepSubPages(appState.currentStep);
+  currentSubPage = Math.max(0, Math.min(currentSubPage, subs.length-1));
+  subs.forEach((p, i)=>p.classList.toggle('active', i === currentSubPage));
+  document.getElementById('btnPrevious').disabled = appState.currentStep === 1 && currentSubPage === 0;
+  if(appState.currentStep === 6) updateWaterLossTotals();
   const isLast = appState.currentStep === TOTAL_STEPS;
   document.getElementById('btnNext').style.display = isLast ? 'none' : 'inline-flex';
   document.getElementById('btnResetStep').style.display = isLast ? 'none' : 'inline-flex';
@@ -1892,13 +2003,110 @@ function renderStepNav(){
       '<button type="button" class="step-nav-btn" '+(disabled?'disabled':'')+' onclick="stepNavClick('+n+')" title="'+escapeHtml((n)+'. '+title)+'">'+
       '<span class="step-nav-circle">'+icon+'</span>'+
       '<span class="step-nav-label">'+escapeHtml(title)+'</span>'+
-      '</button></div>';
+      '</button>'+(n === appState.currentStep ? renderStepSubNav(n) : '')+'</div>';
     if(n < TOTAL_STEPS){
       html += '<div class="step-nav-line '+(n < appState.furthestStep ? 'completed' : '')+'"></div>';
     }
   });
-  nav.innerHTML = html;
+  // Skip identical rewrites -- the sub-nav observer below calls this on
+  // every layout change, and replacing the DOM would drop hover state.
+  if(nav.dataset.rendered !== html){ nav.innerHTML = html; nav.dataset.rendered = html; }
+  updateStepSubNavCurrent();
 }
+
+// Lists the currently visible [data-subnav] blocks of step n as links. Hidden
+// panels (e.g. Commercial when only Residential is chosen) and empty result
+// containers are left out.
+function stepSubNavTargets(n){
+  const page = document.querySelector('.step-page[data-step="'+n+'"]');
+  if(!page) return [];
+  return Array.from(page.querySelectorAll('[data-subnav]')).filter(el=>el.offsetHeight > 0);
+}
+
+// Steps split into sub-pages list those as links that switch pages (a
+// sub-page stays locked until the ones before it validate); other steps list
+// their scroll-to sections.
+function renderStepSubNav(n){
+  const subs = stepSubPages(n);
+  if(subs.length){
+    let locked = false;
+    return '<div class="step-nav-sub">'+subs.map((el, i)=>{
+      const disabled = locked;
+      if(!validateSubPage(n, i).valid) locked = true;
+      return '<button type="button" class="step-nav-sub-btn'+(i === currentSubPage ? ' current' : '')+'" '+
+        (disabled ? 'disabled ' : '')+'onclick="goToSubPage('+i+')">'+escapeHtml(el.dataset.subnav)+'</button>';
+    }).join('')+'</div>';
+  }
+  const targets = stepSubNavTargets(n);
+  if(targets.length < 2) return '';
+  return '<div class="step-nav-sub">'+targets.map((el, i)=>
+    '<button type="button" class="step-nav-sub-btn" onclick="scrollToSubSection('+i+')">'+
+    escapeHtml(el.dataset.subnav)+'</button>').join('')+'</div>';
+}
+
+// Index of the sub-page shown within the current step. UI-only: resuming a
+// saved session starts the step from its first sub-page.
+let currentSubPage = 0;
+
+function stepSubPages(n){
+  const page = document.querySelector('.step-page[data-step="'+n+'"]');
+  return page ? Array.from(page.querySelectorAll(':scope > .sub-page')) : [];
+}
+
+// Validates just sub-page i of step n; the last sub-page defers to the full
+// step validation that Next already runs.
+function validateSubPage(n, i){
+  if(n === 1 && i === 0){
+    return appState.customerType ? {valid:true} : {valid:false, fieldErrors:[], messages:['Select a customer type to continue.']};
+  }
+  if(n === 1 && i === 1){
+    return appState.dataType ? {valid:true} : {valid:false, fieldErrors:[], messages:['Select a data format to continue.']};
+  }
+  if(i === stepSubPages(n).length-1) return validateStep(n);
+  return {valid:true};
+}
+
+function goToSubPage(i){
+  currentSubPage = i;
+  renderStep();
+}
+
+function scrollToSubSection(i){
+  const el = stepSubNavTargets(appState.currentStep)[i];
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// Highlights the sub-section link for the last block whose top has scrolled
+// past the upper third of the viewport.
+function updateStepSubNavCurrent(){
+  if(stepSubPages(appState.currentStep).length) return;
+  const btns = document.querySelectorAll('#stepNav .step-nav-sub-btn');
+  if(!btns.length) return;
+  const targets = stepSubNavTargets(appState.currentStep);
+  const line = window.innerHeight / 3;
+  let cur = 0;
+  targets.forEach((el, i)=>{ if(el.getBoundingClientRect().top <= line) cur = i; });
+  if(window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) cur = targets.length - 1;
+  btns.forEach((b, i)=>b.classList.toggle('current', i === cur));
+}
+
+window.addEventListener('scroll', updateStepSubNavCurrent, {passive:true});
+
+// Panels show/hide as the user makes choices (customer type, fixed vs tier,
+// water-loss bearer) and results fill in on the last step, so re-render the
+// sidebar whenever the wizard's layout changes.
+(function(){
+  let pending = false;
+  const refresh = ()=>{
+    if(pending) return;
+    pending = true;
+    requestAnimationFrame(()=>{ pending = false; renderStepNav(); });
+  };
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const body = document.querySelector('#wizardView .page-body');
+    if(body) new MutationObserver(refresh).observe(body, {attributes:true, attributeFilter:['style','class'], childList:true, subtree:true});
+  });
+})();
 
 // Handles a click on a step-nav circle -- jumps straight there if that step
 // has already been unlocked (reached via Next at least once before).
@@ -1909,21 +2117,35 @@ function stepNavClick(n){
 }
 
 // Jumps directly to step n and renders it.
-function goToStep(n, skipValidation){
+function goToStep(n, skipValidation, subPage){
   appState.currentStep = n;
+  currentSubPage = subPage || 0;
   if(n > (appState.furthestStep||1)) appState.furthestStep = n;
   renderStep();
   saveState(false);
 }
 
 function nextStep(){
+  const subs = stepSubPages(appState.currentStep);
+  if(currentSubPage < subs.length-1){
+    const subRes = validateSubPage(appState.currentStep, currentSubPage);
+    if(!subRes.valid){ renderValidation(appState.currentStep, subRes); return; }
+    goToSubPage(currentSubPage+1);
+    return;
+  }
   const res = validateStep(appState.currentStep);
   if(!res.valid){ renderValidation(appState.currentStep, res); return; }
   if(appState.currentStep < TOTAL_STEPS) goToStep(appState.currentStep+1);
 }
 
+// Steps back through sub-pages first; entering the previous step lands on its
+// last sub-page, since that is where Next left it.
 function previousStep(){
-  if(appState.currentStep > 1) goToStep(appState.currentStep-1);
+  if(currentSubPage > 0){ goToSubPage(currentSubPage-1); return; }
+  if(appState.currentStep > 1){
+    const prev = appState.currentStep-1;
+    goToStep(prev, false, Math.max(0, stepSubPages(prev).length-1));
+  }
 }
 
 // Displays field errors and a toast for a failed step validation.
@@ -1993,6 +2215,10 @@ function validateCustomerBilling(){
   const fieldErrors = [], messages = [];
   if(!appState.customerType){
     messages.push('Select a customer type to continue.');
+    return {valid:false, fieldErrors, messages};
+  }
+  if(!appState.dataType){
+    messages.push('Select a data format to continue.');
     return {valid:false, fieldErrors, messages};
   }
   if(isResidentialIncluded()){
@@ -2118,21 +2344,49 @@ function validatePage5(){
   if(rows.some(r=>rowAmountNegative(r, mr.dataType))) messages.push('Revenue amounts cannot be negative.');
   return {valid: messages.length===0, messages};
 }
-// Validates the Water Loss step (step 6): who bears the loss and the loss amount are both always required, regardless of who bears it.
+// Validates the Water Loss step (step 6): the loss amount (>= 0, gallons or
+// % of water sold) and the Utility / Customer shares (each 0-100, totaling 100).
 function validatePage6(){
-  const messages = [];
+  const messages = [], fieldErrors = [];
   const wl = appState.waterLoss;
-  if(wl.include !== 'yes' && wl.include !== 'no'){
-    messages.push('Select who will bear the water loss.');
-  }
+  const fail = (field, message)=>{ fieldErrors.push({field, message}); messages.push(message); };
+
   if(wl.method === 'gal'){
-    if(wl.annualGal === '') messages.push('Enter the estimated annual water loss in gallons.');
-    else if(Number(wl.annualGal) < 0) messages.push('Annual water loss cannot be negative.');
+    if(wl.annualGal === '') fail('waterLossAnnualGalInput', 'Enter the estimated annual water loss in gallons.');
+    else if(Number(wl.annualGal) < 0) fail('waterLossAnnualGalInput', 'Annual water loss cannot be negative.');
   } else {
-    if(wl.annualPct === '') messages.push('Enter the estimated annual water loss percentage.');
-    else if(Number(wl.annualPct) < 0) messages.push('Water loss percentage cannot be negative.');
+    if(wl.annualPct === '') fail('waterLossAnnualPctInput', 'Enter the estimated annual water loss percentage.');
+    else if(Number(wl.annualPct) < 0) fail('waterLossAnnualPctInput', 'Water loss percentage cannot be negative.');
   }
-  return {valid: messages.length===0, messages};
+
+  const shareFields = [['waterLossUtilityPctInput', wl.absorbedPct, 'Supply Corporation / Utility'], ['waterLossCustomerPctInput', wl.customerPct, 'Customer']];
+  let sharesOk = true;
+  shareFields.forEach(([field, v, label])=>{
+    if(v === '' || v === null || v === undefined){ fail(field, 'Enter the '+label+' share (%).'); sharesOk = false; }
+    else if(Number(v) < 0 || Number(v) > 100){ fail(field, 'Enter a percentage between 0% and 100%.'); sharesOk = false; }
+  });
+  if(sharesOk && Math.abs(Number(wl.absorbedPct) + Number(wl.customerPct) - 100) > 1e-6){
+    fail('waterLossCustomerPctInput', 'Supply Corporation / Utility and Customer shares must total 100%.');
+  }
+  return {valid: messages.length===0, fieldErrors, messages};
+}
+
+// On blur: shows (or clears) the inline error for just the field that was left.
+function validateWaterLossField(field){
+  const fe = (validatePage6().fieldErrors||[]).find(e=>e.field === field);
+  if(!fe){ clearWaterLossError(field); return; }
+  const err = document.getElementById('err-'+field);
+  if(err){ err.textContent = fe.message; err.classList.add('show'); }
+  const input = document.getElementById(field);
+  if(input) input.classList.add('invalid');
+}
+
+// Clears one Water Loss field's inline error once the user addresses it.
+function clearWaterLossError(field){
+  const err = document.getElementById('err-'+field);
+  if(err){ err.classList.remove('show'); err.textContent = ''; }
+  const input = document.getElementById(field);
+  if(input) input.classList.remove('invalid');
 }
 
 /* =========================================================================
@@ -2149,6 +2403,7 @@ function renderCustomerBillingStep(){
   document.getElementById('commercialBillingPanel').style.display = isCommercialIncluded() ? 'block' : 'none';
   if(isResidentialIncluded()) renderCustomerTypePanel('residential');
   if(isCommercialIncluded()) renderCustomerTypePanel('commercial');
+  renderDataTypeUI();
 }
 
 // Sets the Customer Type ('residential'|'commercial'|'both') and re-renders
@@ -2170,9 +2425,6 @@ function setCustomerType(type){
 // Annual-Avg vs Monthly-Data sub-blocks, and current field values.
 function renderCustomerTypePanel(typeKey){
   const typeState = appState[typeKey];
-  document.querySelectorAll('#'+typeKey+'DataTypeToggle .rate-choice-card').forEach(el=>{
-    el.classList.toggle('selected', el.dataset.datatype === typeState.dataType);
-  });
   const ci = typeState.customerInfo;
   document.getElementById(typeKey+'TotalCustomers').value = ci.totalCustomers===''?'':formatNumber(ci.totalCustomers||0);
   document.getElementById(typeKey+'ActiveCustomers').value = ci.activeCustomers===''?'':formatNumber(ci.activeCustomers||0);
@@ -2193,12 +2445,45 @@ function renderCustomerTypePanel(typeKey){
   bindNumberCommaInputs(document);
 }
 
-// Sets a customer type's Data Type (Annual Monthly Average vs Monthly Data) and re-renders its panel.
-function onCustomerDataTypeChange(typeKey, dataType){
-  appState[typeKey].dataType = dataType;
-  renderCustomerTypePanel(typeKey);
+// Copies the tool-wide data format into each table's own dataType, which is
+// what the per-table render/validation/calculation code reads.
+function applyDataTypeEverywhere(){
+  const t = appState.dataType;
+  if(!t) return;
+  appState.residential.dataType = t;
+  appState.commercial.dataType = t;
+  appState.operatingExpenses.dataType = t;
+  appState.miscellaneousRevenue.dataType = t;
+}
+
+// Sets the tool-wide data format (Annual Monthly Average vs Monthly Data)
+// and re-renders every page that depends on it.
+function setDataType(dataType){
+  appState.dataType = dataType;
+  applyDataTypeEverywhere();
+  renderCustomerBillingStep();
   syncCombinedCustomerInfo();
   updateMeterTotals();
+  renderRateStructureStep();
+  renderExpenseTable();
+  renderMiscRevenueTable();
+  renderStepNav();
+}
+
+// Shows the chosen data format on the pages that used to have their own
+// toggle, with a link back to where it's changed.
+function renderDataTypeUI(){
+  document.querySelectorAll('#dataTypeToggle .rate-choice-card').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.datatype === appState.dataType);
+  });
+  const labels = {
+    customer: {annualAvg:'Annual Monthly Average', monthly:'Monthly Data'},
+    money: {annualAvg:'Annual Average', monthly:'Monthly Data'}
+  };
+  document.querySelectorAll('.data-format-note').forEach(el=>{
+    const label = (labels[el.dataset.formatContext]||labels.customer)[appState.dataType] || 'Not selected';
+    el.innerHTML = '<i class="fa-solid fa-table-list"></i> Data format: <b>'+label+'</b> &middot; <a onclick="goToStep(1, false, 1)">Change</a>';
+  });
 }
 
 // Handles edits to a customer type's Total/Active Customers or Monthly Water
@@ -2451,6 +2736,7 @@ function renderRateStructureStep(){
   document.getElementById('assessmentFeePct').value = appState.rateModel.assessmentFeePct;
   document.getElementById('residentialRateStructurePanel').style.display = isResidentialIncluded() ? 'block' : 'none';
   document.getElementById('commercialRateStructurePanel').style.display = isCommercialIncluded() ? 'block' : 'none';
+  document.getElementById('commercialMarkupSection').style.display = (isResidentialIncluded() && isCommercialIncluded()) ? 'block' : 'none';
   if(isResidentialIncluded()) renderTypeRateDetails('residential');
   if(isCommercialIncluded()) renderTypeRateDetails('commercial');
   updateAssessmentFeeDisplay();
@@ -2483,10 +2769,12 @@ function renderTypeRateDetails(typeKey){
 
   if(typeKey === 'commercial'){
     const showMarkup = isResidentialIncluded() && isCommercialIncluded();
+    document.getElementById('commercialMarkupSection').style.display = showMarkup ? 'block' : 'none';
+    document.getElementById('commercialMarkupPendingHint').style.display = rm.type ? 'none' : 'block';
     document.getElementById('commercialFixedMarkupFields').style.display = (showMarkup && rm.type==='fixed') ? 'grid' : 'none';
     document.getElementById('commercialTierMarkupFields').style.display = (showMarkup && rm.type==='tier') ? 'grid' : 'none';
     document.getElementById('commercialFixedRateHint').textContent = showMarkup
-      ? "Solved as Residential's volumetric rate plus the markup below -- see it on the Summary & Results step once all steps are complete."
+      ? "Solved as Residential's volumetric rate plus the Commercial markup at the top of this page -- see it on the Summary & Results step once all steps are complete."
       : 'The volumetric rate for Fixed Rate is calculated automatically so the Base Charge, this rate, misc. revenue, and the assessment fee together cover total annual expenses -- see it on the Summary & Results step once all steps are complete.';
     renderMarkupFields('fixedMarkup');
     renderMarkupFields('tierMarkup');
@@ -2871,17 +3159,8 @@ function moneyRowCellsHtml(row, dataType, handlerName){
     '<td><select data-field="frequency" onchange="'+handlerName+'(this)">'+FREQUENCIES.map(f=>'<option value="'+f+'"'+(f===row.frequency?' selected':'')+'>'+f+'</option>').join('')+'</select></td>';
 }
 
-// Sets the Operating Expenses table's Data Type and re-renders it.
-function setExpenseDataType(type){
-  appState.operatingExpenses.dataType = type;
-  renderExpenseTable();
-}
-
 function renderExpenseTable(){
   const dataType = appState.operatingExpenses.dataType;
-  document.querySelectorAll('#expenseDataTypeToggle .rate-choice-card').forEach(el=>{
-    el.classList.toggle('selected', el.dataset.datatype === dataType);
-  });
   document.getElementById('expenseTableHead').innerHTML = moneyTableHeadHtml(dataType, 'Annual Expense');
   const tbody = document.getElementById('expenseTableBody');
   tbody.innerHTML = '';
@@ -3007,6 +3286,7 @@ function updateExpenseCategoryBreakdown(){
   if(totalEl) totalEl.textContent = formatCurrency(subtotal+contingencyAmount);
   const topTotalEl = document.getElementById('expenseTopTotal');
   if(topTotalEl) topTotalEl.textContent = formatCurrency(subtotal+contingencyAmount);
+  renderWaterLossShareLines();
 }
 
 /* =========================================================================
@@ -3014,17 +3294,8 @@ function updateExpenseCategoryBreakdown(){
    ========================================================================= */
 
 // Rebuilds the miscellaneous-revenue table's rows from state.
-// Sets the Non-Operating Revenue table's Data Type and re-renders it.
-function setMiscRevenueDataType(type){
-  appState.miscellaneousRevenue.dataType = type;
-  renderMiscRevenueTable();
-}
-
 function renderMiscRevenueTable(){
   const dataType = appState.miscellaneousRevenue.dataType;
-  document.querySelectorAll('#miscRevenueDataTypeToggle .rate-choice-card').forEach(el=>{
-    el.classList.toggle('selected', el.dataset.datatype === dataType);
-  });
   document.getElementById('miscRevenueTableHead').innerHTML = moneyTableHeadHtml(dataType, 'Annual Amount');
   const tbody = document.getElementById('miscRevenueTableBody');
   tbody.innerHTML = '';
@@ -3128,24 +3399,16 @@ function updateMiscRevenueCategoryBreakdown(){
    PAGE 6: WATER LOSS
    ========================================================================= */
 
-// Toggles the who-bears-it buttons; the loss-amount section is always shown since it's always required.
+// Renders the Water Loss step's inputs from state.
 function renderPage6(){
-  const wl = appState.waterLoss;
-  document.getElementById('waterLossYes').classList.toggle('active', wl.include==='yes');
-  document.getElementById('waterLossNo').classList.toggle('active', wl.include==='no');
-  document.getElementById('waterLossSection').style.display = 'block';
   renderWaterLossForm();
-}
-
-// Sets who bears the water loss (yes/no) and re-renders the step.
-function setWaterLossInclude(val){
-  appState.waterLoss.include = val;
-  renderPage6();
 }
 
 // Sets the water-loss entry method (percentage or gallons) and re-renders the step.
 function setWaterLossMethod(val){
   appState.waterLoss.method = val;
+  clearWaterLossError('waterLossAnnualPctInput');
+  clearWaterLossError('waterLossAnnualGalInput');
   renderPage6();
 }
 
@@ -3154,10 +3417,32 @@ function renderWaterLossForm(){
   const wl = appState.waterLoss;
   document.getElementById('waterLossMethodPct').classList.toggle('active', wl.method!=='gal');
   document.getElementById('waterLossMethodGal').classList.toggle('active', wl.method==='gal');
-  document.getElementById('waterLossPctGroup').style.display = wl.method==='gal' ? 'none' : 'block';
-  document.getElementById('waterLossGalGroup').style.display = wl.method==='gal' ? 'block' : 'none';
+  document.getElementById('waterLossPctGroup').style.display = wl.method==='gal' ? 'none' : '';
+  document.getElementById('waterLossGalGroup').style.display = wl.method==='gal' ? '' : 'none';
   document.getElementById('waterLossAnnualGalInput').value = wl.annualGal===''?'':formatNumber(wl.annualGal);
   document.getElementById('waterLossAnnualPctInput').value = wl.annualPct===''?'':wl.annualPct;
+  document.getElementById('waterLossUtilityPctInput').value = wl.absorbedPct===''?'':wl.absorbedPct;
+  document.getElementById('waterLossCustomerPctInput').value = wl.customerPct===''?'':wl.customerPct;
+  updateWaterLossTotals();
+}
+
+// Handles edits to either share: a valid 0-100 entry auto-fills the other
+// field so the two always total 100%. An out-of-range entry is left for
+// validation to flag rather than pushing the other field below 0 or above 100.
+function onWaterLossShareChange(which){
+  const wl = appState.waterLoss;
+  const selfId = which === 'utility' ? 'waterLossUtilityPctInput' : 'waterLossCustomerPctInput';
+  const otherId = which === 'utility' ? 'waterLossCustomerPctInput' : 'waterLossUtilityPctInput';
+  const raw = document.getElementById(selfId).value;
+  const v = raw === '' ? '' : Number(raw);
+  const other = (v !== '' && v >= 0 && v <= 100) ? Math.round((100 - v)*100)/100 : null;
+  if(which === 'utility'){ wl.absorbedPct = v; if(other !== null) wl.customerPct = other; }
+  else { wl.customerPct = v; if(other !== null) wl.absorbedPct = other; }
+  if(other !== null){
+    document.getElementById(otherId).value = other;
+    clearWaterLossError(otherId);
+  }
+  clearWaterLossError(selfId);
   updateWaterLossTotals();
 }
 
@@ -3175,40 +3460,101 @@ function onWaterLossFieldChange(){
     if(pct !== '' && pct < 0) pct = 0;
     wl.annualPct = pct;
   }
+  clearWaterLossError(wl.method === 'gal' ? 'waterLossAnnualGalInput' : 'waterLossAnnualPctInput');
   updateWaterLossTotals();
 }
 
-// Only one of gallons/percentage is ever user-entered (per `method`); the
-// other is derived here from annual water sold so production/rate math and
-// reporting both stay consistent regardless of which figure the user had on hand.
-//
-// `include` only controls which rate-setting basis calculateAll() picks (sold
-// vs. produced) -- totalGal/avgPct below are NOT zeroed when include is
-// false: the physical loss volume still affects Water Produced and Cost per
-// 1,000 Gallons either way; only the required-rate denominator depends on the toggle.
+// Water loss is entered in gallons or as a % of water sold; water produced
+// is always derived: produced = sold + loss.
 function getWaterLossSummary(){
   const wl = appState.waterLoss;
   const annualSold = getCombinedMonthlyWaterSold()*12;
-  let totalGal, avgPct;
+  let totalGal;
   if(wl.method === 'gal'){
     totalGal = Number(wl.annualGal)||0;
-    const impliedBase = annualSold + totalGal;
-    avgPct = impliedBase > 0 ? (totalGal/impliedBase)*100 : 0;
   } else {
-    avgPct = wl.annualPct==='' ? 0 : Number(wl.annualPct)||0;
-    totalGal = avgPct > 0 && avgPct < 100 ? annualSold*avgPct/(100-avgPct) : 0;
+    totalGal = annualSold*(Number(wl.annualPct)||0)/100;
   }
+  const absorbedPct = Number(wl.absorbedPct)||0;
+  const customerPct = Number(wl.customerPct)||0;
   return {
-    include: wl.include==='yes',
-    totalGal, avgPct
+    include: absorbedPct >= 100, // Supply Corporation bears the full loss
+    totalGal, annualSold,
+    produced: annualSold + totalGal,
+    avgPct: annualSold > 0 ? totalGal/annualSold*100 : 0, // % of water sold
+    absorbedPct, customerPct
   };
 }
 
-// Re-validates the Water Loss step and updates its warning banner.
+// Revenue that must come from water sales -- the same figure calculateAll()
+// derives: total expenses (with contingency) minus non-operating revenue and
+// base fee revenue. Used for the Water Loss step's live summary.
+function getAnnualRevenueNeededFromRates(){
+  const oe = appState.operatingExpenses;
+  const subtotal = oe.rows.reduce((a,r)=>a+toAnnualForRow(r, oe.dataType),0);
+  const totalExpenses = subtotal*(1+(Number(oe.contingencyPct)||0)/100);
+  const mr = appState.miscellaneousRevenue;
+  const misc = mr.rows.reduce((a,r)=>a+toAnnualForRow(r, mr.dataType),0);
+  return Math.max(0, totalExpenses - misc - getMonthlyBaseFeeRevenue()*12);
+}
+
+// Splits the cost of lost water between customers and the Supply Corporation:
+//   cost_per_gal       = revenue_needed / water_produced
+//   cost_of_water_sold = water_sold x cost_per_gal
+//   loss_cost          = loss_gal x cost_per_gal
+//   customer_loss      = loss_cost x customer%
+//   utility_loss       = loss_cost x utility%
+//   customer_revenue   = cost_of_water_sold + customer_loss
+// customer_revenue is what the volumetric/tier rates recover. revenue_needed
+// already includes the cost of lost water (it comes from the expenses
+// entered), so customer_loss is added on top of cost_of_water_sold only.
+function computeWaterLossCost(revenueNeeded, wls){
+  const costPerGal = wls.produced > 0 ? revenueNeeded/wls.produced : 0;
+  const costOfWaterSold = wls.annualSold*costPerGal;
+  const lossCost = wls.totalGal*costPerGal;
+  const customerLoss = lossCost*wls.customerPct/100;
+  const utilityLoss = lossCost*wls.absorbedPct/100;
+  return {costPerGal, costOfWaterSold, lossCost, customerLoss, utilityLoss, customerRevenue: costOfWaterSold + customerLoss};
+}
+
+// The water-loss cost split, or null until the Water Loss step's inputs are valid.
+function currentWaterLossCost(){
+  const wls = getWaterLossSummary();
+  if(!validatePage6().valid || !(wls.produced > 0)) return null;
+  return computeWaterLossCost(getAnnualRevenueNeededFromRates(), wls);
+}
+
+// Fills the read-only "Water Loss Cost – Customer Share / Absorbed by Supply
+// Corporation" lines on the Operating Expenses step ("—" until valid).
+function renderWaterLossShareLines(){
+  const c = currentWaterLossCost();
+  document.querySelectorAll('[data-wl-share]').forEach(el=>{
+    el.textContent = c ? formatCurrency(el.dataset.wlShare === 'customer' ? c.customerLoss : c.utilityLoss) : '—';
+  });
+}
+
+// Cost per gallon is usually well under $1, so it gets 4 decimals there.
+function formatCostPerGal(v){
+  return Math.abs(v) < 1 ? '$'+Number(v).toFixed(4) : formatCurrency(v);
+}
+
+// Refreshes the Water Loss step's read-outs; the cost summary shows "—"
+// until every input is valid.
 function updateWaterLossTotals(){
-  const alertBox = document.getElementById('waterLossAlert');
   const res = validatePage6();
-  alertBox.innerHTML = alertHtml('warning','triangle-exclamation', res.messages);
+  const wls = getWaterLossSummary();
+
+  renderWaterLossShareLines();
+  const ids = ['wlCostPerGal','wlLossCost','wlCustomerLoss','wlUtilityLoss'];
+  if(!res.valid || !(wls.produced > 0)){
+    ids.forEach(id=>{ document.getElementById(id).textContent = '—'; });
+    return;
+  }
+  const c = computeWaterLossCost(getAnnualRevenueNeededFromRates(), wls);
+  document.getElementById('wlCostPerGal').textContent = formatCostPerGal(c.costPerGal);
+  document.getElementById('wlLossCost').textContent = formatCurrency(c.lossCost);
+  document.getElementById('wlCustomerLoss').textContent = formatCurrency(c.customerLoss);
+  document.getElementById('wlUtilityLoss').textContent = formatCurrency(c.utilityLoss);
 }
 
 /* =========================================================================
@@ -3243,11 +3589,12 @@ function computeFixedRateRevenue(fixed, activeCustomers, monthlyWaterSold){
 // The assessment fee is reported as its own line (see computeAssessmentFeeAnnual)
 // and added on top in calculateAll(), rather than folded into each tier's rate --
 // so the per-tier "Revenue" below is the pre-assessment-fee amount.
+// Revenue is billed on water sold -- the utility's share of lost-water cost
+// is handled up front in calculateAll() (see computeWaterLossCost).
 function computeTierRevenue(tiers, waterLossSummary){
-  const grossFactor = waterLossSummary.include ? 1/(1-(waterLossSummary.avgPct/100)) : 1;
   const rows = tiers.map(t=>{
     const monthlyVolume = Number(t.waterSold)||0;
-    const grossAnnualVolume = monthlyVolume*12*grossFactor;
+    const grossAnnualVolume = monthlyVolume*12;
     const revenue = (grossAnnualVolume/BILLING_UNIT_GAL)*(Number(t.rate)||0);
     return {tier:t, monthlyVolume, grossAnnualVolume, revenue};
   });
@@ -3420,9 +3767,8 @@ function calculateAll(showToast){
 
   const waterLossSummary = getWaterLossSummary();
   const avgLossPct = waterLossSummary.avgPct||0;
-  // Production is always grossed up by loss %, regardless of whether that
-  // loss is billed to customers -- only the required-rate basis below reacts to that toggle.
-  const annualWaterProduced = avgLossPct < 100 ? annualWaterSold/(1-avgLossPct/100) : annualWaterSold;
+  // Water produced = water sold + water loss (see getWaterLossSummary).
+  const annualWaterProduced = waterLossSummary.produced;
   const annualWaterLossGal = waterLossSummary.totalGal;
 
   const totalMeters = appState.meters.reduce((a,m)=>a+(Number(m.count)||0),0);
@@ -3459,8 +3805,10 @@ function calculateAll(showToast){
   // markup-derived) rate(s) jointly against the shared revenue requirement --
   // see solveJointRates() for the algebra. Reduces to today's single-model
   // formula automatically when only one customer type is included.
-  const grossFactor = includeWaterLossInRates ? 1/(1-(avgLossPct/100)) : 1;
-  solveJointRates(annualRevenueNeededFromRates, grossFactor);
+  // Rates recover revenue needed minus the utility's share of lost-water
+  // cost, billed on water sold (volume basis factor 1).
+  const waterLossCost = computeWaterLossCost(annualRevenueNeededFromRates, waterLossSummary);
+  solveJointRates(waterLossCost.customerRevenue, 1);
 
   const sharedBaseChargePerConnMonthly = activeCustomers>0 ? rm.fixed.baseCharge/activeCustomers : 0;
   const residentialResults = isResidentialIncluded() ? buildTypeResults(appState.residential, waterLossSummary, sharedBaseChargePerConnMonthly) : null;
@@ -3517,7 +3865,8 @@ function calculateAll(showToast){
     rateModelType: rm.type,
     fixedResult, tierResult, actualRateRevenue,
     totalRevenue, netSurplusDeficit,
-    includeWaterLossInRates
+    includeWaterLossInRates,
+    waterLossCost, waterLossAbsorbedPct: waterLossSummary.absorbedPct
   };
 
   appState.lastCalculatedAt = new Date();
@@ -3554,6 +3903,11 @@ function renderResults(){
     metricCard('Total Water Production (Annual)', formatNumber(r.annualWaterProduced)+' gal') +
     metricCard('Total Water Sales (Annual)', formatNumber(r.annualWaterSold)+' gal') +
     metricCard('Active Customers', formatNumber(r.activeCustomers)) +
+    metricCard('Cost to Produce per Gal', formatCostPerGal(r.waterLossCost.costPerGal)) +
+    metricCard('Cost of Lost Water', formatCurrency(r.waterLossCost.lossCost)) +
+    metricCard('Water Loss Cost – Customer Share', formatCurrency(r.waterLossCost.customerLoss), formatNumber(100-r.waterLossAbsorbedPct,2)+'% of lost-water cost, added to rates') +
+    metricCard('Water Loss Cost – Absorbed by Supply Corporation', formatCurrency(r.waterLossCost.utilityLoss), formatNumber(r.waterLossAbsorbedPct,2)+'% of lost-water cost') +
+    metricCard('Recovered from Customers', formatCurrency(r.waterLossCost.customerRevenue)) +
     (r.residential ? metricCard('Residential Revenue Contribution', formatCurrency(r.residential.volumetricAnnual)) : '') +
     (r.commercial ? metricCard('Commercial Revenue Contribution', formatCurrency(r.commercial.volumetricAnnual)) : '');
 
@@ -4171,12 +4525,12 @@ function pdfDataEnteredSection(doc, y){
 
   y = pdfEnsureSpace(doc, y, 24);
   y = pdfSubheading(doc, 'Water Loss', y);
-  const wlPartyLabel = document.getElementById(wl.include==='yes' ? 'waterLossYes' : 'waterLossNo').textContent.trim();
   y = pdfTable(doc, y, [['Field','Value']], [
-    ['Who Bears the Water Loss', wlPartyLabel],
     ['Entered As', wl.method==='gal' ? 'Gallons' : 'Percentage'],
-    [wl.method==='gal' ? 'Annual Water Loss (gallons)' : 'Annual Water Loss (%)',
-      wl.method==='gal' ? formatNumber(wl.annualGal||0) : formatNumber(wl.annualPct||0,2)+'%']
+    [wl.method==='gal' ? 'Annual Water Loss (gal/yr)' : 'Annual Water Loss (% of water sold)',
+      wl.method==='gal' ? formatNumber(wl.annualGal||0) : formatNumber(wl.annualPct||0,2)+'%'],
+    ['Supply Corporation / Utility Share', formatNumber(getWaterLossSummary().absorbedPct,2)+'%'],
+    ['Customer Share', formatNumber(getWaterLossSummary().customerPct,2)+'%']
   ]) + 4;
 
   return y;
@@ -4212,24 +4566,33 @@ function pdfCalculationSummarySection(doc, y){
   y = pdfEnsureSpace(doc, y, 24);
   y = pdfTable(doc, y, [['Field','Value']], [
     ['Total Annual Water Sales', formatNumber(r.annualWaterSold)+' gal'],
-    ['Annual Water Loss', formatNumber(r.annualWaterLossGal)+' gal ('+formatNumber(r.avgLossPct,2)+'%)'],
-    ['Total Water Production', formatNumber(r.annualWaterProduced)+' gal']
+    ['Annual Water Loss', formatNumber(r.annualWaterLossGal)+' gal ('+formatNumber(r.avgLossPct,2)+'% of water sold)'],
+    ['Total Water Production (water sold + water loss)', formatNumber(r.annualWaterProduced)+' gal']
   ]) + 6;
 
-  const wlPartyLabel = document.getElementById(wl.include==='yes' ? 'waterLossYes' : 'waterLossNo').textContent.trim();
-  const basisLabel = r.includeWaterLossInRates ? 'Total Annual Water Production' : 'Total Annual Water Sales';
-  const basisValue = r.includeWaterLossInRates ? r.annualWaterProduced : r.annualWaterSold;
-
-  y = pdfEnsureSpace(doc, y, 16);
-  y = pdfParagraph(doc, 'Since the '+wlPartyLabel+' is bearing the water loss costs, the water rate shall be determined based on the '+basisLabel+'.', y) + 4;
+  const c = r.waterLossCost;
+  y = pdfEnsureSpace(doc, y, 60);
+  y = pdfParagraph(doc, 'Cost to produce per gallon = Revenue Needed / Total Water Production', y, {bold:true});
+  y = pdfParagraph(doc, '= '+formatCurrency(revenueNeeded)+' / '+formatNumber(r.annualWaterProduced)+' = '+formatCostPerGal(c.costPerGal), y, {color:PDF_MUTED, indent:6}) + 2;
+  y = pdfParagraph(doc, 'Cost of lost water = Annual Water Loss x Cost per gallon', y, {bold:true});
+  y = pdfParagraph(doc, '= '+formatNumber(r.annualWaterLossGal)+' x '+formatCostPerGal(c.costPerGal)+' = '+formatCurrency(c.lossCost), y, {color:PDF_MUTED, indent:6}) + 2;
+  const custPct = 100 - r.waterLossAbsorbedPct;
+  y = pdfParagraph(doc, 'Cost of water sold = Total Annual Water Sales x Cost per gallon', y, {bold:true});
+  y = pdfParagraph(doc, '= '+formatNumber(r.annualWaterSold)+' x '+formatCostPerGal(c.costPerGal)+' = '+formatCurrency(c.costOfWaterSold), y, {color:PDF_MUTED, indent:6}) + 2;
+  y = pdfParagraph(doc, 'Water Loss Cost – Customer Share = Cost of lost water x '+formatNumber(custPct,2)+'%', y, {bold:true});
+  y = pdfParagraph(doc, '= '+formatCurrency(c.customerLoss), y, {color:PDF_MUTED, indent:6}) + 2;
+  y = pdfParagraph(doc, 'Water Loss Cost – Absorbed by Supply Corporation = Cost of lost water x '+formatNumber(r.waterLossAbsorbedPct,2)+'%', y, {bold:true});
+  y = pdfParagraph(doc, '= '+formatCurrency(c.utilityLoss), y, {color:PDF_MUTED, indent:6}) + 2;
+  y = pdfParagraph(doc, 'Recovered from customers = Cost of water sold + Water Loss Cost – Customer Share', y, {bold:true});
+  y = pdfParagraph(doc, '= '+formatCurrency(c.costOfWaterSold)+' + '+formatCurrency(c.customerLoss)+' = '+formatCurrency(c.customerRevenue), y, {bold:true, indent:6}) + 6;
 
   if(rm.type === 'fixed'){
     y = pdfEnsureSpace(doc, y, 24);
-    y = pdfParagraph(doc, 'Water Rate = Revenue Needed / '+basisLabel, y, {bold:true});
-    y = pdfParagraph(doc, '= '+formatCurrency(revenueNeeded)+' / '+formatNumber(basisValue), y, {color:PDF_MUTED, indent:6});
+    y = pdfParagraph(doc, 'Water Rate = Recovered from customers / Total Annual Water Sales', y, {bold:true});
+    y = pdfParagraph(doc, '= '+formatCurrency(c.customerRevenue)+' / '+formatNumber(r.annualWaterSold), y, {color:PDF_MUTED, indent:6});
     y = pdfParagraph(doc, '= '+formatCurrency(rm.fixed.volumetricRate)+' per 1,000 gallons', y, {bold:true, indent:6}) + 6;
   } else if(rm.type === 'tier' && rm.tiers.length){
-    y = pdfTierDerivation(doc, y, rm, r, revenueNeeded);
+    y = pdfTierDerivation(doc, y, rm, r, c.customerRevenue);
   }
 
   return y;
@@ -4240,21 +4603,10 @@ function pdfCalculationSummarySection(doc, y){
 // resulting numeric per-tier rates -- mirroring the tier branch of calculateAll()
 // exactly so the report always matches whatever the app actually computed.
 function pdfTierDerivation(doc, y, rm, r, revenueNeeded){
-  const includeWaterLossInRates = r.includeWaterLossInRates;
-  const avgLossPct = r.avgLossPct||0;
-  const grossFactor = includeWaterLossInRates ? 1/(1-(avgLossPct/100)) : 1;
+  // Tiers are billed on water sold; the utility's share of lost-water cost is
+  // already taken out of revenueNeeded (see computeWaterLossCost).
+  const grossFactor = 1;
   const pctMethod = rm.tierDiffMethod === 'pct';
-
-  if(includeWaterLossInRates && avgLossPct > 0){
-    y = pdfEnsureSpace(doc, y, 24);
-    y = pdfParagraph(doc, 'For the sake of water production, the water loss entered is assumed to apply at the same percentage across all tiers:', y) + 2;
-    y = pdfTable(doc, y, [['Tier Name','Water Sold (gal/mo)','Water Produced (gal/mo)']],
-      rm.tiers.map(t=>{
-        const sold = Number(t.waterSold)||0;
-        return [t.name, formatNumber(sold), formatNumber(sold*grossFactor)];
-      })
-    ) + 8;
-  }
 
   y = pdfEnsureSpace(doc, y, 24);
   y = pdfParagraph(doc, 'Assume Tier 1’s cost as X per 1,000 gallons:', y) + 2;
@@ -4283,7 +4635,7 @@ function pdfTierDerivation(doc, y, rm, r, revenueNeeded){
     return [t.name, pdfTierRangeLabel(t), formatNumber((Number(t.waterSold)||0)*grossFactor), increaseLabel, unitCostLabel, revenueLabel];
   });
 
-  const volumeColLabel = includeWaterLossInRates ? 'Water Produced (gal/mo)' : 'Water Sold (gal/mo)';
+  const volumeColLabel = 'Water Sold (gal/mo)';
   y = pdfTable(doc, y, [['Tier Name','Range (gal)',volumeColLabel,'Cost Increase','Unit Cost','Revenue from Tier']], symRows, {fontSize:8}) + 4;
 
   const tier1Rate = Number(rm.tiers[0].rate)||0;
@@ -4295,9 +4647,8 @@ function pdfTierDerivation(doc, y, rm, r, revenueNeeded){
   }
 
   y = pdfEnsureSpace(doc, y, 28);
-  const totalRevenueLabel = includeWaterLossInRates ? 'Total Water Production Revenue' : 'Total Water Sales Revenue';
-  y = pdfParagraph(doc, totalRevenueLabel+' = '+totalLabel, y);
-  y = pdfParagraph(doc, 'Total revenue should equal the Revenue Needed:', y, {color:PDF_MUTED});
+  y = pdfParagraph(doc, 'Total Water Sales Revenue = '+totalLabel, y);
+  y = pdfParagraph(doc, 'Total revenue should equal the amount recovered from customers:', y, {color:PDF_MUTED});
   y = pdfParagraph(doc, totalLabel+' = '+formatCurrency(revenueNeeded), y, {color:PDF_MUTED, indent:6});
   y = pdfParagraph(doc, 'X = '+formatCurrency(tier1Rate)+' per 1,000 gallons', y, {bold:true, indent:6}) + 6;
 
@@ -4428,7 +4779,12 @@ function pdfRateResultsSection(doc, y){
     {label:'Non-Operating Annual Revenue', value:formatCurrency(r.annualMiscRevenue)},
     {label:'Total Water Production (Annual)', value:formatNumber(r.annualWaterProduced)+' gal'},
     {label:'Total Water Sales (Annual)', value:formatNumber(r.annualWaterSold)+' gal'},
-    {label:'Active Customers', value:formatNumber(r.activeCustomers)}
+    {label:'Active Customers', value:formatNumber(r.activeCustomers)},
+    {label:'Cost to Produce per Gal', value:formatCostPerGal(r.waterLossCost.costPerGal)},
+    {label:'Cost of Lost Water', value:formatCurrency(r.waterLossCost.lossCost)},
+    {label:'Water Loss Cost – Customer Share', value:formatCurrency(r.waterLossCost.customerLoss)},
+    {label:'Water Loss Cost – Absorbed by Supply Corporation', value:formatCurrency(r.waterLossCost.utilityLoss)},
+    {label:'Recovered from Customers', value:formatCurrency(r.waterLossCost.customerRevenue)}
   ]) + 6;
 }
 
