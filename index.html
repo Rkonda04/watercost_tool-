@@ -3878,6 +3878,12 @@ function calculateAll(showToast){
    PAGE 7: SUMMARY & RESULTS
    ========================================================================= */
 
+// "Recovered from Customers" split by customer type -- each type's water-sales
+// revenue, which solveJointRates() makes sum to the total recovered.
+function recoveredByTypeCards(r){
+  return includedTypeResults(r).map(([label,,typeResult])=>({label:'Recovered from '+label+' Customers', value:formatCurrency(typeResult.volumetricAnnual)}));
+}
+
 // Builds the HTML for one metric tile on the Summary page.
 function metricCard(label, value, sub, negative){
   return '<div class="metric-card'+(negative?' negative':'')+'"><div class="metric-label">'+label+'</div><div class="metric-value'+(negative?' negative':'')+'">'+value+'</div>'+(sub?'<div class="metric-sub">'+sub+'</div>':'')+'</div>';
@@ -3906,8 +3912,7 @@ function renderResults(){
     metricCard('Water Loss Cost – Customer Share', formatCurrency(r.waterLossCost.customerLoss), formatNumber(100-r.waterLossAbsorbedPct,2)+'% of lost-water cost, added to rates') +
     metricCard('Water Loss Cost – Absorbed by Supply Corporation', formatCurrency(r.waterLossCost.utilityLoss), formatNumber(r.waterLossAbsorbedPct,2)+'% of lost-water cost') +
     metricCard('Recovered from Customers', formatCurrency(r.waterLossCost.customerRevenue)) +
-    (r.residential ? metricCard('Residential Revenue Contribution', formatCurrency(r.residential.volumetricAnnual)) : '') +
-    (r.commercial ? metricCard('Commercial Revenue Contribution', formatCurrency(r.commercial.volumetricAnnual)) : '');
+    recoveredByTypeCards(r).map(c=>metricCard(c.label, c.value)).join('');
 
   const tsEl = document.getElementById('lastCalculatedTimestamp');
   if(tsEl) tsEl.textContent = appState.lastCalculatedAt ? 'Last calculated: '+appState.lastCalculatedAt.toLocaleString('en-US') : '';
@@ -4663,6 +4668,7 @@ function pdfBadge(doc, text, xRight, yBaseline){
 function pdfMetricCardGrid(doc, y, cards){
   const cols = 4, gap = 5, cardH = 20;
   const cardW = (PDF_CONTENT_W - gap*(cols-1)) / cols;
+  y = pdfEnsureSpace(doc, y, Math.ceil(cards.length/cols)*(cardH+gap));
   cards.forEach((c, i)=>{
     const col = i % cols, row = Math.floor(i/cols);
     const x = PDF_MARGIN + col*(cardW+gap);
@@ -4767,7 +4773,7 @@ function pdfRateResultsSection(doc, y){
     {label:'Water Loss Cost – Customer Share', value:formatCurrency(r.waterLossCost.customerLoss)},
     {label:'Water Loss Cost – Absorbed by Supply Corporation', value:formatCurrency(r.waterLossCost.utilityLoss)},
     {label:'Recovered from Customers', value:formatCurrency(r.waterLossCost.customerRevenue)}
-  ]) + 6;
+  ].concat(recoveredByTypeCards(r))) + 6;
 }
 
 // Exports a results summary report, including chart snapshots, to a PDF.
