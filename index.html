@@ -4016,6 +4016,20 @@ function expenseCategoryColor(category){
   return EXPENSE_CATEGORY_COLORS[category] || '#898781';
 }
 
+// Revenue sources as [label, amount, color], shared by the Revenue doughnut,
+// the Revenue vs. Expenses bar, and the PDF so all three split revenue the
+// same way: Base Revenue, then water sales per included customer type, then
+// Non-Operating Revenue (and Assessment Fees for the bar, which must sum to
+// totalRevenue). Colors are fixed per source so each reads the same in both charts.
+function revenueSourceEntries(r, includeAssessmentFees){
+  const entries = [['Base Revenue', r.baseChargeAnnual, CHART_PALETTE[3]]];
+  if(r.residential) entries.push(['Residential Water Sales', r.residential.volumetricAnnual, CHART_PALETTE[0]]);
+  if(r.commercial) entries.push(['Commercial Water Sales', r.commercial.volumetricAnnual, CHART_PALETTE[5]]);
+  entries.push(['Non-Operating Revenue', r.annualMiscRevenue, CHART_PALETTE[1]]);
+  if(includeAssessmentFees) entries.push(['Assessment Fees', r.totalAssessmentFees, CHART_PALETTE[4]]);
+  return entries;
+}
+
 // Registered globally but off by default; each pie/doughnut chart below turns
 // it on explicitly via percentDataLabels() so percentages show directly on
 // the slices, not just on hover. Tiny slices skip the label to avoid clutter.
@@ -4186,20 +4200,19 @@ function renderExpenseChart(r){
   });
 }
 
-// Renders the Revenue doughnut chart (Water Sales Revenue, Misc Revenue).
+// Renders the Revenue doughnut chart (Base Revenue, Residential/Commercial
+// Water Sales, Non-Operating Revenue).
 function renderRevenueChart(r){
   destroyChart('revenue');
-  const entries = [
-    ['Water Sales Revenue', r.actualRateRevenue],
-    ['Non-Operating Revenue', r.annualMiscRevenue]
-  ].filter(([,v])=>v>0);
+  const sources = revenueSourceEntries(r, false).filter(([,v])=>v>0);
+  const entries = sources.map(([label,v])=>[label,v]);
   if(entries.length===0){ showChartEmpty('revenueChart','No revenue data to display yet.'); return; }
   hideChartEmpty('revenueChart');
   const total = entries.reduce((a,[,v])=>a+v,0);
   const ctx = document.getElementById('revenueChart').getContext('2d');
   charts.revenue = new Chart(ctx, {
     type:'doughnut',
-    data:{labels:entries.map(e=>e[0]), datasets:[{data:entries.map(e=>e[1]), backgroundColor:CHART_PALETTE}]},
+    data:{labels:entries.map(e=>e[0]), datasets:[{data:entries.map(e=>e[1]), backgroundColor:sources.map(e=>e[2])}]},
     options:{
       maintainAspectRatio:false,
       plugins:{
@@ -4223,26 +4236,18 @@ function renderRevenueChart(r){
 }
 
 // Renders the Revenue vs. Expenses stacked bar chart -- the Total Revenue bar
-// is split into Base/Water Sales/Misc Revenue and Assessment Fees (these four
-// always sum to totalRevenue for both rate models); the Total Expenses bar is
+// is split into Base Revenue, Residential/Commercial Water Sales, Misc Revenue
+// and Assessment Fees (these always sum to totalRevenue); the Total Expenses bar is
 // split into each individual expense category plus Contingency.
 function renderRevExpChart(r){
   destroyChart('revExp');
   if(r.totalRevenue<=0 && r.totalAnnualExpenses<=0){ showChartEmpty('revExpChart','No data to display yet.'); return; }
   hideChartEmpty('revExpChart');
 
-  const baseRevenue = r.baseChargeAnnual;
-  const waterSalesRevenue = r.rateModelType==='fixed' ? r.fixedResult.volumetricAnnual : r.tierResult.totalAnnual;
-  const miscRevenue = r.annualMiscRevenue;
-  const assessmentFees = r.totalAssessmentFees;
   const contingency = r.totalAnnualExpenses - r.expenseSubtotal;
 
-  const revenueEntries = [
-    ['Base Revenue', baseRevenue],
-    ['Water Sales Revenue', waterSalesRevenue],
-    ['Non-Operating Revenue', miscRevenue],
-    ['Assessment Fees', assessmentFees]
-  ];
+  const revenueSources = revenueSourceEntries(r, true);
+  const revenueEntries = revenueSources.map(([label,v])=>[label,v]);
   // Each expense category gets its own bar segment/legend entry, the same
   // way the revenue side is already split -- instead of one lumped
   // "Operating Expenses" block. Contingency stays its own segment since it
@@ -4251,16 +4256,10 @@ function renderRevExpChart(r){
     .concat([['Contingency', contingency]]);
 
   const labels = ['Total Revenue','Total Expenses'];
-  // Water Sales Revenue and Misc Revenue keep the exact colors they use in
-  // the Revenue doughnut chart; expense categories keep the exact colors
-  // they use in the Operating Expense doughnut (via expenseCategoryColor).
-  // Contingency takes the one palette slot the 4 real categories don't use.
-  const segments = [
-    {label:'Base Revenue', color:CHART_PALETTE[3], values:[baseRevenue, 0]},
-    {label:'Water Sales Revenue', color:CHART_PALETTE[0], values:[waterSalesRevenue, 0]},
-    {label:'Non-Operating Revenue', color:CHART_PALETTE[1], values:[miscRevenue, 0]},
-    {label:'Assessment Fees', color:CHART_PALETTE[4], values:[assessmentFees, 0]}
-  ].concat(expenseEntries.map(([label,amount])=>(
+  // Revenue sources keep the exact colors they use in the Revenue doughnut
+  // chart; expense categories keep the exact colors they use in the
+  // Operating Expense doughnut (via expenseCategoryColor).
+  const segments = revenueSources.map(([label,v,color])=>({label, color, values:[v, 0]})).concat(expenseEntries.map(([label,amount])=>(
     {label, color: label==='Contingency' ? CHART_PALETTE[4] : expenseCategoryColor(label), values:[0, amount]}
   )));
 
@@ -4818,12 +4817,8 @@ async function exportPDF(){
         value: toAnnualForRow(row, appState.operatingExpenses.dataType)
       }))
       .filter(row=>row.value>0);
-    const revenueBarEntries = [
-      ['Base Revenue', r.baseChargeAnnual],
-      ['Water Sales Revenue', r.rateModelType==='fixed' ? r.fixedResult.volumetricAnnual : r.tierResult.totalAnnual],
-      ['Non-Operating Revenue', r.annualMiscRevenue],
-      ['Assessment Fees', r.totalAssessmentFees]
-    ].filter(([,v])=>v>0);
+    const revenueBarEntries = revenueSourceEntries(r, true).map(([label,v])=>[label,v]).filter(([,v])=>v>0);
+    const revenueChartEntries = revenueSourceEntries(r, false).map(([label,v])=>[label,v]).filter(([,v])=>v>0);
     const expenseBarEntries = Object.entries(r.expenseByCategory).filter(([,v])=>v>0).concat(contingencyAmount>0?[['Contingency', contingencyAmount]]:[]);
 
     // Each chart gets its title, the chart image, and the same category
@@ -4836,7 +4831,7 @@ async function exportPDF(){
       {id:'waterProductionChart', title:'Water Production', needed:95,
         table:(doc,ty)=>pdfBreakdownTable(doc, ty, [['Water Sold', r.annualWaterSold],['Water Lost', r.annualWaterLossGal]].filter(([,v])=>v>0), v=>formatNumber(v)+' gal')},
       {id:'revenueChart', title:'Revenue', needed:95,
-        table:(doc,ty)=>pdfBreakdownTable(doc, ty, [['Water Sales Revenue', r.actualRateRevenue],['Non-Operating Revenue', r.annualMiscRevenue]].filter(([,v])=>v>0), formatCurrency)},
+        table:(doc,ty)=>pdfBreakdownTable(doc, ty, revenueChartEntries, formatCurrency)},
       {id:'revExpChart', title:'Revenue vs. Expenses', needed:150,
         table:(doc,ty)=>{
           ty = pdfBreakdownTable(doc, ty, revenueBarEntries, formatCurrency, 'Revenue Breakdown') + 6;
