@@ -969,6 +969,12 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
             <div class="chart-canvas-wrap"><canvas id="revExpChart"></canvas></div>
             <div class="chart-detail" id="revExpChartDetail">Click a bar to see details.</div>
           </div>
+          <div class="chart-box" style="grid-column:1/-1;">
+            <h4>Monthly Revenue vs. Expenses</h4>
+            <p class="hint" id="monthlyRevExpNote" style="margin:0 0 10px;display:block;"></p>
+            <div class="chart-canvas-wrap" style="height:300px;"><canvas id="monthlyRevExpChart"></canvas></div>
+            <div class="chart-detail" id="monthlyRevExpChartDetail">Click a month to see details.</div>
+          </div>
         </div>
 
         <p class="hint" id="lastCalculatedTimestamp" style="margin-top:10px;text-align:right;font-size:11.5px;color:var(--muted);font-weight:400;"></p>
@@ -1378,7 +1384,7 @@ function defaultState(){
 }
 
 let appState = defaultState();
-let charts = {expense:null, waterProduction:null, revenue:null, revExp:null};
+let charts = {expense:null, waterProduction:null, revenue:null, revExp:null, monthlyRevExp:null};
 
 // Generates a short random id used to key meter rows, tier rows, and other dynamic list items.
 function uid(){
@@ -4103,6 +4109,7 @@ function renderCharts(r){
   renderWaterProductionChart(r);
   renderRevenueChart(r);
   renderRevExpChart(r);
+  renderMonthlyRevExpChart(r);
 }
 
 // Renders the Water Production doughnut chart (Water Sold vs. Water Lost).
@@ -4274,6 +4281,117 @@ function renderRevExpChart(r){
         const total = barIndex===0 ? r.totalRevenue : r.totalAnnualExpenses;
         const clickedIdx = entries.findIndex(([label])=>label===segments[datasetIndex].label);
         document.getElementById('revExpChartDetail').innerHTML = chartBreakdownTableHtml(entries, total, formatCurrency, clickedIdx);
+      }
+    }
+  });
+}
+
+// Splits the annual results into 12 months for the Monthly Revenue vs.
+// Expenses chart. With Monthly Data entered, each month uses its own entered
+// values: water-sales revenue follows that type's monthly water sold, and
+// expenses/non-operating revenue use their monthly amounts. Annual Monthly
+// Average data (or a type with no water sold) is spread evenly over 12 months.
+// Assessment fees follow the month's water-sales revenue, and contingency is
+// applied to each month's expenses at the same rate as the annual total, so
+// the 12 months always add up to totalRevenue and totalAnnualExpenses.
+function computeMonthlyRevExp(r){
+  const months = [...Array(12).keys()];
+  const monthly = appState.dataType === 'monthly';
+  const evenShare = months.map(()=>1/12);
+
+  const typeShares = (typeState)=>{
+    if(!monthly) return evenShare;
+    const vals = months.map(m=>Number(typeState.monthlyData[m])||0);
+    const sum = vals.reduce((a,v)=>a+v,0);
+    return sum>0 ? vals.map(v=>v/sum) : evenShare;
+  };
+  const rowMonth = (row, dataType, m)=> dataType==='monthly'
+    ? Number((row.monthlyData||[])[m])||0
+    : toAnnualForRow(row, dataType)/12;
+
+  const base = months.map(()=>r.baseChargeAnnual/12);
+  const resShares = r.residential ? typeShares(appState.residential) : null;
+  const comShares = r.commercial ? typeShares(appState.commercial) : null;
+  const residential = months.map(m=>r.residential ? r.residential.volumetricAnnual*resShares[m] : 0);
+  const commercial = months.map(m=>r.commercial ? r.commercial.volumetricAnnual*comShares[m] : 0);
+  const mr = appState.miscellaneousRevenue;
+  const nonOperating = months.map(m=>mr.rows.reduce((a,row)=>a+rowMonth(row, mr.dataType, m), 0));
+  const waterSalesAnnual = r.actualRateRevenue;
+  const assessment = months.map(m=>waterSalesAnnual>0
+    ? r.totalAssessmentFees*(residential[m]+commercial[m])/waterSalesAnnual
+    : r.totalAssessmentFees/12);
+
+  const oe = appState.operatingExpenses;
+  const contingencyFactor = r.expenseSubtotal>0 ? r.totalAnnualExpenses/r.expenseSubtotal : 0;
+  const expenses = months.map(m=>oe.rows.reduce((a,row)=>a+rowMonth(row, oe.dataType, m), 0)*contingencyFactor);
+
+  const income = months.map(m=>base[m]+residential[m]+commercial[m]+nonOperating[m]+assessment[m]);
+  const net = months.map(m=>income[m]-expenses[m]);
+  return {monthly, base, residential, commercial, nonOperating, assessment, expenses, income, net};
+}
+
+// Rows of the breakdown table for one month of the Monthly Revenue vs. Expenses chart.
+function monthlyRevExpDetailRows(r, d, m){
+  const rows = [['Base Revenue', d.base[m]]];
+  if(r.residential) rows.push(['Residential Water Sales', d.residential[m]]);
+  if(r.commercial) rows.push(['Commercial Water Sales', d.commercial[m]]);
+  rows.push(['Non-Operating Revenue', d.nonOperating[m]], ['Assessment Fees', d.assessment[m]],
+    ['Total Income', d.income[m]], ['Expenses (incl. inflation)', d.expenses[m]], ['Net', d.net[m]]);
+  return rows;
+}
+
+// Renders the Monthly Revenue vs. Expenses chart: Income and Expense bars for
+// each month, with a Net (income minus expenses) line on top.
+function renderMonthlyRevExpChart(r){
+  destroyChart('monthlyRevExp');
+  document.getElementById('monthlyRevExpNote').textContent = appState.dataType === 'monthly'
+    ? 'Based on the monthly data entered for water sold, operating expenses and non-operating revenues.'
+    : 'Annual Monthly Average data is spread evenly across the 12 months. Choose Monthly Data on the Data Format step to see month-by-month changes.';
+  if(r.totalRevenue<=0 && r.totalAnnualExpenses<=0){ showChartEmpty('monthlyRevExpChart','No data to display yet.'); return; }
+  hideChartEmpty('monthlyRevExpChart');
+
+  const d = computeMonthlyRevExp(r);
+  const labels = MONTH_LABELS.map(m=>m.slice(0,3));
+  const allValues = d.income.concat(d.expenses, d.net);
+  const maxAbs = Math.max(1, ...allValues.map(Math.abs));
+  const yMin = Math.min(0, ...allValues) - maxAbs*0.15;
+  const yMax = Math.max(0, ...allValues) + maxAbs*0.05;
+  const ctx = document.getElementById('monthlyRevExpChart').getContext('2d');
+  charts.monthlyRevExp = new Chart(ctx, {
+    type:'bar',
+    data:{labels, datasets:[
+      {type:'line', label:'Net', data:d.net, borderColor:CHART_PALETTE[4], backgroundColor:CHART_PALETTE[4], borderWidth:2, pointRadius:3, order:0},
+      {label:'Income', data:d.income, backgroundColor:CHART_PALETTE[1], order:1},
+      {label:'Expenses', data:d.expenses, backgroundColor:CHART_PALETTE[0], order:1}
+    ]},
+    options:{
+      maintainAspectRatio:false,
+      interaction:{mode:'index', intersect:false},
+      plugins:{
+        tooltip:{callbacks:{label:(ctx)=>ctx.dataset.label+': '+formatCurrency(ctx.parsed.y)}},
+        legend:{position:'bottom'}
+      },
+      scales:{
+        // Scales to the data, and always leaves some room below $0 so a
+        // negative Net stays visible; the $0 line is drawn darker.
+        y:{
+          suggestedMin: yMin, suggestedMax: yMax,
+          ticks:{callback:(v)=>(v<0?'-$':'$')+formatNumber(Math.abs(v))},
+          grid:{
+            color:(c)=>c.tick && c.tick.value===0 ? '#6b6680' : 'rgba(0,0,0,0.08)',
+            lineWidth:(c)=>c.tick && c.tick.value===0 ? 1.5 : 1
+          }
+        }
+      },
+      onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const m = elements[0].index;
+        let html = '<table class="data-table"><thead><tr><th>'+escapeHtml(MONTH_LABELS[m])+'</th><th>Amount</th></tr></thead><tbody>';
+        monthlyRevExpDetailRows(r, d, m).forEach(([label,v])=>{
+          const bold = label==='Total Income' || label==='Net';
+          html += '<tr'+(bold?' style="font-weight:700;"':'')+'><td>'+escapeHtml(label)+'</td><td>'+formatCurrency(v)+'</td></tr>';
+        });
+        document.getElementById('monthlyRevExpChartDetail').innerHTML = html+'</tbody></table>';
       }
     }
   });
@@ -4825,6 +4943,15 @@ async function exportPDF(){
         table:(doc,ty)=>{
           ty = pdfBreakdownTable(doc, ty, revenueBarEntries, formatCurrency, 'Revenue Breakdown') + 6;
           return pdfBreakdownTable(doc, ty, expenseBarEntries, formatCurrency, 'Expense Breakdown');
+        }},
+      {id:'monthlyRevExpChart', title:'Monthly Revenue vs. Expenses', needed:150,
+        table:(doc,ty)=>{
+          const d = computeMonthlyRevExp(r);
+          if(!d.monthly) ty = pdfParagraph(doc, 'Annual Monthly Average data is spread evenly across the 12 months.', ty, {fontSize:8.5, color:PDF_MUTED}) + 2;
+          const sum = a=>a.reduce((x,v)=>x+v,0);
+          return pdfTable(doc, ty, [['Month','Income','Expenses','Net']],
+            MONTH_LABELS.map((m,i)=>[m, formatCurrency(d.income[i]), formatCurrency(d.expenses[i]), formatCurrency(d.net[i])]),
+            {fontSize:8.5, foot:[['Total', formatCurrency(sum(d.income)), formatCurrency(sum(d.expenses)), formatCurrency(sum(d.net))]]});
         }}
     ];
 
