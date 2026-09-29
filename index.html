@@ -942,13 +942,11 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         <div id="resultsAlert"></div>
 
         <div class="section" data-subnav="Rate Results" id="rateResultsSection">
-          <div class="section-title">Rate Results <span class="badge" id="rateModelBadge"></span></div>
-          <div id="rateResultsContent"></div>
+          <div class="section-title">Rate Results</div>
+          <div class="results-split-grid" id="typeResultsGrid" style="margin-bottom:0;"></div>
         </div>
 
         <div class="metric-grid" data-subnav="Key Metrics" id="metricGrid"></div>
-
-        <div class="results-split-grid" data-subnav="By Customer Type" id="typeResultsGrid"></div>
 
         <div class="chart-grid" data-subnav="Charts">
           <div class="chart-box">
@@ -3911,44 +3909,15 @@ function renderResults(){
     (r.residential ? metricCard('Residential Revenue Contribution', formatCurrency(r.residential.volumetricAnnual)) : '') +
     (r.commercial ? metricCard('Commercial Revenue Contribution', formatCurrency(r.commercial.volumetricAnnual)) : '');
 
-  document.getElementById('rateModelBadge').className = 'badge ' + (r.rateModelType==='fixed'?'badge-fixed':'badge-tier');
-  document.getElementById('rateModelBadge').textContent = r.rateModelType==='fixed' ? 'Fixed Rate' : 'Tier-Based Rate';
-
   const tsEl = document.getElementById('lastCalculatedTimestamp');
   if(tsEl) tsEl.textContent = appState.lastCalculatedAt ? 'Last calculated: '+appState.lastCalculatedAt.toLocaleString('en-US') : '';
-
-  const rateContent = document.getElementById('rateResultsContent');
-  if(r.rateModelType === 'fixed'){
-    rateContent.innerHTML =
-      '<div class="totals-row">'+
-      '<div class="total-item"><span class="label">Volumetric Rate ($/1,000 gal)</span><span class="value">'+formatCurrency(appState.rateModel.fixed.volumetricRate)+'</span></div>'+
-      '</div>';
-  } else if(tiersHaveNegativeRate()){
-    // Negative calculated rates aren't a usable result -- show nothing but a single
-    // explanation instead of a table full of nonsensical negative costs.
-    rateContent.innerHTML = alertHtml('danger','triangle-exclamation', [negativeTierRateWarning()]);
-  } else {
-    const tierTableRows = r.tierResult.rows.map(row=>
-      '<tr><td>'+formatNumber(row.tier.start)+'</td><td>'+(row.tier.end===null?'and above':formatNumber(row.tier.end))+'</td><td>'+formatCurrency(row.tier.rate)+'</td><td>'+formatCurrency(row.revenue)+'</td></tr>'
-    ).join('');
-    rateContent.innerHTML =
-      '<div class="section-title">Customer Rates Table - Tier Model</div>'+
-      '<div class="table-scroll">'+
-      '<table class="data-table">'+
-      '<thead><tr><th>Tier Start (Gal)</th><th>Tier End (Gal)</th><th>Cost per 1,000 Gal</th><th>Revenue in Each Tier</th></tr></thead>'+
-      '<tbody>'+tierTableRows+'</tbody>'+
-      '<tfoot><tr><td colspan="3">Total</td><td>'+formatCurrency(r.tierResult.totalAnnual)+'</td></tr></tfoot>'+
-      '</table>'+
-      '</div>';
-  }
 
   renderTypeResults(r);
   renderCharts(r);
 }
 
 // Builds the rate table (or negative-rate warning) for one customer type's
-// results panel -- the same table shape the legacy single-block section
-// above shows, just scoped to one type's own results.
+// results panel.
 function buildRateResultsHtml(typeState, typeResult){
   if(typeHasNegativeRate(typeState)){
     return alertHtml('danger','triangle-exclamation', [negativeRateWarning(typeState, typeState===appState.residential?'Residential':'Commercial')]);
@@ -3970,13 +3939,23 @@ function buildRateResultsHtml(typeState, typeResult){
     '</div>';
 }
 
+// [label, typeState, typeResult] for each customer type included in the results.
+function includedTypeResults(r){
+  return [['Residential', appState.residential, r.residential], ['Commercial', appState.commercial, r.commercial]].filter(([,,tr])=>tr);
+}
+
+// Fixed/Tier badge for one customer type's results.
+function typeBadgeHtml(typeResult){
+  return typeResult.rateModelType==='fixed'
+    ? '<span class="badge badge-fixed">Fixed Rate</span>'
+    : '<span class="badge badge-tier">Tier-Based Rate</span>';
+}
+
 // Builds one customer type's results panel: label, Fixed/Tier badge, its rate
 // table (or negative-rate warning), and a totals row.
 function renderOneTypePanel(label, typeState, typeResult){
-  const badgeClass = typeResult.rateModelType==='fixed' ? 'badge-fixed' : 'badge-tier';
-  const badgeText = typeResult.rateModelType==='fixed' ? 'Fixed Rate' : 'Tier-Based Rate';
   return '<div class="section">'+
-    '<div class="section-title">'+escapeHtml(label)+' Rate Results <span class="badge '+badgeClass+'">'+badgeText+'</span></div>'+
+    '<div class="section-title">'+escapeHtml(label)+' Rate Results '+typeBadgeHtml(typeResult)+'</div>'+
     buildRateResultsHtml(typeState, typeResult)+
     '<div class="totals-row">'+
       '<div class="total-item"><span class="label">Annual Revenue from Rates</span><span class="value">'+formatCurrency(typeResult.volumetricAnnual)+'</span></div>'+
@@ -3985,8 +3964,8 @@ function renderOneTypePanel(label, typeState, typeResult){
     '</div></div>';
 }
 
-// Renders the Residential/Commercial side-by-side results grid, one panel
-// per included customer type.
+// Renders the Residential/Commercial side-by-side results grid (inside the
+// Summary page's Rate Results section), one panel per included customer type.
 function renderTypeResults(r){
   const grid = document.getElementById('typeResultsGrid');
   if(!grid) return;
@@ -4747,30 +4726,34 @@ function pdfExpenseBreakdownTable(doc, y, rows, subtotal, contingencyAmount, gra
 function pdfRateResultsSection(doc, y){
   const r = appState.results;
   pdfSectionTitle(doc, 'Rate Results', y);
-  pdfBadge(doc, r.rateModelType==='tier' ? 'Tier-Based Rate' : 'Fixed Rate', PDF_MARGIN+PDF_CONTENT_W, y-1);
   y += 6;
 
-  if(r.rateModelType === 'tier'){
+  // One rate table per included customer type, each with its own badge.
+  includedTypeResults(r).forEach(([label, typeState, typeResult])=>{
+    const isTier = typeResult.rateModelType === 'tier';
+    y = pdfEnsureSpace(doc, y, 30);
     doc.setFontSize(10.5);
     doc.setFont(undefined,'bold');
     doc.setTextColor(...PDF_PURPLE_DARK);
-    doc.text('Customer Rates Table - Tier Model', PDF_MARGIN, y);
+    doc.text(label+' Rates'+(isTier ? ' - Tier Model' : ''), PDF_MARGIN, y);
     doc.setFont(undefined,'normal');
     doc.setTextColor(0,0,0);
+    pdfBadge(doc, isTier ? 'Tier-Based Rate' : 'Fixed Rate', PDF_MARGIN+PDF_CONTENT_W, y);
     y += 5;
-    if(tiersHaveNegativeRate()){
-      y = pdfParagraph(doc, negativeTierRateWarning(), y, {fontSize:9, color:PDF_MUTED}) + 4;
-    } else {
+    if(typeHasNegativeRate(typeState)){
+      y = pdfParagraph(doc, negativeRateWarning(typeState, label), y, {fontSize:9, color:PDF_MUTED}) + 6;
+    } else if(isTier){
       y = pdfTable(doc, y,
         [['TIER START (GAL)','TIER END (GAL)','COST PER 1,000 GAL','REVENUE IN EACH TIER']],
-        r.tierResult.rows.map(row=>[formatNumber(row.tier.start), row.tier.end===null?'and above':formatNumber(row.tier.end), formatCurrency(row.tier.rate), formatCurrency(row.revenue)])
+        (typeResult.tierRows||[]).map(row=>[formatNumber(row.tier.start), row.tier.end===null?'and above':formatNumber(row.tier.end), formatCurrency(row.tier.rate), formatCurrency(row.revenue)]),
+        {foot:[['Total','','',formatCurrency(typeResult.volumetricAnnual)]]}
       ) + 10;
+    } else {
+      y = pdfTable(doc, y, [['Component','Amount']], [
+        ['Volumetric Rate ($/1,000 gal)', formatCurrency(typeState.rateModel.fixed.volumetricRate)]
+      ]) + 10;
     }
-  } else {
-    y = pdfTable(doc, y, [['Component','Amount']], [
-      ['Volumetric Rate ($/1,000 gal)', formatCurrency(appState.rateModel.fixed.volumetricRate)]
-    ]) + 10;
-  }
+  });
 
   return pdfMetricCardGrid(doc, y, [
     {label:'Base Revenue', value:formatCurrency(r.baseChargeAnnual)},
