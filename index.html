@@ -500,12 +500,12 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         <div class="section" id="residentialBillingPanel" style="display:none;">
           <div class="section-title">Residential</div>
           <div class="form-grid">
-            <div class="form-group">
+            <div class="form-group" id="residentialTotalGroup">
               <label>Total number of customers *</label>
               <input type="text" inputmode="numeric" class="number-commas" data-integer id="residentialTotalCustomers" oninput="onCustomerFieldChange('residential','totalCustomers',this)">
               <div class="field-error" id="err-residentialTotalCustomers"></div>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="residentialActiveGroup">
               <label>Active customers *</label>
               <input type="text" inputmode="numeric" class="number-commas" data-integer id="residentialActiveCustomers" oninput="onCustomerFieldChange('residential','activeCustomers',this)">
               <div class="field-error" id="err-residentialActiveCustomers"></div>
@@ -517,20 +517,21 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
             </div>
           </div>
           <div id="residentialMonthlyFields" style="display:none;margin-top:14px;">
-            <div class="section-title" style="border-bottom:none;margin-bottom:10px;">Water Sold by Month (gal)</div>
-            <div class="form-grid" id="residentialMonthGrid"></div>
+            <div class="table-scroll">
+              <table class="data-table" id="residentialMonthTable"></table>
+            </div>
           </div>
         </div>
 
         <div class="section" id="commercialBillingPanel" style="display:none;">
           <div class="section-title">Commercial</div>
           <div class="form-grid">
-            <div class="form-group">
+            <div class="form-group" id="commercialTotalGroup">
               <label>Total number of customers *</label>
               <input type="text" inputmode="numeric" class="number-commas" data-integer id="commercialTotalCustomers" oninput="onCustomerFieldChange('commercial','totalCustomers',this)">
               <div class="field-error" id="err-commercialTotalCustomers"></div>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="commercialActiveGroup">
               <label>Active customers *</label>
               <input type="text" inputmode="numeric" class="number-commas" data-integer id="commercialActiveCustomers" oninput="onCustomerFieldChange('commercial','activeCustomers',this)">
               <div class="field-error" id="err-commercialActiveCustomers"></div>
@@ -542,8 +543,9 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
             </div>
           </div>
           <div id="commercialMonthlyFields" style="display:none;margin-top:14px;">
-            <div class="section-title" style="border-bottom:none;margin-bottom:10px;">Water Sold by Month (gal)</div>
-            <div class="form-grid" id="commercialMonthGrid"></div>
+            <div class="table-scroll">
+              <table class="data-table" id="commercialMonthTable"></table>
+            </div>
           </div>
         </div>
         </div>
@@ -557,7 +559,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
 
         <div id="meterAlert"></div>
 
-        <div class="table-scroll" data-subnav="Meter Sizes">
+        <div class="table-scroll">
           <table class="data-table" id="meterTable">
             <thead>
               <tr>
@@ -584,7 +586,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
           <button class="btn btn-secondary btn-sm" onclick="addMeterRow()"><i class="fa-solid fa-plus"></i> Add Meter Row</button>
         </div>
 
-        <div class="totals-row" data-subnav="Meter Totals">
+        <div class="totals-row">
           <div class="total-item"><span class="label">Total Monthly Base Fee Revenue</span><span class="value" id="meterSummaryBaseFeeRevenue">$0.00</span></div>
           <div class="total-item"><span class="label">Total Active Meters</span><span class="value" id="meterSummaryCount">0</span></div>
           <div class="total-item"><span class="label">Active Customers</span><span class="value" id="meterSummaryConnections">0</span></div>
@@ -624,13 +626,8 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         </div>
         </div>
 
-        <div class="section" data-subnav="Base Charge &amp; Fees">
+        <div class="section" data-subnav="Assessment Fee">
           <div class="form-grid">
-            <div class="form-group">
-              <label>Total Base Charge ($ / month)</label>
-              <input type="text" id="fixedBaseCharge" class="currency-input" readonly>
-              <span class="hint">Total of every meter row's Monthly Base Fee × count, from the Meter Distribution step. Shared across all customer types.</span>
-            </div>
             <div class="form-group">
               <label>Assessment Fee (% of Revenue)</label>
               <input type="number" min="0" step="0.01" id="assessmentFeePct" oninput="onAssessmentFeeChange()">
@@ -891,7 +888,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
           </div>
           <div class="form-grid" style="margin-top:14px;">
             <div class="form-group" id="waterLossPctGroup">
-              <label>Annual Water Loss (% of water sold) *</label>
+              <label>Annual Water Loss (% of water produced) *</label>
               <input type="number" min="0" step="0.01" id="waterLossAnnualPctInput" oninput="onWaterLossFieldChange()" onblur="validateWaterLossField('waterLossAnnualPctInput')">
               <div class="field-error" id="err-waterLossAnnualPctInput"></div>
             </div>
@@ -904,7 +901,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
         </div>
 
         <div class="section">
-          <div class="section-title" data-subnav="Who Bears the Loss">Who will bear the water loss? *</div>
+          <div class="section-title" data-subnav="Water Loss Responsibility">Water Loss Responsibility *</div>
           <div class="form-grid">
             <div class="form-group">
               <label>Supply Corporation / Utility (%) *</label>
@@ -969,7 +966,7 @@ table.data-table tfoot td{font-weight:700;background:#f5f2fa;border-top:2px soli
             <div class="chart-canvas-wrap"><canvas id="revExpChart"></canvas></div>
             <div class="chart-detail" id="revExpChartDetail">Click a bar to see details.</div>
           </div>
-          <div class="chart-box" style="grid-column:1/-1;">
+          <div class="chart-box" id="monthlyRevExpBox" style="grid-column:1/-1;">
             <h4>Monthly Revenue vs. Expenses</h4>
             <p class="hint" id="monthlyRevExpNote" style="margin:0 0 10px;display:block;"></p>
             <div class="chart-canvas-wrap" style="height:300px;"><canvas id="monthlyRevExpChart"></canvas></div>
@@ -1260,12 +1257,12 @@ Click NEXT to continue.`,
 Water losses may result from leaks, meter inaccuracies, flushing, unauthorized consumption, or other differences between water supplied and water billed.
 
 Enter Loss
-Enter the utility's average annual water loss as either a percentage of water sold or a volume in gallons. Use recent water production/purchase and customer billing records when available.
+Enter the utility's average annual water loss as either a percentage of water produced or a volume in gallons. Use recent water production/purchase and customer billing records when available.
 
 Water Produced
 Calculated automatically as water sold (from the Customer & Billing step) plus water loss.
 
-Who Will Bear the Water Loss?
+Water Loss Responsibility
 Split the cost of lost water between the Supply Corporation / Utility and the Customer, in %. Entering one fills in the other so the two always total 100% (default: Customer 100%). Customer share is added to the costs recovered through rates. Utility share is absorbed by the Supply Corporation.
 
 Click NEXT or FINISH to complete the analysis.`,
@@ -1319,6 +1316,8 @@ function defaultTypeState(){
     dataType:'',
     customerInfo:{totalCustomers:'', activeCustomers:'', monthlyWaterSold:''},
     monthlyData:['','','','','','','','','','','',''],
+    monthlyTotalCustomers:['','','','','','','','','','','',''],
+    monthlyActiveCustomers:['','','','','','','','','','','',''],
     rateModel: defaultTypeRateModel()
   };
 }
@@ -1375,7 +1374,7 @@ function defaultState(){
     waterLoss: {
       method:'pct',
       annualGal:'',
-      annualPct:'', // % of water sold
+      annualPct:'', // % of water produced
       absorbedPct:0, // Supply Corporation / Utility share of lost-water cost (%)
       customerPct:100 // Customer share (%); the two always total 100
     },
@@ -1695,7 +1694,7 @@ function formatCurrency(n){
   if(n === '' || n === null || n === undefined) return '';
   const num = Number(n);
   if(!isFinite(num)) return '$0.00';
-  return '$' + num.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return (num < 0 ? '-' : '') + '$' + Math.abs(num).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
 // Strips currency formatting from a string and returns its numeric value (0 if invalid).
@@ -1778,7 +1777,12 @@ function reformatLive(el, buildFn){
 }
 
 // Builds the partially-formatted currency text shown while the user is still typing.
-function liveCurrencyText(raw){
+function liveCurrencyText(raw, allowNegative){
+  const neg = allowNegative && /^\s*[$]?\s*-/.test(String(raw)) ? '-' : '';
+  if(neg && /^[^0-9.]*$/.test(String(raw))) return '-';
+  return neg + liveCurrencyTextAbs(raw);
+}
+function liveCurrencyTextAbs(raw){
   let digits = String(raw).replace(/[^0-9.]/g,'');
   const firstDot = digits.indexOf('.');
   if(firstDot !== -1) digits = digits.slice(0,firstDot+1) + digits.slice(firstDot+1).replace(/\./g,'');
@@ -1818,7 +1822,8 @@ function bindCurrencyInputs(root){
     if(inp._currencyBound) return;
     inp._currencyBound = true;
     inp.addEventListener('focus', function(){ this.select(); });
-    inp.addEventListener('input', function(){ reformatLive(this, liveCurrencyText); });
+    const allowNeg = inp.dataset.field === 'diffDollar';
+    inp.addEventListener('input', function(){ reformatLive(this, v=>liveCurrencyText(v, allowNeg)); });
     inp.addEventListener('blur', function(){
       const raw = parseCurrencyInputOrBlank(this.value);
       this.value = formatCurrency(raw);
@@ -2191,25 +2196,26 @@ function validateTypeBilling(typeState, label, idPrefix){
     return {fieldErrors, messages};
   }
   const ci = typeState.customerInfo;
+  if(typeState.dataType === 'monthly'){
+    ensureMonthlyCustomerArrays(typeState);
+    let bad = false;
+    for(let i=0;i<12;i++){
+      const t = typeState.monthlyTotalCustomers[i], a = typeState.monthlyActiveCustomers[i], w = typeState.monthlyData[i];
+      if(t === '' || !(Number(t) > 0)){ bad = true; fieldErrors.push({field:idPrefix+'MonthTotal'+i, message:'Enter total customers (greater than 0).'}); }
+      if(a === '' || Number(a) < 0 || Number(a) > Number(t)){ bad = true; fieldErrors.push({field:idPrefix+'MonthActive'+i, message:'Active must be between 0 and total.'}); }
+      if(w === '' || w === null || w === undefined || Number(w) < 0){ bad = true; fieldErrors.push({field:idPrefix+'MonthWater'+i, message:'Enter water sold for this month.'}); }
+    }
+    if(bad) messages.push(label+': enter total customers (greater than 0), active customers (0 to total) and water sold for every month.');
+    const sum = typeState.monthlyData.reduce((s,v)=>s+(Number(v)||0),0);
+    if(!bad && !(sum > 0)) messages.push(label+': total water sold across all 12 months must be greater than 0.');
+    return {fieldErrors, messages};
+  }
   const total = Number(ci.totalCustomers);
   if(!(total > 0)){ fieldErrors.push({field:idPrefix+'TotalCustomers', message:'Total number of customers must be greater than 0.'}); messages.push(label+': total number of customers must be greater than 0.'); }
   const active = Number(ci.activeCustomers);
   if(ci.activeCustomers === '' || active < 0 || active > total){ fieldErrors.push({field:idPrefix+'ActiveCustomers', message:'Active customers must be between 0 and the total number of customers.'}); messages.push(label+': active customers must be between 0 and the total number of customers.'); }
-  if(typeState.dataType === 'monthly'){
-    let anyBlank = false;
-    typeState.monthlyData.forEach((v,i)=>{
-      if(v === '' || v === null || v === undefined || Number(v) < 0){
-        anyBlank = true;
-        fieldErrors.push({field:idPrefix+'Month'+i, message:'Enter a water-sold value for every month.'});
-      }
-    });
-    if(anyBlank) messages.push(label+': enter a water-sold value (0 or greater) for every month.');
-    const sum = typeState.monthlyData.reduce((s,v)=>s+(Number(v)||0),0);
-    if(!anyBlank && !(sum > 0)) messages.push(label+': total water sold across all 12 months must be greater than 0.');
-  } else {
-    const sold = Number(ci.monthlyWaterSold);
-    if(!(sold > 0)){ fieldErrors.push({field:idPrefix+'MonthlyWaterSold', message:'Monthly average water sold must be greater than 0.'}); messages.push(label+': monthly average water sold must be greater than 0.'); }
-  }
+  const sold = Number(ci.monthlyWaterSold);
+  if(!(sold > 0)){ fieldErrors.push({field:idPrefix+'MonthlyWaterSold', message:'Monthly average water sold must be greater than 0.'}); messages.push(label+': monthly average water sold must be greater than 0.'); }
   return {fieldErrors, messages};
 }
 
@@ -2349,7 +2355,7 @@ function validatePage5(){
   return {valid: messages.length===0, messages};
 }
 // Validates the Water Loss step (step 6): the loss amount (>= 0, gallons or
-// % of water sold) and the Utility / Customer shares (each 0-100, totaling 100).
+// % of water produced) and the Utility / Customer shares (each 0-100, totaling 100).
 function validatePage6(){
   const messages = [], fieldErrors = [];
   const wl = appState.waterLoss;
@@ -2361,6 +2367,7 @@ function validatePage6(){
   } else {
     if(wl.annualPct === '') fail('waterLossAnnualPctInput', 'Enter the estimated annual water loss percentage.');
     else if(Number(wl.annualPct) < 0) fail('waterLossAnnualPctInput', 'Water loss percentage cannot be negative.');
+    else if(Number(wl.annualPct) >= 100) fail('waterLossAnnualPctInput', 'Water loss percentage must be less than 100% of water produced.');
   }
 
   const shareFields = [['waterLossUtilityPctInput', wl.absorbedPct, 'Supply Corporation / Utility'], ['waterLossCustomerPctInput', wl.customerPct, 'Customer']];
@@ -2438,14 +2445,21 @@ function renderCustomerTypePanel(typeKey){
   document.getElementById(typeKey+'AnnualAvgFields').style.display = isMonthly ? 'none' : 'flex';
   document.getElementById(typeKey+'MonthlyFields').style.display = isMonthly ? 'block' : 'none';
 
-  const grid = document.getElementById(typeKey+'MonthGrid');
-  grid.innerHTML = MONTH_LABELS.map((label,i)=>
-    '<div class="form-group">'+
-      '<label>'+label+'</label>'+
-      '<input type="text" inputmode="numeric" class="number-commas" id="'+typeKey+'Month'+i+'" value="'+(typeState.monthlyData[i]===''?'':formatNumber(typeState.monthlyData[i]||0))+'" oninput="onMonthlyDataChange(\''+typeKey+'\','+i+',this)">'+
-      '<div class="field-error" id="err-'+typeKey+'Month'+i+'"></div>'+
-    '</div>'
-  ).join('');
+  document.getElementById(typeKey+'TotalGroup').style.display = isMonthly ? 'none' : '';
+  document.getElementById(typeKey+'ActiveGroup').style.display = isMonthly ? 'none' : '';
+
+  ensureMonthlyCustomerArrays(typeState);
+  const cell = (field, arr, i)=>
+    '<td><input type="text" inputmode="numeric" class="number-commas" '+(field==='Water'?'':'data-integer ')+'id="'+typeKey+'Month'+field+i+'" value="'+(arr[i]===''?'':formatNumber(arr[i]||0))+'" oninput="onMonthlyDataChange(\''+typeKey+'\','+i+',this,\''+field+'\')">'+
+    '<div class="field-error" id="err-'+typeKey+'Month'+field+i+'"></div></td>';
+  const row = (label, field, arr)=>'<tr><th style="text-align:left;white-space:nowrap;">'+label+'</th>'+MONTH_LABELS.map((m,i)=>cell(field, arr, i)).join('')+'</tr>';
+  document.getElementById(typeKey+'MonthTable').innerHTML =
+    '<thead><tr><th></th>'+MONTH_LABELS.map(m=>'<th>'+m.slice(0,3)+'</th>').join('')+'</tr></thead>'+
+    '<tbody>'+
+      row('Total Customers *', 'Total', typeState.monthlyTotalCustomers)+
+      row('Active Customers *', 'Active', typeState.monthlyActiveCustomers)+
+      row('Water Sold (gal) *', 'Water', typeState.monthlyData)+
+    '</tbody>';
   bindNumberCommaInputs(document);
 }
 
@@ -2506,15 +2520,37 @@ function onCustomerFieldChange(typeKey, field, el){
   if(appState[typeKey].rateModel.type === 'tier') renderTierTable(typeKey);
 }
 
-// Handles edits to one month's water-sold figure in Monthly Data mode.
-function onMonthlyDataChange(typeKey, monthIndex, el){
+// Older sessions have no per-month customer counts: start each month at the single value entered before.
+function ensureMonthlyCustomerArrays(typeState){
+  if(!Array.isArray(typeState.monthlyTotalCustomers)) typeState.monthlyTotalCustomers = Array(12).fill(typeState.customerInfo.totalCustomers);
+  if(!Array.isArray(typeState.monthlyActiveCustomers)) typeState.monthlyActiveCustomers = Array(12).fill(typeState.customerInfo.activeCustomers);
+}
+
+// Averages the 12 monthly counts into the single figure the calc engine uses.
+function averageMonthlyCount(arr){
+  return Math.round(arr.reduce((s,v)=>s+(Number(v)||0),0)/12);
+}
+
+// Handles edits to one month's Total Customers / Active Customers / Water Sold
+// in Monthly Data mode. Customer counts are averaged over the 12 months.
+function onMonthlyDataChange(typeKey, monthIndex, el, field){
+  const typeState = appState[typeKey];
   const raw = el.value.replace(/,/g,'');
   let val = Number(raw);
   if(val < 0) val = 0;
-  appState[typeKey].monthlyData[monthIndex] = raw === '' ? '' : val;
+  if(field !== 'Water') val = Math.round(val);
+  const v = raw === '' ? '' : val;
+  ensureMonthlyCustomerArrays(typeState);
+  if(field === 'Total') typeState.monthlyTotalCustomers[monthIndex] = v;
+  else if(field === 'Active') typeState.monthlyActiveCustomers[monthIndex] = v;
+  else typeState.monthlyData[monthIndex] = v;
+  if(field !== 'Water'){
+    typeState.customerInfo.totalCustomers = averageMonthlyCount(typeState.monthlyTotalCustomers);
+    typeState.customerInfo.activeCustomers = averageMonthlyCount(typeState.monthlyActiveCustomers);
+  }
   syncCombinedCustomerInfo();
   updateMeterTotals();
-  if(appState[typeKey].rateModel.type === 'tier') renderTierTable(typeKey);
+  if(typeState.rateModel.type === 'tier') renderTierTable(typeKey);
 }
 
 // Escapes HTML special characters so untrusted text can be safely inserted into innerHTML.
@@ -2709,8 +2745,6 @@ function updateMeterTotals(){
   document.getElementById('meterTotalBaseFeeRevenue').textContent = formatCurrency(baseFeeRevenue);
   document.getElementById('meterSummaryBaseFeeRevenue').textContent = formatCurrency(baseFeeRevenue);
   appState.rateModel.fixed.baseCharge = baseFeeRevenue;
-  const fixedBaseChargeInput = document.getElementById('fixedBaseCharge');
-  if(fixedBaseChargeInput) setCurrencyValue(fixedBaseChargeInput, appState.rateModel.fixed.baseCharge);
 
   // Duplicate meter-size detection -> combine hint.
   const counts = {};
@@ -2736,7 +2770,6 @@ function updateMeterTotals(){
 // Top-level renderer for the Rate Structure step: shows/hides each included
 // type's panel and refreshes the shared base-charge readout.
 function renderRateStructureStep(){
-  setCurrencyValue(document.getElementById('fixedBaseCharge'), appState.rateModel.fixed.baseCharge);
   document.getElementById('assessmentFeePct').value = appState.rateModel.assessmentFeePct;
   document.getElementById('residentialRateStructurePanel').style.display = isResidentialIncluded() ? 'block' : 'none';
   document.getElementById('commercialRateStructurePanel').style.display = isCommercialIncluded() ? 'block' : 'none';
@@ -2989,13 +3022,14 @@ function onTierRowChange(typeKey, el){
   }
   else if(field === 'customers'){
     let v = el.value === '' ? '' : Number(el.value);
-    if(v !== '' && v < 0) v = 0;
+    if(v !== '' && v < 0){ v = 0; el.value = 0; }
     t.customers = v;
     const total = getTierCustomersTotal(typeState);
     setTierSiblingField(tr, 'customersPct', (v==='' || total<=0) ? '' : round1(v/total*100));
   } else if(field === 'customersPct'){
     const total = getTierCustomersTotal(typeState);
-    const pct = el.value === '' ? '' : Number(el.value);
+    let pct = el.value === '' ? '' : Number(el.value);
+    if(pct !== '' && pct < 0){ pct = 0; el.value = 0; }
     if(total > 0 && pct !== ''){
       t.customers = Math.round(pct/100*total);
       setTierSiblingField(tr, 'customers', t.customers);
@@ -3008,7 +3042,8 @@ function onTierRowChange(typeKey, el){
     setTierSiblingField(tr, 'waterSoldPct', (v==='' || total<=0) ? '' : round1(v/total*100));
   } else if(field === 'waterSoldPct'){
     const total = getTierWaterSoldTotal(typeState);
-    const pct = el.value === '' ? '' : Number(el.value);
+    let pct = el.value === '' ? '' : Number(el.value);
+    if(pct !== '' && pct < 0){ pct = 0; el.value = 0; }
     if(total > 0 && pct !== ''){
       t.waterSold = Math.round(pct/100*total);
       setTierSiblingField(tr, 'waterSold', formatNumber(t.waterSold));
@@ -3468,8 +3503,8 @@ function onWaterLossFieldChange(){
   updateWaterLossTotals();
 }
 
-// Water loss is entered in gallons or as a % of water sold; water produced
-// is always derived: produced = sold + loss.
+// Water loss is entered in gallons or as a % of water produced; water produced
+// is always derived: produced = sold + loss, so loss = sold x p / (1 - p).
 function getWaterLossSummary(){
   const wl = appState.waterLoss;
   const annualSold = getCombinedMonthlyWaterSold()*12;
@@ -3477,7 +3512,8 @@ function getWaterLossSummary(){
   if(wl.method === 'gal'){
     totalGal = Number(wl.annualGal)||0;
   } else {
-    totalGal = annualSold*(Number(wl.annualPct)||0)/100;
+    const p = Math.min(Number(wl.annualPct)||0, 99.99)/100;
+    totalGal = annualSold*p/(1-p);
   }
   const absorbedPct = Number(wl.absorbedPct)||0;
   const customerPct = Number(wl.customerPct)||0;
@@ -3485,7 +3521,7 @@ function getWaterLossSummary(){
     include: absorbedPct >= 100, // Supply Corporation bears the full loss
     totalGal, annualSold,
     produced: annualSold + totalGal,
-    avgPct: annualSold > 0 ? totalGal/annualSold*100 : 0, // % of water sold
+    avgPct: (annualSold+totalGal) > 0 ? totalGal/(annualSold+totalGal)*100 : 0, // % of water produced
     absorbedPct, customerPct
   };
 }
@@ -4323,11 +4359,20 @@ function computeMonthlyRevExp(r){
 
   const oe = appState.operatingExpenses;
   const contingencyFactor = r.expenseSubtotal>0 ? r.totalAnnualExpenses/r.expenseSubtotal : 0;
-  const expenses = months.map(m=>oe.rows.reduce((a,row)=>a+rowMonth(row, oe.dataType, m), 0)*contingencyFactor);
+  const rawExpenses = months.map(m=>oe.rows.reduce((a,row)=>a+rowMonth(row, oe.dataType, m), 0));
+  const expenses = rawExpenses.map(v=>v*contingencyFactor);
+  // Per-category split (the same categories as the annual chart), with contingency on its own.
+  const expenseByCat = {};
+  oe.rows.forEach(row=>{
+    const cat = row.category;
+    if(!expenseByCat[cat]) expenseByCat[cat] = months.map(()=>0);
+    months.forEach(m=>{ expenseByCat[cat][m] += rowMonth(row, oe.dataType, m); });
+  });
+  const contingency = rawExpenses.map(v=>v*(contingencyFactor-1));
 
   const income = months.map(m=>base[m]+residential[m]+commercial[m]+nonOperating[m]+assessment[m]);
   const net = months.map(m=>income[m]-expenses[m]);
-  return {monthly, base, residential, commercial, nonOperating, assessment, expenses, income, net};
+  return {monthly, base, residential, commercial, nonOperating, assessment, expenses, expenseByCat, contingency, income, net};
 }
 
 // Rows of the breakdown table for one month of the Monthly Revenue vs. Expenses chart.
@@ -4344,9 +4389,12 @@ function monthlyRevExpDetailRows(r, d, m){
 // each month, with a Net (income minus expenses) line on top.
 function renderMonthlyRevExpChart(r){
   destroyChart('monthlyRevExp');
-  document.getElementById('monthlyRevExpNote').textContent = appState.dataType === 'monthly'
-    ? 'Based on the monthly data entered for water sold, operating expenses and non-operating revenues.'
-    : 'Annual Monthly Average data is spread evenly across the 12 months. Choose Monthly Data on the Data Format step to see month-by-month changes.';
+  // Only meaningful with month-by-month data; hide it (and keep it out of the PDF) otherwise.
+  const isMonthly = appState.dataType === 'monthly';
+  document.getElementById('monthlyRevExpBox').style.display = isMonthly ? '' : 'none';
+  document.getElementById('monthlyRevExpChart').style.display = isMonthly ? '' : 'none';
+  if(!isMonthly) return;
+  document.getElementById('monthlyRevExpNote').textContent = 'Income, Expenses and Net (income minus expenses) for each month, based on the monthly data entered. Click a month to see where the income comes from.';
   if(r.totalRevenue<=0 && r.totalAnnualExpenses<=0){ showChartEmpty('monthlyRevExpChart','No data to display yet.'); return; }
   hideChartEmpty('monthlyRevExpChart');
 
@@ -4354,16 +4402,16 @@ function renderMonthlyRevExpChart(r){
   const labels = MONTH_LABELS.map(m=>m.slice(0,3));
   const allValues = d.income.concat(d.expenses, d.net);
   const maxAbs = Math.max(1, ...allValues.map(Math.abs));
-  const yMin = Math.min(0, ...allValues) - maxAbs*0.15;
-  const yMax = Math.max(0, ...allValues) + maxAbs*0.05;
+  // Three bars side by side for each month: Income, Expenses and Net (income minus expenses).
+  const datasets = [
+    {label:'Income', data:d.income, backgroundColor:CHART_PALETTE[1]},
+    {label:'Expenses', data:d.expenses, backgroundColor:CHART_PALETTE[0]},
+    {label:'Net', data:d.net, backgroundColor:CHART_PALETTE[4]}
+  ];
   const ctx = document.getElementById('monthlyRevExpChart').getContext('2d');
   charts.monthlyRevExp = new Chart(ctx, {
     type:'bar',
-    data:{labels, datasets:[
-      {type:'line', label:'Net', data:d.net, borderColor:CHART_PALETTE[4], backgroundColor:CHART_PALETTE[4], borderWidth:2, pointRadius:3, order:0},
-      {label:'Income', data:d.income, backgroundColor:CHART_PALETTE[1], order:1},
-      {label:'Expenses', data:d.expenses, backgroundColor:CHART_PALETTE[0], order:1}
-    ]},
+    data:{labels, datasets},
     options:{
       maintainAspectRatio:false,
       interaction:{mode:'index', intersect:false},
@@ -4372,10 +4420,8 @@ function renderMonthlyRevExpChart(r){
         legend:{position:'bottom'}
       },
       scales:{
-        // Scales to the data, and always leaves some room below $0 so a
-        // negative Net stays visible; the $0 line is drawn darker.
         y:{
-          suggestedMin: yMin, suggestedMax: yMax,
+          beginAtZero:true,
           ticks:{callback:(v)=>(v<0?'-$':'$')+formatNumber(Math.abs(v))},
           grid:{
             color:(c)=>c.tick && c.tick.value===0 ? '#6b6680' : 'rgba(0,0,0,0.08)',
@@ -4628,7 +4674,7 @@ function pdfDataEnteredSection(doc, y){
   y = pdfSubheading(doc, 'Water Loss', y);
   y = pdfTable(doc, y, [['Field','Value']], [
     ['Entered As', wl.method==='gal' ? 'Gallons' : 'Percentage'],
-    [wl.method==='gal' ? 'Annual Water Loss (gal/yr)' : 'Annual Water Loss (% of water sold)',
+    [wl.method==='gal' ? 'Annual Water Loss (gal/yr)' : 'Annual Water Loss (% of water produced)',
       wl.method==='gal' ? formatNumber(wl.annualGal||0) : formatNumber(wl.annualPct||0,2)+'%'],
     ['Supply Corporation / Utility Share', formatNumber(getWaterLossSummary().absorbedPct,2)+'%'],
     ['Customer Share', formatNumber(getWaterLossSummary().customerPct,2)+'%']
@@ -4667,7 +4713,7 @@ function pdfCalculationSummarySection(doc, y){
   y = pdfEnsureSpace(doc, y, 24);
   y = pdfTable(doc, y, [['Field','Value']], [
     ['Total Annual Water Sales', formatNumber(r.annualWaterSold)+' gal'],
-    ['Annual Water Loss', formatNumber(r.annualWaterLossGal)+' gal ('+formatNumber(r.avgLossPct,2)+'% of water sold)'],
+    ['Annual Water Loss', formatNumber(r.annualWaterLossGal)+' gal ('+formatNumber(r.avgLossPct,2)+'% of water produced)'],
     ['Total Water Production (water sold + water loss)', formatNumber(r.annualWaterProduced)+' gal']
   ]) + 6;
 
