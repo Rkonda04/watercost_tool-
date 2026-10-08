@@ -2293,6 +2293,8 @@ function validateTierShape(rm, custTotal, waterTotal, label){
       }
     }
   }
+  if(rm.tierCustomersMethod === 'pct') snapTierPctCounts(tiers, 'customers', custTotal);
+  if(rm.tierWaterSoldMethod === 'pct') snapTierPctCounts(tiers, 'waterSold', waterTotal);
   const custSum = tiers.reduce((a,t)=>a+(Number(t.customers)||0),0);
   if(custTotal > 0 && custSum !== custTotal){
     messages.push(label+': total tier customers ('+formatNumber(custSum)+') must equal Active Customers ('+formatNumber(custTotal)+') from the Customer & Billing step.');
@@ -2888,25 +2890,19 @@ function getTierCustomersTotal(typeState){ return Number(typeState.customerInfo.
 function getTierWaterSoldTotal(typeState){ return Math.ceil(getEffectiveMonthlyWaterSold(typeState) - 1e-9); }
 function round1(n){ return Math.round(n*10)/10; }
 
-// Converts every tier's % input for one field into whole counts that add up
-// exactly to `total` when the %s sum to 100 (largest-remainder rounding), so
-// per-tier rounding can't leave the sum a gallon or customer off.
-function allocateTierPcts(tbody, tiers, pctField, countField, total){
-  const rows = tiers.map(t=>{
-    const input = tbody.querySelector('tr[data-id="'+t.id+'"] input[data-field="'+pctField+'"]');
-    const pct = input && input.value !== '' ? Math.max(0, Number(input.value)) : null;
-    return {t, exact: pct===null ? null : pct/100*total};
-  });
-  const pctSum = rows.reduce((a,r)=>a+(r.exact===null?0:r.exact/total*100),0);
-  const filled = rows.filter(r=>r.exact!==null);
-  if(filled.length === rows.length && Math.abs(pctSum-100) < 0.05){
-    filled.forEach(r=>{ r.t[countField] = Math.floor(r.exact); });
-    let left = total - filled.reduce((a,r)=>a+r.t[countField],0);
-    filled.slice().sort((a,b)=>(b.exact-Math.floor(b.exact))-(a.exact-Math.floor(a.exact)))
-      .forEach(r=>{ if(left>0){ r.t[countField]++; left--; } });
-  } else {
-    filled.forEach(r=>{ r.t[countField] = Math.round(r.exact); });
-  }
+// In % mode, snaps every tier's whole count for `field` (customers/waterSold)
+// so they add up to exactly `total` whenever the displayed %s total 100%
+// (largest-remainder rounding). Otherwise each tier's own rounding could
+// leave the sum a gallon or customer off and trip the totals check.
+function snapTierPctCounts(tiers, field, total){
+  if(!(total > 0) || tiers.length === 0 || tiers.some(t=>t[field]==='')) return;
+  const pcts = tiers.map(t=>round1(Number(t[field])/total*100));
+  if(Math.round(pcts.reduce((a,p)=>a+p,0)*10) !== 1000) return;
+  const exact = pcts.map(p=>p/100*total);
+  tiers.forEach((t,i)=>{ t[field] = Math.floor(exact[i]); });
+  let left = total - tiers.reduce((a,t)=>a+t[field],0);
+  exact.map((x,i)=>i).sort((a,b)=>(exact[b]%1)-(exact[a]%1))
+    .forEach(i=>{ if(left>0){ tiers[i][field]++; left--; } });
 }
 
 // Rebuilds one customer type's tier table rows from state.
@@ -3054,11 +3050,8 @@ function onTierRowChange(typeKey, el){
     let pct = el.value === '' ? '' : Number(el.value);
     if(pct !== '' && pct < 0){ pct = 0; el.value = 0; }
     if(total > 0 && pct !== ''){
-      allocateTierPcts(tr.parentNode, rm.tiers, 'customersPct', 'customers', total);
-      rm.tiers.forEach(x=>{
-        const row = tr.parentNode.querySelector('tr[data-id="'+x.id+'"]');
-        if(row && x.customers !== '') setTierSiblingField(row, 'customers', x.customers);
-      });
+      t.customers = Math.round(pct/100*total);
+      setTierSiblingField(tr, 'customers', t.customers);
     }
   } else if(field === 'waterSold'){
     const num = parseFloat(String(el.value).replace(/,/g,''));
@@ -3071,11 +3064,8 @@ function onTierRowChange(typeKey, el){
     let pct = el.value === '' ? '' : Number(el.value);
     if(pct !== '' && pct < 0){ pct = 0; el.value = 0; }
     if(total > 0 && pct !== ''){
-      allocateTierPcts(tr.parentNode, rm.tiers, 'waterSoldPct', 'waterSold', total);
-      rm.tiers.forEach(x=>{
-        const row = tr.parentNode.querySelector('tr[data-id="'+x.id+'"]');
-        if(row && x.waterSold !== '') setTierSiblingField(row, 'waterSold', formatNumber(x.waterSold));
-      });
+      t.waterSold = Math.round(pct/100*total);
+      setTierSiblingField(tr, 'waterSold', formatNumber(t.waterSold));
     }
   } else if(field === 'diffDollar'){
     t.diffDollar = parseCurrencyInputOrBlank(el.value);
